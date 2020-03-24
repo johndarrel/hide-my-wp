@@ -1,0 +1,56 @@
+.hmw-admin-notice {
+  background: #fdfaf8 !important;
+  color: #555;
+  border: 1px solid #e0baba;
+  display: block;
+  min-height: 68px;
+  padding: 20px 40px 20px 125px;
+  position: relative;
+}
+.hmw-admin-notice a {
+  color: #1e81f3;
+}
+.hmw-notice-logo {
+  clear: both;
+  content: "";
+  display: block;
+  background-image: url("../img/logo.png");
+  background-size: 77px auto;
+  background-repeat: no-repeat;
+  background-position: 0 45%;
+  width: 125px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 15px;
+}
+.hmw-admin-notice > .dashicons {
+  color: #424242;
+  position: absolute;
+  right: 20px;
+  top: 40%;
+}
+.hmw-notice-title {
+  font-size: 24px;
+  margin: 0;
+}
+.hmw-notice-body {
+  font-weight: normal;
+  margin: 10px 0 0 0;
+  font-size: 16px;
+}
+.hmw-notice-body:after {
+  clear: both;
+  content: "";
+  display: block;
+}
+.hmw-notice-body li {
+  float: left;
+  margin-right: 20px;
+}
+.hmw-notice-body .dashicons {
+  font-size: 17px;
+}
+.hmw-blue {
+  color: #10738B;
+}
