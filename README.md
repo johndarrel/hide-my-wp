@@ -1,8 +1,6 @@
-<p><strong>Hide My WP Ghost</strong> is a <strong>WordPress Security plugin</strong>. It’s one of the best security through obscurity WordPress plugins.</p>
-<p>It has over <strong>50.000 secured websites</strong>, over <strong>1,400,000 brute force attempts protection</strong> and over <strong>5.000 login email alerts</strong>.</p>
+<p><strong>Hide My WP</strong> is a <strong>WordPress Security plugin</strong>. It’s one of the best security through obscurity WordPress plugins.</p>
 <p>The plugin <strong>adds filters and security layers</strong> to prevent Scripts and SQL Injections, Brute Force attacks, XML-RPC attacks and more.</p>
 <p>It changes and hides the common paths, plugins and themes paths offering the <strong>best protection against hacker bots attacks</strong>.</p>
-<p>Note! <strong>No file or directory is physically changed</strong>. All the changes are made by redirects. All the actions are done automatically by the plugin.</p>
 <p>After the common paths are changed, <strong>all the common paths are hidden from hackers</strong> to protect all the plugins and themes.</p>
 
 <blockquote>
@@ -19,7 +17,7 @@
 </blockquote>
 
 <p>The plugin works with other security plugins and adds a layer of firewall to proactively secure your WordPress website against hackers.</p>
-<p>Hide My WP Ghost is compatible with all servers, hosting services, and also supports WP Multisite.</p>
+<p>Hide My WP is compatible with all servers, hosting services, and also supports WP Multisite.</p>
 <p>Over 90,000 hacking attacks per minute strike WordPress sites and WordPress hosting around the world, hitting not only large corporate websites packed with sensitive data, but also sites belonging to small businesses, independent entrepreneurs, and individuals running personal blogs.</p>
 <p>Security of WordPress sites typically tops the list of concerns for new and experienced website owners alike.</p>
 <p>For owners of WordPress sites, statistics like that one raises particular worries about the security not just of individual WordPress sites, but of WordPress itself.</p>
@@ -29,7 +27,7 @@
 <a href="https://translate.wordpress.org/projects/wp-plugins/hide-my-wp" rel="nofollow ugc">https://translate.wordpress.org/projects/wp-plugins/hide-my-wp</a></p>
 <p>Thank you all for your trust, support and positive reviews!</p>
 <blockquote>
-<p><strong>Hide My WP Ghost Lite Security Features</strong>:</p>
+<p><strong>Hide My WP Free Security Features</strong>:</p>
 <ul>
 <li><strong>Hide WordPress wp-admin</strong> URL and redirect it to 404 page or a custom page</li>
 <li><strong>Hide WordPress wp-login.php</strong> and redirect it to 404 page or a custom page</li>
@@ -83,7 +81,7 @@ All In One SEO, Yoast SEO, Squirrly SEO, WP-Rocket, Minify HTML, iThemes Securit
 Back-Up WordPress, Elementor Page Builder, Weglot Translate, AddToAny Share Btn, WordFence Security, Sucuri Security, Asset CleanUp</strong></p>
 <p>Hosting Compatibility checked: <strong>WP Engine, Inmotion Hosting, Hostgator Hosting, Godaddy Hosting, Host1plus,<br>
 Payperhost, Fastcomet, Dreamhost, Bitnami Apache, Bitnami Nginx, Google Cloud Hosting, Litespeed Hosting</strong></p>
-<p>To <strong>hide all the common WordPress paths</strong> you need Hide My WP Ghost version. Check all the Ghost security features below.</p>
+<p>To <strong>hide all the common WordPress paths</strong> you need Hide My WP version. Check all the Ghost security features below.</p>
 <p>The admin URL is the most common path that hackers use to break your WordPress site.</p>
 <p>Being able to cover up the common paths is critical because you get to keep intruders away from sensitive website data.</p>
 <p>This is crucial, and it will provide you with a great experience and really good results in the long term.</p>
@@ -92,8 +90,8 @@ Payperhost, Fastcomet, Dreamhost, Bitnami Apache, Bitnami Nginx, Google Cloud Ho
 <p><strong>This is a free version of the plugin so you can use it for all your blogs without any restrictions.</strong></p>
 <p>No theme or other plugins functionality will be blocked, everything will function the same</p>
 <p>Note: The plugin requires custom permalinks. Make sure you have it activated at Settings &gt; Permalinks</p>
-<blockquote>
-<p><strong>Hide My WP Ghost Premium security features</strong>:</p>
+
+<p><strong>Hide My WP Premium security features</strong>:</p>
 <ul>
 <li>Hide WordPress /wp-admin</li>
 <li>Hide WordPress /wp-login.php</li>
@@ -194,14 +192,7 @@ Payperhost, Fastcomet, Dreamhost, Bitnami Apache, Bitnami Nginx, Google Cloud Ho
 <li>Cross Site Scripting (XSS)</li>
 <li>and more</li>
 </ul>
-<p>See all the <strong>Ghost features</strong>:<br>
-  <a href="https://shrsl.com/2jfym" rel="nofollow ugc">https://hidemywpghost.com</a></p>
-<p>Hide My WP Ghost <strong>Knowledge Base</strong>:<br>
-  <a href="https://shrsl.com/2jixr" rel="nofollow ugc">https://hidemywpghost.com</a></p>
-<p>Check the Demo Website:<br>
-  <a href="https://demo.wpplugins.tips/" rel="nofollow ugc">https://demo.wpplugins.tips/</a></p>
-<p>Other websites for Hide My WP Ghost Free:<br>
-  <a href="https://hidemywp.app" rel="nofollow ugc">https://hidemywp.app</a><br>
-  <a href="https://hidemywp.co" rel="nofollow ugc">https://hidemywp.co</a></p>
-</blockquote>
-<p>Once you use the Hide My WP Ghost plugin you will get custom upload paths, author paths, plugin paths and so on.</p>
+
+<p>See all the <strong>Ghost features</strong>: <a href="https://hidemywp.co/security-features/" rel="follow">https://hidemywp.co/security-features/</a></p>
+
+<p>Once you use the Hide My WP plugin you will get custom upload paths, author paths, plugin paths and so on.</p>
