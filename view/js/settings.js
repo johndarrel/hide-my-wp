@@ -14,73 +14,6 @@
         return $this;
     };
 
-    $.fn.hmw_fixSettings = function (name, value) {
-        var $div = $('#hmw_wrap');
-        var $this = this;
-        $this.hmw_loading(true);
-        $.post(
-            hmwQuery.ajaxurl,
-            {
-                action: 'hmw_fixsettings',
-                name: name,
-                value: value,
-                hmw_nonce: hmwQuery.nonce
-            }
-        ).done(function (response) {
-            $this.hmw_loading(false);
-            if (typeof response.success !== 'undefined' && typeof response.message !== 'undefined') {
-                if (response.success) {
-                    $div.prepend('<div class="fixed-top mt-4 pt-4 alert alert-success text-center hmw_alert" role="alert"><strong>' + response.message + '</strong></div>');
-                    $this.hide();
-                } else {
-                    $div.prepend('<div class="fixed-top mt-4 pt-4 alert alert-danger text-center hmw_alert" role="alert"><strong>' + response.message + '</strong></div>');
-                }
-            }
-            setTimeout(function () {
-                $('.hmw_alert').remove();
-            }, 5000)
-        }).error(function () {
-            $this.hmw_loading(false);
-            $div.prepend('<div class="fixed-top mt-4 pt-4 alert alert-danger text-center hmw_alert" role="alert"><strong>Ajax Error.</strong></div>');
-            setTimeout(function () {
-                $('.hmw_alert').remove();
-            }, 5000)
-        }, 'json');
-    };
-
-    $.fn.hmw_fixConfig = function (name, value) {
-        var $div = $('#hmw_wrap');
-        var $this = this;
-        $this.hmw_loading(true);
-        $.post(
-            hmwQuery.ajaxurl,
-            {
-                action: 'hmw_fixconfig',
-                name: name,
-                value: value,
-                hmw_nonce: hmwQuery.nonce
-            }
-        ).done(function (response) {
-            $this.hmw_loading(false);
-            if (typeof response.success !== 'undefined' && typeof response.message !== 'undefined') {
-                if (response.success) {
-                    $div.prepend('<div class="fixed-top mt-4 pt-4 alert alert-success text-center hmw_alert" role="alert"><strong>' + response.message + '</strong></div>');
-                    $this.hide();
-                } else {
-                    $div.prepend('<div class="fixed-top mt-4 pt-4 alert alert-danger text-center hmw_alert" role="alert"><strong>' + response.message + '</strong></div>');
-                }
-            }
-            setTimeout(function () {
-                $('.hmw_alert').remove();
-            }, 5000)
-        }).error(function () {
-            $this.hmw_loading(false);
-            $div.prepend('<div class="fixed-top mt-4 pt-4 alert alert-danger text-center hmw_alert" role="alert"><strong>Ajax Error.</strong></div>');
-            setTimeout(function () {
-                $('.hmw_alert').remove();
-            }, 5000)
-        }, 'json');
-    };
 
     $.fn.hmw_securityExclude = function (name) {
         var $div = $('#hmw_wrap');
@@ -129,11 +62,19 @@
 
         $this.find('input[name=hmw_login_url]').on('keyup', function () {
             if ($(this).val() !== 'wp-login.php'  && $(this).val() != '') {
+                $this.find('.hmw_hide_wplogin_div').show();
+            } else {
+                $this.find('.hmw_hide_wplogin_div').hide();
+            }
+
+            if ($(this).val() !== 'login'  && $(this).val() != '') {
                 $this.find('.hmw_hide_login_div').show();
             } else {
                 $this.find('.hmw_hide_login_div').hide();
             }
         });
+
+        $this.find('input[name=hmw_login_url]').trigger('keyup');
 
         $this.find("input[name=hmw_hide_admin].switch").change(function () {
             if ($(this).prop('checked')) {
@@ -158,6 +99,7 @@
                 $this.find('.hmw_brute_enabled').hide();
             }
         });
+
 
         if ($this.find('#hmw_blockedips').length > 0) {
             $.post(
@@ -281,6 +223,11 @@
                 form.find(".hmw_error").show();
             }, 'json');
         });
+
+        $('#frontend_test_modal').on('hidden.bs.modal', function () {
+            $('button.frontend_test').hmw_loading(true);
+            location.reload();
+        })
 
     };
 

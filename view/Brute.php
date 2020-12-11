@@ -27,8 +27,8 @@
                             <div class="group_autoload col-sm-12 d-flex justify-content-center btn-group mt-3" role="group" data-toggle="button">
                                 <button type="button" class="btn btn-lg btn-outline-info brute_use_math m-1 py-3 px-4 active"><?php _e('Math Check protection', _HMW_PLUGIN_NAME_); ?></button>
 
-                                <div class="hmw_pro mt-1" style="position: relative" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf(__('This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_), "<a href='http://hidemywpghost.com/' target='_blank'>", "</a>") ?>">
-                                    <div class="box" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf(__('This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_), "<a href='http://hidemywpghost.com/' target='_blank'>", "</a>") ?>">
+                                <div class="hmw_pro mt-1" style="position: relative" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf(__('This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_), "<a href='https://hidemywpghost.com/hide-my-wp-pricing/' target='_blank'>", "</a>") ?>">
+                                    <div class="box" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf(__('This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_), "<a href='https://hidemywpghost.com/hide-my-wp-pricing/' target='_blank'>", "</a>") ?>">
                                         <div class="ribbon"><span><?php echo __('PRO', _HMW_PLUGIN_NAME_) ?></span>
                                         </div>
                                     </div>
@@ -78,7 +78,7 @@
                             </div>
                             <div class="border-top">
                                 <div class="col-sm-12 row border-bottom border-light py-3 mx-0 my-3">
-                                    <div class="box" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf(__('This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_), "<a href='http://hidemywpghost.com/' target='_blank'>", "</a>") ?>">
+                                    <div class="box" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf(__('This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_), "<a href='https://hidemywpghost.com/hide-my-wp-pricing/' target='_blank'>", "</a>") ?>">
                                         <div class="ribbon"><span><?php echo __('PRO', _HMW_PLUGIN_NAME_) ?></span>
                                         </div>
                                     </div>
@@ -91,7 +91,7 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-12 row border-bottom border-light py-3 mx-0 my-3">
-                                    <div class="box" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf(__('This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_), "<a href='http://hidemywpghost.com/' target='_blank'>", "</a>") ?>">
+                                    <div class="box" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf(__('This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_), "<a href='https://hidemywpghost.com/hide-my-wp-pricing/' target='_blank'>", "</a>") ?>">
                                         <div class="ribbon"><span><?php echo __('PRO', _HMW_PLUGIN_NAME_) ?></span>
                                         </div>
                                     </div>
@@ -113,7 +113,7 @@
 
                 <div class="col-sm-12 m-0 p-2 bg-light text-center" style="position: fixed; bottom: 0; right: 0; z-index: 100; box-shadow: 0px 0px 8px -3px #444;">
                     <button type="submit" class="btn rounded-0 btn-success btn-lg px-5 mr-5 save"><?php _e('Save', _HMW_PLUGIN_NAME_); ?></button>
-                    <a href="https://wordpress.org/support/plugin/hide-my-wp/reviews/?rate=5#new-post" target="_blank"><?php echo sprintf( __( 'Love Hide My WP %s? Show us ;)', _HMW_PLUGIN_NAME_ ), _HMW_VER_NAME_ ); ?></a>
+                    <a href="https://wordpress.org/support/plugin/hide-my-wp/reviews/?rate=5#new-post" target="_blank" style="color: #ff005e;"><?php echo sprintf( __( 'Love Hide My WP %s? Show us ;)', _HMW_PLUGIN_NAME_ ), _HMW_VER_NAME_ ); ?></a>
                 </div>
             </form>
 

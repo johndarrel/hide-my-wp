@@ -2,6 +2,8 @@
 	<?php echo $view->getAdminTabs( HMW_Classes_Tools::getValue( 'tab', 'hmw_permalinks' ) ); ?>
     <div class="hmw_row d-flex flex-row bg-white px-3">
         <div class="hmw_col flex-grow-1 mr-3">
+	        <?php echo $view->getView( 'FrontendCheck' ); ?>
+
             <form method="POST">
 				<?php wp_nonce_field( 'hmw_mappsettings', 'hmw_nonce' ) ?>
                 <input type="hidden" name="action" value="hmw_mappsettings"/>
@@ -27,6 +29,19 @@
 
 
                             <div class="hmw_text_mapping_group py-3">
+                                <div class="col-sm-12 row mb-1 ml-1">
+                                    <div class="checker col-sm-12 row my-2 py-1">
+                                        <div class="col-sm-12 p-0 switch switch-sm">
+                                            <input type="hidden" name="hmw_mapping_classes" value="0"/>
+                                            <input type="checkbox" id="hmw_mapping_classes" name="hmw_mapping_classes" class="switch" <?php echo(HMW_Classes_Tools::getOption( 'hmw_mapping_classes' ) ? 'checked="checked"' : '') ?> value="1"/>
+                                            <label for="hmw_mapping_classes"><?php _e( 'Text Mapping only Classes, IDs, JS variables', _HMW_PLUGIN_NAME_ ); ?></label>
+                                            <a href="https://hidemywpghost.com/kb/url-mapping-text-mapping/#text_mapping_style" target="_blank" class="d-inline-block ml-2"><i class="fa fa-question-circle"></i></a>
+                                            <div class="offset-1 text-black-50"><?php _e( "Change the text only in classes, styles & scrips. (Recommended ON)", _HMW_PLUGIN_NAME_ ); ?></div>
+                                            <div class="offset-1 text-black-50"><?php _e( "If this option is switched off, the text is changed in all page", _HMW_PLUGIN_NAME_ ); ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+
 								<?php
 								$hmw_text_mapping = json_decode( HMW_Classes_Tools::getOption( 'hmw_text_mapping' ), true );
 								if ( isset( $hmw_text_mapping['from'] ) && ! empty( $hmw_text_mapping['from'] ) ) {
@@ -58,7 +73,7 @@
                             </div>
                             <div class="col-sm-12 row border-bottom border-light p-0 m-0">
                                 <div class="col-sm-4 p-0 offset-4">
-                                    <button type="button" class="col-sm-12 btn btn-sm btn-warning text-white" onclick="jQuery('div.hmw_text_mapping:last').clone().appendTo('div.hmw_text_mapping_group'); jQuery('div.hmw_text_mapping_remove').show(); jQuery('div.hmw_text_mapping:last').find('div.hmw_text_mapping_remove').hide()"><?php echo __( 'Add new text', _HMW_PLUGIN_NAME_ ) ?></button>
+                                    <button type="button" class="col-sm-12 btn btn-sm btn-warning text-white" onclick="jQuery('div.hmw_text_mapping:last').clone().appendTo('div.hmw_text_mapping_group'); jQuery('div.hmw_text_mapping_remove').show(); jQuery('div.hmw_text_mapping:last').find('div.hmw_text_mapping_remove').hide()"><?php echo __( 'Add another text', _HMW_PLUGIN_NAME_ ) ?></button>
                                 </div>
                             </div>
 
@@ -70,7 +85,7 @@
                         <a href="https://hidemywpghost.com/kb/url-mapping-text-mapping/#url_mapping" target="_blank" class="d-inline-block ml-2" style="color: white"><i class="fa fa-question-circle"></i></a>
                     </h3>
                     <div class="card-body">
-                        <div class="box" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf( __( 'This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_ ), "<a href='http://hidemywpghost.com/' target='_blank'>", "</a>" ) ?>">
+                        <div class="box" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf( __( 'This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_ ), "<a href='https://hidemywpghost.com/hide-my-wp-pricing/' target='_blank'>", "</a>" ) ?>">
                             <div class="ribbon"><span><?php echo __( 'PRO', _HMW_PLUGIN_NAME_ ) ?></span></div>
                         </div>
                         <div style="opacity: 0.3">
@@ -132,7 +147,7 @@
                                 </div>
                                 <div class="col-sm-12 row border-bottom border-light p-0 m-0">
                                     <div class="col-sm-4 p-0 offset-4">
-                                        <button type="button" class="col-sm-12 btn btn-sm btn-warning text-white" onclick="jQuery('div.hmw_url_mapping:last').clone().appendTo('div.hmw_url_mapping_group'); jQuery('div.hmw_url_mapping_remove').show(); jQuery('div.hmw_url_mapping:last').find('div.hmw_url_mapping_remove').hide()"><?php echo __( 'Add new URL', _HMW_PLUGIN_NAME_ ) ?></button>
+                                        <button type="button" class="col-sm-12 btn btn-sm btn-warning text-white" onclick="jQuery('div.hmw_url_mapping:last').clone().appendTo('div.hmw_url_mapping_group'); jQuery('div.hmw_url_mapping_remove').show(); jQuery('div.hmw_url_mapping:last').find('div.hmw_url_mapping_remove').hide()"><?php echo __( 'Add another URL', _HMW_PLUGIN_NAME_ ) ?></button>
                                     </div>
                                 </div>
 							<?php } ?>
@@ -144,7 +159,7 @@
                         <a href="https://hidemywpghost.com/kb/url-mapping-text-mapping/#cdn_urls" target="_blank" class="d-inline-block ml-2" style="color: white"><i class="fa fa-question-circle"></i></a>
                     </h3>
                     <div class="card-body">
-                        <div class="box" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf( __( 'This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_ ), "<a href='http://hidemywpghost.com/' target='_blank'>", "</a>" ) ?>">
+                        <div class="box" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf( __( 'This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_ ), "<a href='https://hidemywpghost.com/hide-my-wp-pricing/' target='_blank'>", "</a>" ) ?>">
                             <div class="ribbon"><span><?php echo __( 'PRO', _HMW_PLUGIN_NAME_ ) ?></span></div>
                         </div>
                         <div style="opacity: 0.3">
@@ -181,17 +196,26 @@
                                 </div>
                                 <div class="col-sm-12 row border-bottom border-light p-0 m-0">
                                     <div class="col-sm-4 p-0 offset-4">
-                                        <button type="button" class="col-sm-12 btn btn-sm btn-warning text-white" onclick="jQuery('div.hmw_cdn_mapping:last').clone().appendTo('div.hmw_cdn_mapping_group'); jQuery('div.hmw_cdn_mapping_remove').show(); jQuery('div.hmw_cdn_mapping:last').find('div.hmw_cdn_mapping_remove').hide()"><?php echo __( 'Add new CDN URL', _HMW_PLUGIN_NAME_ ) ?></button>
+                                        <button type="button" class="col-sm-12 btn btn-sm btn-warning text-white" onclick="jQuery('div.hmw_cdn_mapping:last').clone().appendTo('div.hmw_cdn_mapping_group'); jQuery('div.hmw_cdn_mapping_remove').show(); jQuery('div.hmw_cdn_mapping:last').find('div.hmw_cdn_mapping_remove').hide()"><?php echo __( 'Add another CDN URL', _HMW_PLUGIN_NAME_ ) ?></button>
                                     </div>
                                 </div>
 							<?php } ?>
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 m-0 p-2 bg-light text-center" style="position: fixed; bottom: 0; right: 0; z-index: 100; box-shadow: 0px 0px 8px -3px #444;">
-                    <button type="submit" class="btn rounded-0 btn-success btn-lg px-5 mr-5 save"><?php _e('Save', _HMW_PLUGIN_NAME_); ?></button>
-                    <a href="https://wordpress.org/support/plugin/hide-my-wp/reviews/?rate=5#new-post" target="_blank"><?php echo sprintf( __( 'Love Hide My WP %s? Show us ;)', _HMW_PLUGIN_NAME_ ), _HMW_VER_NAME_ ); ?></a>
-                </div>
+
+
+	            <?php if ( HMW_Classes_Tools::getOption( 'test_frontend' ) || HMW_Classes_Tools::getOption( 'logout' ) || HMW_Classes_Tools::getOption( 'error' ) ) { ?>
+                    <div class="col-sm-12 m-0 p-2">
+                        <button type="submit" class="btn rounded-0 btn-success btn-lg px-5 mr-5 save"><?php _e( 'Save', _HMW_PLUGIN_NAME_ ); ?></button>
+                        <a href="https://wordpress.org/support/plugin/hide-my-wp/reviews/?rate=5#new-post" target="_blank" style="color: #ff005e;"><?php echo sprintf( __( 'Love Hide My WP %s? Show us ;)', _HMW_PLUGIN_NAME_ ), _HMW_VER_NAME_ ); ?></a>
+                    </div>
+	            <?php } else { ?>
+                    <div class="col-sm-12 m-0 p-2 bg-light text-center" style="position: fixed; bottom: 0; right: 0; z-index: 100; box-shadow: 0px 0px 8px -3px #444;">
+                        <button type="submit" class="btn rounded-0 btn-success btn-lg px-5 mr-5 save"><?php _e('Save', _HMW_PLUGIN_NAME_); ?></button>
+                        <a href="https://wordpress.org/support/plugin/hide-my-wp/reviews/?rate=5#new-post" target="_blank" style="color: #ff005e;"><?php echo sprintf( __( 'Love Hide My WP %s? Show us ;)', _HMW_PLUGIN_NAME_ ), _HMW_VER_NAME_ ); ?></a>
+                    </div>
+	            <?php } ?>
             </form>
         </div>
         <div class="hmw_col hmw_col_side">
@@ -209,7 +233,7 @@
                     </div>
 
                     <div class="card-text m-3 ">
-                        <a class="bigbutton text-center" href="http://hidemywp.co/" target="_blank"><?php echo __( "Learn more about Hide My WP", _HMW_PLUGIN_NAME_ ); ?></a>
+                        <a class="bigbutton text-center" href="https://hidemywpghost.com/" target="_blank"><?php echo __( "Learn more about Hide My WP", _HMW_PLUGIN_NAME_ ); ?></a>
                     </div>
                 </div>
             </div>

@@ -9,7 +9,7 @@
                 <div class="card p-0 col-sm-12 tab-panel">
                         <h3 class="card-title bg-brown text-white p-2"><?php _e('Events Settings', _HMW_PLUGIN_NAME_); ?>:</h3>
                         <div class="card-body">
-                            <div class="box" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf(__('This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_), "<a href='http://hidemywpghost.com/' target='_blank'>", "</a>") ?>">
+                            <div class="box" data-toggle="popover" data-html="true" data-placement="top" data-content="<?php echo sprintf(__('This feature requires %sHide My WP Ghost%s.', _HMW_PLUGIN_NAME_), "<a href='https://hidemywpghost.com/hide-my-wp-pricing/' target='_blank'>", "</a>") ?>">
                                 <div class="ribbon"><span><?php echo __('PRO', _HMW_PLUGIN_NAME_) ?></span></div>
                             </div>
 

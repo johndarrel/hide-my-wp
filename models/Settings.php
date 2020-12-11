@@ -62,84 +62,97 @@ class HMW_Models_Settings {
      * @return array
      */
     public function getPlugins() {
-        return array(
-            'wp-super-cache' => array(
-                'title' => __("WP Super Cache"),
-                'banner' => '//ps.w.org/wp-super-cache/assets/banner-772x250.png?rev=1082414',
-                'description' => __("A very fast caching engine for WordPress that produces static html files. Works well with Minify HTML plugin.") . '<div class="text-success my-2">' . 'Cache plugin' . '</div>',
-                'path' => 'wp-super-cache/wp-cache.php',
-                'url' => 'https://wordpress.org/plugins/wp-super-cache/'
-            ),
-            'autoptimize' => array(
-                'title' => __("Autoptimize"),
-                'banner' => '//ps.w.org/autoptimize/assets/banner-772x250.jpg?rev=1315920',
-                'description' => __("Autoptimize speeds up your website by optimizing JS, CSS and HTML, async-ing JavaScript, removing emoji cruft, optimizing Google Fonts and more.") . '<div class="text-success my-2">' . 'Cache plugin' . '</div>',
-                'path' => 'autoptimize/autoptimize.php',
-                'url' => 'https://wordpress.org/plugins/autoptimize/'
-            ),
-            'minify-html-markup' => array(
-                'title' => __("Minify HTML"),
-                'banner' => '//ps.w.org/minify-html-markup/assets/banner-772x250.png?rev=1354339',
-                'description' => __("Minify HTML output for clean looking markup and faster downloading. Minify HTML also has optional specialized minification for JS and internal CSS.") . '<div class="text-success my-2">' . 'Minify content (works with other cache plugins)' . '</div>',
-                'path' => 'minify-html-markup/minify-html.php',
-                'url' => 'https://wordpress.org/plugins/minify-html-markup/'
-            ),
-            'better-wp-security' => array(
-                'title' => __("iThemes Security"),
-                'banner' => '//ps.w.org/better-wp-security/assets/banner-772x250.png?rev=881897',
-                'description' => __("iThemes Security gives you over 30+ ways to secure and protect your WP site. WP sites can be an easy target for attacks because of plugin vulnerabilities, weak passwords and obsolete software.") . '<div class="text-success my-2">' . 'Security Plugin' . '</div>',
-                'path' => 'better-wp-security/better-wp-security.php',
-                'url' => 'https://wordpress.org/plugins/better-wp-security/'
-            ),
-            'sucuri-scanner' => array(
-                'title' => __("Sucuri Security"),
-                'banner' => '//ps.w.org/sucuri-scanner/assets/banner-772x250.png?rev=1235419',
-                'description' => __("The Sucuri WordPress Security plugin is a security toolset for security integrity monitoring, malware detection and security hardening.") . '<div class="text-success my-2">' . 'Security Plugin' . '</div>',
-                'path' => 'sucuri-scanner/sucuri.php',
-                'url' => 'https://wordpress.org/plugins/sucuri-scanner/'
-            ),
-            'backupwordpress' => array(
-                'title' => __("Back Up WordPress"),
-                'banner' => '//ps.w.org/backupwordpress/assets/banner-772x250.jpg?rev=904756',
-                'description' => __("Simple automated backups of your WordPress-powered website. Back Up WordPress will back up your entire site including your database and all your files on a schedule that suits you.") . '<div class="text-success my-2">' . 'Backup Plugin' . '</div>',
-                'path' => 'backupwordpress/backupwordpress.php',
-                'url' => 'https://wordpress.org/plugins/backupwordpress/'
-            ),
-            'squirrly-seo' => array(
-                'title' => __("SEO SQUIRRLY"),
-                'banner' => '//ps.w.org/squirrly-seo/assets/banner-772x250.jpg?rev=1735460',
-                'description' => __("Welcome to Assisted WordPress SEO. Say Good-Bye to Search Engine Frustrations. Squirrly assists you in getting Excellent SEO for Humans and Search Engines.") . '<div class="text-success my-2">' . 'SEO Plugin' . '</div>',
-                'path' => 'squirrly-seo/squirrly.php',
-                'url' => 'https://wordpress.org/plugins/squirrly-seo/'
-            ),
-            'elementor' => array(
-                'title' => __("Elementor Page Builder"),
-                'banner' => '//ps.w.org/elementor/assets/banner-772x250.png?rev=1475479',
-                'description' => __("The most advanced frontend drag & drop page builder. Create high-end, pixel perfect websites at record speeds. Any theme, any page, any design.") . '<div class="text-success my-2">' . 'Page Builder' . '</div>',
-                'path' => 'elementor/elementor.php',
-                'url' => 'https://wordpress.org/plugins/elementor/'
-            ),
-            'weglot' => array(
-                'title' => __("Weglot Translate"),
-                'banner' => '//ps.w.org/weglot/assets/banner-772x250.jpg?rev=1784581',
-                'description' => __("Translate your website into multiple languages without any code. Weglot Translate is fully SEO compatible and follows Google's best practices.") . '<div class="text-success my-2">' . 'Multilingual' . '</div>',
-                'path' => 'weglot/weglot.php',
-                'url' => 'https://wordpress.org/plugins/weglot/'
-            ),
-            'add-to-any' => array(
-                'title' => __("AddToAny Share Btn"),
-                'banner' => '//ps.w.org/add-to-any/assets/banner-772x250.png?rev=1629680',
-                'description' => __("Share buttons for WordPress including the AddToAny sharing button, Facebook, Twitter, Google+, Pinterest, WhatsApp, many more, and follow icons too.") . '<div class="text-success my-2">' . 'Share Buttons' . '</div>',
-                'path' => 'add-to-any/add-to-any.php',
-                'url' => 'https://wordpress.org/plugins/add-to-any/'
-            ),
-        );
+	    return array(
+		    'squirrly-seo' => array(
+			    'title' => __("SEO SQUIRRLY"),
+			    'banner' => '//ps.w.org/squirrly-seo/assets/banner-772x250.png?rev=2302934',
+			    'description' => __("A.I.-based Private SEO Consultant. In a Plugin. Powered by Machine Learning and Cloud Services. Over 300 functionalities for SEO now available when you need them.") . '<div class="text-success my-2">' . 'SEO Plugin' . '</div>',
+			    'path' => 'squirrly-seo/squirrly.php',
+			    'url' => 'https://wpplugins.tips/plugin/squirrly-seo'
+		    ),
+		    'wp-rocket' => array(
+			    'title' => __("WP-Rocket"),
+			    'banner' => _HMW_THEME_URL_ . 'img/plugins/wp-rocket-banner.jpg',
+			    'description' => __("WP Rocket is in fact the only cache plugin which integrates more than 80% of web performance best practices even without any options activated. ") . '<div class="text-success my-2">' . 'Cache Plugin' . '</div>',
+			    'path' => 'wp-rocket/wp-rocket.php',
+			    'url' => 'https://wpplugins.tips/plugin/wp-rocket'
+		    ),
+		    'autoptimize' => array(
+			    'title' => __("Autoptimize"),
+			    'banner' => '//ps.w.org/autoptimize/assets/banner-772x250.jpg?rev=1315920',
+			    'description' => __("Autoptimize speeds up your website by optimizing JS, CSS and HTML, async-ing JavaScript, removing emoji cruft, optimizing Google Fonts and more.") . '<div class="text-success my-2">' . 'Cache plugin' . '</div>',
+			    'path' => 'autoptimize/autoptimize.php',
+			    'url' => 'https://wordpress.org/plugins/autoptimize/'
+		    ),
+		    'ninjaforms' => array(
+			    'title' => __("Ninja Forms"),
+			    'banner' => '//ps.w.org/ninja-forms/assets/banner-772x250.png?rev=2069024',
+			    'description' => __("Use Ninja Forms to create beautiful, user friendly WordPress forms that will make you feel like a professional web developer") . '<div class="text-success my-2">' . 'Form Plugin' . '</div>',
+			    'path' => 'minify-html-markup/minify-html.php',
+			    'url' => 'https://wpplugins.tips/plugin/ninja-forms'
+		    ),
+		    'wpforms' => array(
+			    'title' => __("WP Forms"),
+			    'banner' => '//ps.w.org/wpforms-lite/assets/banner-772x250.png?rev=1371112',
+			    'description' => __("WPForms allows you to create beautiful contact forms, feedback form, subscription forms, payment forms, and other types of forms for your site in minutes, not hours!") . '<div class="text-success my-2">' . 'Form Plugin' . '</div>',
+			    'path' => 'wpforms-lite/wpforms.php',
+			    'url' => 'https://wpplugins.tips/plugin/wp-forms'
+		    ),
+		    'better-wp-security' => array(
+			    'title' => __("iThemes Security"),
+			    'banner' => '//ps.w.org/better-wp-security/assets/banner-772x250.png?rev=881897',
+			    'description' => __("iThemes Security gives you over 30+ ways to secure and protect your WP site. WP sites can be an easy target for attacks because of plugin vulnerabilities, weak passwords and obsolete software.") . '<div class="text-success my-2">' . 'Security Plugin' . '</div>',
+			    'path' => 'better-wp-security/better-wp-security.php',
+			    'url' => 'https://wpplugins.tips/plugin/ithemes'
+		    ),
+		    'sucuri-scanner' => array(
+			    'title' => __("Sucuri Security"),
+			    'banner' => '//ps.w.org/sucuri-scanner/assets/banner-772x250.png?rev=1235419',
+			    'description' => __("The Sucuri WordPress Security plugin is a security toolset for security integrity monitoring, malware detection and security hardening.") . '<div class="text-success my-2">' . 'Security Plugin' . '</div>',
+			    'path' => 'sucuri-scanner/sucuri.php',
+			    'url' => 'https://wordpress.org/plugins/sucuri-scanner/'
+		    ),
+		    'backupwordpress' => array(
+			    'title' => __("Back Up WordPress"),
+			    'banner' => '//ps.w.org/backupwordpress/assets/banner-772x250.jpg?rev=904756',
+			    'description' => __("Simple automated backups of your WordPress-powered website. Back Up WordPress will back up your entire site including your database and all your files on a schedule that suits you.") . '<div class="text-success my-2">' . 'Backup Plugin' . '</div>',
+			    'path' => 'backupwordpress/backupwordpress.php',
+			    'url' => 'https://wordpress.org/plugins/backupwordpress/'
+		    ),
+		    'elementor' => array(
+			    'title' => __("Elementor Builder"),
+			    'banner' => '//ps.w.org/elementor/assets/banner-772x250.png?rev=1475479',
+			    'description' => __("The most advanced frontend drag & drop page builder. Create high-end, pixel perfect websites at record speeds. Any theme, any page, any design.") . '<div class="text-success my-2">' . 'Page Builder' . '</div>',
+			    'path' => 'elementor/elementor.php',
+			    'url' => 'https://wpplugins.tips/plugin/elementor'
+		    ),
+		    'weglot' => array(
+			    'title' => __("Weglot Translate"),
+			    'banner' => '//ps.w.org/weglot/assets/banner-772x250.png?rev=2186774',
+			    'description' => __("Translate your website into multiple languages without any code. Weglot Translate is fully SEO compatible and follows Google's best practices.") . '<div class="text-success my-2">' . 'Multilingual' . '</div>',
+			    'path' => 'weglot/weglot.php',
+			    'url' => 'https://wordpress.org/plugins/weglot/'
+		    ),
+		    'facebook-pixel' => array(
+			    'title' => __("Facebook Pixel"),
+			    'banner' => '//ps.w.org/pixelyoursite/assets/banner-772x250.jpg?rev=2163168',
+			    'description' => __("Manage your Facebook Pixel or Google Analytics code with a single plugin and add ANY other script (Head & Footer feature). The Pinterest Tag can be implemented via free add-on.") . '<div class="text-success my-2">' . 'Tracking Plugin' . '</div>',
+			    'path' => 'pixelyoursite/pixelyoursite.php',
+			    'url' => 'https://wpplugins.tips/plugin/facebook-pixel'
+		    ),
+		    'maintenance' => array(
+			    'title' => __("Maintenance"),
+			    'banner' => '//ps.w.org/maintenance/assets/banner-772x250.png?rev=1637471',
+			    'description' => __("Maintenance plugin allows the WordPress site administrator to close the website for maintenance, set a temporary page with authorization, which can be edited via the plugin settings.") . '<div class="text-success my-2">' . 'Tracking Plugin' . '</div>',
+			    'path' => 'add-to-any/add-to-any.php',
+			    'url' => 'https://wordpress.org/plugins/maintenance/'
+		    ),
+	    );
     }
 
 
     public function savePermalinks($params) {
         HMW_Classes_Tools::saveOptions('error', false);
-        HMW_Classes_Tools::saveOptions('configure_error', false);
         HMW_Classes_Tools::saveOptions('changes', false);
 
         if ($params['hmw_admin_url'] == $params['hmw_login_url'] && $params['hmw_admin_url'] <> '') {
@@ -219,18 +232,6 @@ class HMW_Models_Settings {
             }
         }
 
-        if (HMW_Classes_Tools::isNginx()) {
-            $form = '<br />
-                    <form method="POST" style="margin: 8px 0;">
-                        ' . wp_nonce_field('hmw_configureerror', 'hmw_nonce', true, false) . '
-                        <input type="hidden" name="action" value="hmw_configureerror" />
-                        <input type="submit" class="btn rounded-0 btn-link p-0 save" value="' . __("Can't configure it now. Run without rewrites", _HMW_PLUGIN_NAME_) . '" />
-                    </form>
-                    ';
-
-            $config_file = HMW_Classes_ObjController::getClass('HMW_Models_Rules')->getConfFile();
-            HMW_Classes_Error::setError(sprintf(__("NGINX detected. In case you didn't add the code in the NGINX config already, please add the following line. %s", _HMW_PLUGIN_NAME_), '<strong><a href="http://hidemywpghost.com/article/how-to-setup-hide-my-wp-on-nginx-server/" target="_blank" style="color: red">' . __("Learn How To Add the Code", _HMW_PLUGIN_NAME_) . '</a></strong> <br /><br /><code><strong>include ' . $config_file . ';</strong></code> <br /><br /><h4>' . __("Don't forget to reload the Nginx service", _HMW_PLUGIN_NAME_) . ' ' . '<strong><a href="http://hidemywpghost.com/article/how-to-setup-hide-my-wp-on-nginx-server/" target="_blank" style="color: red">' . __("Learn How", _HMW_PLUGIN_NAME_) . '</a></strong>' . '</h4>' . $form . '<br />'));
-        }
     }
 
     /**
@@ -258,7 +259,8 @@ class HMW_Models_Settings {
 
                     //Detect Invalid Names
                     if ($validate) {
-                        if (!$this->invalidName($value)) { //if the name is valid
+                        if (!$this->invalidName($key, $value)) { //if the name is valid
+
                             //Detect Weak Names
                             $this->weakName($value); //show weak names
                             HMW_Classes_Tools::saveOptions($key, $value);
@@ -273,10 +275,11 @@ class HMW_Models_Settings {
 
     /**
      * Check invalid name and avoid errors
-     * @param $name
+     * @param string $key Option name
+     * @param string $name Option value
      * @return bool
      */
-    public function invalidName($name) {
+    public function invalidName($key, $name) {
         $invalid_paths = array(
             'index.php',
             'readme.html',
@@ -297,13 +300,17 @@ class HMW_Models_Settings {
             'xmlrpc.php',
             'content',
             'includes',
-            'plugins',
-            'themes',
             'css',
             'js',
             'font',
             'assets',
         );
+
+	    if(($key <> 'hmw_themes_url' && $name == 'themes') || ($key <> 'hmw_upload_url' && $name == 'uploads')){
+		    HMW_Classes_Error::setError(sprintf(__("Invalid name detected: %s. You need to use another name to avoid WordPress errors.", _HMW_PLUGIN_NAME_), '<strong>' . $name . '</strong>'));
+		    return true;
+	    }
+
         if (is_string($name) && strlen($name) > 1 && strlen($name) < 3) {
             HMW_Classes_Error::setError(sprintf(__("Short name detected: %s. You need to use unique paths with more than 4 chars to avoid WordPress errors.", _HMW_PLUGIN_NAME_), '<strong>' . $name . '</strong>'));
             return true;

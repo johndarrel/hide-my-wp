@@ -1,3 +1,7 @@
+.hmw_settings #adminmenu .wp-menu-image img {
+    max-width: 20px;
+}
+
 #hmw_wrap .hmw_nav {
     flex: 0 0 225px;
 }
@@ -16,13 +20,27 @@
     width: auto !important;
 }
 
-#update-nag, .notice-error, .notice-success, .update-nag, .updated, .show-settings, .screen-meta-toggle, .notice-warning,
-div.fs-notice.updated, div.fs-notice.success, div.fs-notice.promotion, .notice:not(.hmw_notice), #toolbar-header, .poopy_affiliates, .analyst-modal {
+.hmw_settings #update-nag,
+.hmw_settings .notice-error,
+.hmw_settings .notice-success,
+.hmw_settings .update-nag, .updated,
+.hmw_settings .show-settings,
+.hmw_settings .screen-meta-toggle,
+.hmw_settings .notice-warning,
+.hmw_settings .wccp_free_review-notice,
+.hmw_settings div.fs-notice.updated,
+.hmw_settings div.fs-notice.success,
+.hmw_settings div.fs-notice.promotion,
+.hmw_settings .notice:not(.hmw_notice),
+.hmw_settings #toolbar-header,
+.hmw_settings .analyst-modal,
+.hmw_settings div.error.fade {
     display: none !important;
 }
 
-#wpcontent {
+.hmw_settings #wpcontent {
     background-color: #f8f9fa !important;
+    padding: 0 20px !important;
 }
 
 #hmw_wrap .wp_loading {
@@ -81,6 +99,10 @@ div.fs-notice.updated, div.fs-notice.success, div.fs-notice.promotion, .notice:n
     opacity: 0.4;
     transition: all 150ms ease-out;
     -webkit-transition: all 150ms ease-out;
+}
+
+#hmw_wrap select.form-control {
+    max-width: 100%;
 }
 
 #hmw_wrap .hmw_row {

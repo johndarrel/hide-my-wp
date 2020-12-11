@@ -121,14 +121,30 @@ class HMW_Models_Rules {
             return false;
         }
 
-        if (!is_array($insertion)) {
-            $insertion = explode("\n", $insertion);
-        }
-
         $start_marker = "# BEGIN {$marker}";
         $end_marker = "# END {$marker}";
 
-        $fp = fopen($this->getConfFile(), 'r+');
+	    if($insertion == '') { //delete the marker if there is no data to add in it
+		    global $wp_filesystem;
+
+		    if(method_exists($wp_filesystem, 'get_contents') && method_exists($wp_filesystem, 'put_contents')) {
+			    try {
+				    $htaccess = $wp_filesystem->get_contents( $this->getConfFile() );
+				    $htaccess = preg_replace( "/$start_marker.*$end_marker/s", "", $htaccess );
+				    $htaccess = preg_replace( "/\n+/", "\n", $htaccess );
+				    $wp_filesystem->put_contents( $this->getConfFile(), $htaccess );
+
+				    return true;
+			    } catch ( Exception $e ) {
+			    }
+		    }
+	    }
+
+	    if (!is_array($insertion)) {
+		    $insertion = explode("\n", $insertion);
+	    }
+
+	    $fp = fopen($this->getConfFile(), 'r+');
         if (!$fp) {
             return false;
         }

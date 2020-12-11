@@ -1,20 +1,27 @@
 ﻿=== Hide My WP Ghost - Security Plugin ===
 Contributors: johndarrel
-Tags: security, firewall, hide my wp, hide wp-admin, hide wp-login, hide wordpress, ocultar mi wp, hide my site, hide my wordpress
-Requires at least: 4.0
-Tested up to: 5.4
+Tags: security, wordpress security, firewall, hide my wp, hide wp-admin, hide wp-login, hide wordpress, hide wp, security plugin, ocultar mi wp, hide my site, hide my wordpress
+Requires at least: 4.3
+Tested up to: 5.6
+Requires PHP: 5.6
 Stable tag: trunk
 Donate link: https://wpplugins.tips/wordpress
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Hide all common paths, wp-admin, wp-login, wp-content, plugins, themes, authors, comments, xml-rpc, etc. Add Firewall, Brute Force protection & more.
 
 == Description ==
 
-**Hide My WP Ghost** is a **WordPress Security plugin**. It **changes and hides** WP common paths for the Best WP Security against hacker bots.
+**Hide My WP Ghost** is a **WordPress Security plugin**. It's one of the best security through obscurity WordPress plugins.
 
-All the WordPress common paths can be changed together with the plugins and themes names.
+It has over **50.000 secured websites**, over **1,400,000 brute force attempts protection** and over **5.000 login email alerts**.
 
-**No file or directory is physically changed**. All the changes are made by WordPress redirects. All the actions are done automatically by the plugin.
+The plugin **adds filters and security layers** to prevent Scripts and SQL Injections, Brute Force attacks, XML-RPC attacks and more.
+
+It changes and hides the common paths, plugins and themes paths offering the **best protection against hacker bots attacks**.
+
+Note! **No file or directory is physically changed**. All the changes are made by redirects. All the actions are done automatically by the plugin.
 
 After the common paths are changed, **all the common paths are hidden from hackers** to protect all the plugins and themes.
 
@@ -22,7 +29,7 @@ After the common paths are changed, **all the common paths are hidden from hacke
 
 > Check the Demo Website source code:
 > <a href="https://demo.wpplugins.tips/">https://demo.wpplugins.tips/</a>
-> (the woocommerce and elementor are changed in files and classes using the PRO version)
+> (the elementor is changed in files and classes using the PRO version)
 
 
 > Check the Redirected URLs in Demo Website (all are redirected to Front Page):
@@ -36,9 +43,9 @@ After the common paths are changed, **all the common paths are hidden from hacke
 > <a href="https://demo.wpplugins.tips/wp-content/themes/">https://demo.wpplugins.tips/wp-content/themes</a>
 
 
-The plugin works as security through obscurity solution for WordPress websites.
+The plugin works with other security plugins and adds a layer of firewall to proactively secure your WordPress website against hackers.
 
-Security through obscurity is one of the best solutions against hacker bots and one of the best ways to protect vulnerable plugins and themes.
+Hide My WP Ghost is compatible with all servers, hosting services, and also supports WP Multisite.
 
 Over 90,000 hacking attacks per minute strike WordPress sites and WordPress hosting around the world, hitting not only large corporate websites packed with sensitive data, but also sites belonging to small businesses, independent entrepreneurs, and individuals running personal blogs.
 
@@ -104,13 +111,13 @@ Thank you all for your trust, support and positive reviews!
 
 Compatible with: <strong>WP Multisite, Apache, Litespeed, Nginx and IIS</strong>.
 
-Plugins Compatibility updates: **W3 Total Cache, WP Super Cache, WP Fastest Cache, Cache Enabler, CDN Enabler,
-WOT Cache, Autoptimize, Jetpack by WordPress, Contact Form 7, bbPress, All In One SEO, Yoast SEO, Squirrly SEO,
-WP-Rocket, Minify HTML, iThemes Security, Sucuri Security, Back-Up WordPress, Elementor Page Builder,
-Weglot Translate, AddToAny Share Btn**
+Plugins Compatibility updates: **WPML, W3 Total Cache, WP Super Cache, WP Fastest Cache, Hummingbird Cache, Cachify Cache, Litespeed Cache,
+Cache Enabler, CDN Enabler, WOT Cache, Autoptimize, Jetpack by WordPress, Contact Form 7, bbPress,
+All In One SEO, Yoast SEO, Squirrly SEO, WP-Rocket, Minify HTML, iThemes Security, Sucuri Security,
+Back-Up WordPress, Elementor Page Builder, Weglot Translate, AddToAny Share Btn, WordFence Security, Sucuri Security, Asset CleanUp**
 
 Hosting Compatibility checked: **WP Engine, Inmotion Hosting, Hostgator Hosting, Godaddy Hosting, Host1plus,
-Payperhost, Fastcomet, Dreamhost, Bitnami Apache, Bitnami Nginx, Google Cloud Hosting**
+Payperhost, Fastcomet, Dreamhost, Bitnami Apache, Bitnami Nginx, Google Cloud Hosting, Litespeed Hosting**
 
 
 To **hide all the common WordPress paths** you need Hide My WP Ghost version. Check all the Ghost security features below.
@@ -233,13 +240,18 @@ Note: The plugin requires custom permalinks. Make sure you have it activated at 
 > * and more
 >
 > See all the **Ghost features**:
-> <a href="https://hidemywpghost.com/wordpress">https://hidemywpghost.com/wordpress</a>
+> <a href="https://shrsl.com/2jfym">https://hidemywpghost.com</a>
 >
 > Hide My WP Ghost **Knowledge Base**:
-> <a href="https://hidemywpghost.com/knowledge-base/">https://hidemywpghost.com</a>
+> <a href="https://shrsl.com/2jixr">https://hidemywpghost.com</a>
 >
 > Check the Demo Website:
 > <a href="https://demo.wpplugins.tips/">https://demo.wpplugins.tips/</a>
+>
+> Other websites for Hide My WP Ghost Free:
+> <a href="https://hidemywp.app">https://hidemywp.app</a>
+> <a href="https://hidemywp.co">https://hidemywp.co</a>
+
 
 Once you use the Hide My WP Ghost plugin you will get custom upload paths, author paths, plugin paths and so on.
 
@@ -298,6 +310,116 @@ Enjoy!
 8. Run a security check for your website and see all the vulnerabilities
 
 == Changelog ==
+= 4.1.03 (TBA) =
+* Update - The rules update on adding new plugin or theme
+* Update - Compatibility with PPress plugin on Login Page
+* Fixed - Rollback the settings when pressing the Abort button
+* Fixed - Fixed Backup/Restore rules flash
+* Fixed - Add the correct text direction for WPML while in Posts and Pages
+* Fixed - Compatibility with WordPress 5.6
+
+= 4.1.02 (11 Oct 2020 ) =
+* Update - Compatibility with Manage WP plugin
+* Update - Added the option to disable the REST API wp-json in Hide My WP - Permalinks
+* Update - Add the plugin as Must Use plugin for better security and compatibility with other plugins
+* Update - Compatibility with Really Simple SSL plugin
+* Update - New UX for better understanding of the redirects in Hide My WP > Tweaks
+* Update - Compatibility with WPML when setting custom wp-admin and admin-ajax
+* Update - Compatibility with WPML when RTL languages are set in dashboard
+* Update - Compatibility with bbPress plugin
+* Update - Compatibility with JetPack plugin
+* Update - Compatibility with Newspaper theme on XMLWPC.php access
+* Update - Added Compatibility with WP 5.5.3
+
+= 4.1.01 (26 Oct 2020 ) =
+* Update - Extra caching in htaccess when "Optimize CSS and JS Files" is activated
+* Update - Do not cache if already cached by WP-Rocket or WP Fastest Cache
+* Update - Added Login and Logout redirects for each user role
+* Update - New UX for better understanding of the redirects
+* Fix - 404 error on Nxing server when updating the settings
+
+= 4.0.12 (01 Oct 2020 ) =
+* Update - Added compatibility with Pro Theme by Themeco
+* Update - Added compatibility with Smush PRO by WPMU DEV
+* Update - Added compatibility for WP Client plugin by WP-Client.com
+* Update - Header removals for theme detectors
+
+= 4.0.11 (03 Sept 2020 ) =
+* Update - Remove version parameter from CSS and JS URLs containing the plus sign
+* Update - Added {rand} in Text Mapping to show random string on change
+* Update - Added {blank} in Text Mapping to show an empty string on change
+* Update - Compatibility with last version WP Fastest Cache plugin
+* Fix - Added a fix for noredirect param on infinite loops
+* Fix - Load the 404 not found files correctly
+
+= 4.0.10 (31 Aug 2020 ) =
+* Fixed some errors cause by the last version
+* Fix - Saving options in Mapping, Tweaks and Advanced when followed by Permalinks Changing abort
+
+= 4.0.09 (27 Aug 2020 ) =
+* Update - Added the version hook to remove the versions from CSS and JS
+* Update - Load the login on WPEngine server with PHP7.4 when the login is set as /login
+* Update - Detect Flywheel server and add the rules accordingly
+* Update - Compatibility with IThemes Security on custom login
+
+= 4.0.08 (13 Aug 2020 ) =
+* Update - WordPress Security Updates for WP 5.5
+* Update - Compatibility with WPML
+* Update - Compatibility with the last versions of the popular plugins
+
+= 4.0.07 (06 Aug 2020 ) =
+* Update - Added the option to hide /login and /wp-login individually
+* Update - Added the option to redirect to a custom URL on logout
+* Small Bugs Fix
+
+= 4.0.06 (09 July 2020 ) =
+* Update - Compatibility with WPEngine + PHP 7
+* Update - Compatibility with Absolutely Glamorous Custom Admin plugin
+* Update - Compatibility with Admin Menu Editor Pro plugin
+* Fix - Small CSS & Warning issues
+
+= 4.0.05 (30 June 2020 ) =
+* Update - Compatibility with WPEngine with PHP 7.4
+* Update - Compatibility with the cache plugins (tested the latest versions)
+* Update - The Security Check report task
+* Update - Plugin security on Security Check
+* Update - The plugins list in Hide My WP
+* Fixed - Removed the map URL from bootstrap css and js
+* Fixed - CSS in Hide My WP Settings
+
+= 4.0.04 (16 June 2020 ) =
+* Update - Added HMW_RULES_IN_CONFIG and HMW_RULES_IN_WP_RULES to control the rules in the config file
+* HMW_RULES_IN_CONFIG will add the rules in the top of the config file (default true)
+* HMW_RULES_IN_WP_RULES will add the ruls in the WordPress config area  (default true)
+* Update - Change the rewrite hook to make sure the rules are added in the WordPress rewrites before flushing them
+* Update - Compatibility with IThemes Security plugin
+
+
+= 4.0.03 (04 June 2020) =
+* Update - RTL Support
+* Update - Brute Force Protection Filter
+* Update - Compatibility with more cache plugins like Hummingbird and Cachify
+* Update - Alert when the rewrites are not added correctly in the config file
+* Update - WordPress Security Updates for WP 5.4.1
+* Fixed - Small CSS fixes
+
+= 4.0.02 (04 May 2020) =
+* Fix - login redirect for nginx server
+* Fix - constant warning NONCE_KEY in confi.php
+* Update - Compatibility with WordFence
+
+= 4.0.01 (29 April 2020) =
+* Update - Show the Hide My WP menu only on Network if WP Multisite
+* Update - Prevent from loading the style from wp-admin in the custom login page
+* Update - WPEngine 2020 rewrites compatibility
+* Update - Added option to hide only the IDs and Classes in Hide My WP > Text Mapping
+* Update - Added the option to remove the WordPress common paths in /robots.txt file
+* Update - Added the option to remove the WordPress common paths in /sitemap.xml
+* Update - Compatibility with the most populat plugins and WordPress 5.4.1
+* Fix - Show 404 files in case the rewrites are not working or Allowoverride is OFF
+* Fix - Detect correct https or http sheme for Login Preview and validation
+* Fix - Save the Hide My WP rewrites when other plugin are updating the config file to prevent rewrite errors
+
 = 3.5.03 (12 March 2020) =
 * Update - WordPress Security Updates for WP 5.4
 * Update - Compatibility with Asset CleanUp PRO: Page Speed Booster

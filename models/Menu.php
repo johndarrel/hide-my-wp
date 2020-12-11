@@ -100,30 +100,30 @@ class HMW_Models_Menu {
         }
     }
 
-    /**
+
+	public function addSettingsClass( $classes ){
+		if ($page = HMW_Classes_Tools::getValue('page')) {
+
+			if (strpos($page,'hmw_settings') !== false || strpos($page,'hmw_securitycheck') !== false) {
+				$classes = "$classes hmw_settings";
+			}
+
+		}
+
+		return $classes;
+	}
+
+
+	/**
      * Prevent other plugins to load CSS into HMW
      */
     public function fixEnqueueErrors() {
-        global $wp_styles, $wp_scripts;
-        $corelib = array('admin-bar', 'colors', 'ie', 'common', 'utils', 'wp-auth-check','dismissible-notices',
-            'media-editor', 'media-audiovideo', 'media-views', 'imgareaselect', 'mce-view', 'image-edit',
-            'wordfence-global-style','ip2location_country_blocker_admin_menu_styles','wf-adminbar','autoptimize-toolbar',
-            'yoast-seo-adminbar','bbp-admin-css','bp-admin-common-css','bp-admin-bar','elementor-common','ithemes-icon-font',
-            'wordfence-ls-admin-global','woocommerce_admin_menu_styles','besclwp_cpt_admin_style','uabb-notice-settings',
-            'besclwp_cpt_admin_script','itsec-core-admin-notices','flatsome-panel-css'
-        );
+	    $exclude = array('boostrap','wpcd-admin-js');
 
-        foreach ($wp_styles->queue as $key => $queue) {
-            if (!in_array($queue, $corelib)) {
-                unset($wp_styles->queue[$key]);
-            }
-        }
-
-        foreach ($wp_scripts->queue as $key => $queue) {
-            if (!in_array($queue, $corelib)) {
-                unset($wp_scripts->queue[$key]);
-            }
-        }
+	    foreach ($exclude as $name) {
+		    wp_dequeue_script($name);
+		    wp_dequeue_style($name);
+	    }
     }
 
 }

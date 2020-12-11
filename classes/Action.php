@@ -58,6 +58,10 @@ class HMW_Classes_Action extends HMW_Classes_FrontController {
      * @return void
      */
     public function getActions($ajax = false) {
+	    global $wp_filesystem;
+	    require_once ( ABSPATH . '/wp-admin/includes/file.php' );
+	    WP_Filesystem();
+
         $this->actions = array();
         $action = HMW_Classes_Tools::getValue('action');
         $nonce = HMW_Classes_Tools::getValue('hmw_nonce');
@@ -69,11 +73,12 @@ class HMW_Classes_Action extends HMW_Classes_FrontController {
         /* if config allready in cache */
         if (!isset(self::$config)) {
             $config_file = _HMW_ROOT_DIR_ . '/config.json';
-            if (!file_exists($config_file))
-                return;
 
-            /* load configuration blocks data from core config files */
-            self::$config = json_decode(file_get_contents($config_file), 1);
+	        if ( !$wp_filesystem->exists( $config_file ) )
+		        return;
+
+	        /* load configuration blocks data from core config files */
+	        self::$config = json_decode( $wp_filesystem->get_contents( $config_file ), 1 );
         }
 
         if (is_array(self::$config))

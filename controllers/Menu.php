@@ -16,23 +16,12 @@ class HMW_Controllers_Menu extends HMW_Classes_FrontController {
                 // Delete the redirect transient
                 delete_transient('hmw_activate');
 
-                //Make sure the plugin is loaded first
-                $plugin = _HMW_PLUGIN_NAME_ . '/index.php';
-                $active_plugins = get_option('active_plugins');
-                if(!empty($active_plugins)) {
-                    $this_plugin_key = array_search($plugin, $active_plugins);
-                    if($this_plugin_key <> '') {
-                        array_splice($active_plugins, $this_plugin_key, 1);
-                        array_unshift($active_plugins, $plugin);
-                        update_option('active_plugins', $active_plugins);
-                    }
-                }
-
 	            //Check if there are expected upgrades
 	            HMW_Classes_Tools::checkUpgrade();
             }
 
-
+			//Make sure HideMyWP in the loading first
+	        HMW_Classes_Tools::movePluginFirst();
 
             //Load notice class in admin
             HMW_Classes_ObjController::getClass('HMW_Controllers_Notice');
@@ -52,7 +41,7 @@ class HMW_Controllers_Menu extends HMW_Classes_FrontController {
      * Creates the Setting menu in WordPress
      */
     public function hookMenu() {
-        if (current_user_can('manage_options')) {
+        if (!is_multisite() && current_user_can('manage_options')) {
             $this->model->addMenu(array(ucfirst(_HMW_PLUGIN_NAME_),
                 'Hide My WP' . $this->alert,
                 'manage_options',

@@ -47,6 +47,34 @@ class HMW_Classes_ObjController {
         return false;
     }
 
+	/**
+	 * Clear the class instance
+	 *
+	 * @param string $className
+	 * @param array $args
+	 *
+	 * @return mixed
+	 * @throws Exception
+	 */
+	public static function newInstance( $className, $args = array() ) {
+		if ( $class = self::getClassPath( $className ) ) {
+			/* check if class is already defined */
+			if ( class_exists( $className ) ) {
+				//check if abstract
+				self::$instances[ $className ] = new $className();
+				if ( ! empty( $args ) ) {
+					call_user_func_array( array( self::$instances[ $className ], '__construct' ), $args );
+				}
+
+				return self::$instances[ $className ];
+			} else {
+				return self::getClass( $className, $args );
+			}
+		}
+
+		return false;
+	}
+
     /**
      * Include Class if exists
      * @param $classDir

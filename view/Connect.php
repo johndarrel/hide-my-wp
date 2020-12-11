@@ -9,7 +9,7 @@
 
 				<?php do_action( 'hmw_form_notices' ); ?>
                 <div class="card p-0 col-sm-12 tab-panel">
-                    <h3 class="card-title bg-brown text-white p-2"><?php _e( 'Activate Free version', _HMW_PLUGIN_NAME_ ); ?></h3>
+                    <h3 class="card-title bg-brown text-white p-2"><?php _e( 'Activate Free Token', _HMW_PLUGIN_NAME_ ); ?></h3>
                     <div class="card-body">
 
                         <div class="col-sm-12 row border-bottom border-light py-3 mx-0 my-3">
@@ -61,7 +61,7 @@
             <form method="POST">
 				<?php wp_nonce_field( 'hmw_dont_connect', 'hmw_nonce' ) ?>
                 <input type="hidden" name="action" value="hmw_dont_connect"/>
-                <button type="submit" class="btn rounded-0 float-left btn-link btn-lg px-5" style="position: relative;margin-top: -65px;margin-left: 164px;"><?php _e( 'Skip Activation', _HMW_PLUGIN_NAME_ ); ?></button>
+                <button type="submit" class="btn rounded-0 float-right btn-link btn-lg px-3" style="position: relative;margin-top: -65px; color: gray;"><?php _e( 'Skip Activation', _HMW_PLUGIN_NAME_ ); ?></button>
             </form>
             <div class="card col-sm-12 p-3 tab-panel_tutorial embed-responsive embed-responsive-16by9 text-center">
                 <iframe width="853" height="480" style="max-width: 100%" src="https://www.youtube.com/embed/zhvRGHMjKic" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>

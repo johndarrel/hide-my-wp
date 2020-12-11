@@ -16,7 +16,7 @@ if (HMW_Classes_Tools::getOption('hmw_security_alert')) {
 ?>
 <div class="hmw_widget_content" style="position: relative;">
     <div style="font-size: 18px; text-align: center; font-weight: bold"><?php echo __('Security Level', _HMW_PLUGIN_NAME_) ?></div>
-    <?php if (!$do_check) { ?>
+	<?php if (!$do_check) { ?>
         <div style="text-align: center">
             <?php if (((count($view->riskreport) * 100) / count($view->risktasks)) > 90) { ?>
                 <a href="<?php echo HMW_Classes_Tools::getSettingsUrl('hmw_securitycheck') ?>"><img src="<?php echo _HMW_THEME_URL_ . 'img/speedometer_danger.png' ?>" style="max-width: 60%; margin: 10px auto;"/></a>
@@ -41,9 +41,9 @@ if (HMW_Classes_Tools::getOption('hmw_security_alert')) {
                     <?php } ?>
                 </ul>
 
-                <div style="font-size: 12px; text-align: center; font-weight: bold;">
-                    <a href="<?php echo HMW_Classes_Tools::getSettingsUrl('hmw_securitycheck') ?>" style="color: orangered"><?php echo __('Check All The Security Tasks', _HMW_PLUGIN_NAME_) ?></a>
-                     | <a href="https://hidemywpghost.com/hide-my-wp-pricing/" target="_blank" style="color: green">
+                <div style="margin-top: 20px; text-align: center; font-weight: bold;">
+                    <a href="<?php echo HMW_Classes_Tools::getSettingsUrl('hmw_securitycheck') ?>" style="color: orangered; font-size: 16px; margin-right: 10px;"><?php echo __('Check Security Report', _HMW_PLUGIN_NAME_) ?></a>
+                     | <a href="https://hidemywpghost.com/hide-my-wp-pricing/" target="_blank" style="color: green; font-size: 16px; margin-left: 10px;">
                             <?php _e('Upgrade Your Security', _HMW_PLUGIN_NAME_); ?>
                         </a>
                 </div>
@@ -52,7 +52,6 @@ if (HMW_Classes_Tools::getOption('hmw_security_alert')) {
         <?php } ?>
     <?php } ?>
 
-    <button type="button" class="wp_button recheck_security"><?php _e('Recheck Security', _HMW_PLUGIN_NAME_); ?></button>
 
 </div>
 

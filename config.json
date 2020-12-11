@@ -7,10 +7,12 @@
           "action": [
             "hmw_settings",
             "hmw_tweakssettings",
+            "hmw_confirm",
+            "hmw_newpluginschange",
             "hmw_mappsettings",
+            "hmw_logout",
             "hmw_abort",
             "hmw_manualrewrite",
-            "hmw_configureerror",
             "hmw_advsettings",
             "hmw_backup",
             "hmw_restore",
@@ -37,8 +39,6 @@
         "actions": {
           "action": [
             "hmw_securitycheck",
-            "hmw_fixsettings",
-            "hmw_fixconfig",
             "hmw_securityexclude",
             "hmw_resetexclude"
           ]
@@ -59,16 +59,11 @@
         "admin": "1",
         "active": "1"
       },
-
-      {
-        "name": "HMW_Controllers_Settings",
-        "actions": { "action": "hmw_logout" },
-        "admin": "0",
-        "active": "1"
-      },
       {
         "name": "HMW_Controllers_Widget",
-        "actions": { "action": "hmw_widget_securitycheck" },
+        "actions": {
+          "action": "hmw_widget_securitycheck"
+        },
         "admin": "1",
         "active": "1"
       },
@@ -83,7 +78,6 @@
         "admin": "1",
         "active": "1"
       }
-
     ]
   }
 }

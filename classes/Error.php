@@ -53,18 +53,25 @@ class HMW_Classes_Error extends HMW_Classes_FrontController {
             'text' => $error);
     }
 
+	/**
+	 * Return if error
+	 * @return bool
+	 */
+	public static function isError() {
+    	return !empty(self::$errors);
+	}
+
     /**
      * This hook will show the error in WP header
      */
     public function hookNotices() {
-        HMW_Classes_ObjController::getClass('HMW_Classes_DisplayController')->loadMedia('alert');
 
         if (is_array(self::$errors) &&
             ((is_string(HMW_Classes_Tools::getValue('page', '')) && stripos(HMW_Classes_Tools::getValue('page', ''), _HMW_NAMESPACE_) !== false) ||
                 (is_string(HMW_Classes_Tools::getValue('plugin', '')) && stripos(HMW_Classes_Tools::getValue('plugin', ''), _HMW_PLUGIN_NAME_) !== false))
         ) {
-            foreach (self::$errors as $error) {
 
+	        foreach (self::$errors as $error) {
                 switch ($error['type']) {
                     case 'fatal':
                         self::showError(ucfirst(_HMW_PLUGIN_NAME_ . " " . $error['type']) . ': ' . $error['text'], $error['type']);
@@ -85,7 +92,7 @@ class HMW_Classes_Error extends HMW_Classes_FrontController {
      * @param string $type
      */
     public static function showError($message, $type = '') {
-        if (file_exists(_HMW_THEME_DIR_ . 'Notices.php')) {
+	    if (file_exists(_HMW_THEME_DIR_ . 'Notices.php')) {
             include(_HMW_THEME_DIR_ . 'Notices.php');
         } else {
             echo $message;
