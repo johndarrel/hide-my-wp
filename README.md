@@ -1,3 +1,4 @@
+# Hide My WP
 <p><strong>Hide My WP</strong> is a <strong>WordPress Security plugin</strong>. It’s one of the best security through obscurity WordPress plugins.</p>
 <p>The plugin <strong>adds filters and security layers</strong> to prevent Scripts and SQL Injections, Brute Force attacks, XML-RPC attacks and more.</p>
 <p>It changes and hides the common paths, plugins and themes paths offering the <strong>best protection against hacker bots attacks</strong>.</p>
