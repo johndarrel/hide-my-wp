@@ -11,6 +11,10 @@
     margin-right: 5px;
 }
 
+#hmw_wrap code {
+    word-break: break-word !important;
+}
+
 #hmw_wrap .row > div.input-group {
     display: flex !important;
 }

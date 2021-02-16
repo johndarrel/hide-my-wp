@@ -172,7 +172,7 @@ class HMW_Models_Rewrite {
 				global $wpdb;
 				$this->paths = array();
 
-				$blogs = $wpdb->get_results( "SELECT path FROM " . $wpdb->blogs . " where blog_id > 1" );
+				$blogs = $wpdb->get_results( "SELECT path FROM `" . $wpdb->blogs . "` where blog_id > 1" );
 				foreach ( $blogs as $blog ) {
 					$this->paths[] = HMW_Classes_Tools::getRelativePath( $blog->path );
 				}
@@ -264,7 +264,6 @@ class HMW_Models_Rewrite {
 					foreach ( $all_plugins['to'] as $index => $plugin_path ) {
 						if ( HMW_Classes_Tools::isMultisites() ) {
 							foreach ( $this->paths as $path ) {
-								//hmw_Debug::dump($path);
 								$this->_replace['from'][]    = $path . HMW_Classes_Tools::$default['hmw_plugin_url'] . '/' . $all_plugins['from'][ $index ];
 								$this->_replace['to'][]      = HMW_Classes_Tools::getOption( 'hmw_plugin_url' ) . '/' . $plugin_path . '/';
 								$this->_replace['rewrite'][] = false;
@@ -290,9 +289,6 @@ class HMW_Models_Rewrite {
 				$this->_replace['from'][]    = HMW_Classes_Tools::$default['hmw_plugin_url'] . '/';
 				$this->_replace['to'][]      = HMW_Classes_Tools::getOption( 'hmw_plugin_url' ) . '/';
 				$this->_replace['rewrite'][] = true;
-
-
-				//HMW_Debug::dump($this->_replace['from']);
 
 			}
 
@@ -1107,7 +1103,6 @@ class HMW_Models_Rewrite {
 		add_filter( 'wp_safe_redirect_fallback', array( $this, 'loopCheck' ), 99, 1 );
 		add_filter( 'wp_redirect', array( $this, 'loopCheck' ), 99, 1 );
 
-
 		//////////////////////////////// Rewrite the login style
 		wp_deregister_script( 'password-strength-meter' );
 		wp_deregister_script( 'user-profile' );
@@ -1262,6 +1257,9 @@ class HMW_Models_Rewrite {
 	 */
 	public function wp_logout() {
 		$_REQUEST['redirect_to'] = apply_filters( 'hmw_url_logout_redirect', site_url() );
+
+		do_action('hmw_wp_logout');
+
 	}
 
 	/**
@@ -1279,16 +1277,6 @@ class HMW_Models_Rewrite {
 			return $redirect;
 		}
 
-		$parsed = parse_url( $redirect );
-		//Check if there is the safe parameter in the url
-		if ( isset( $parsed['query'] ) && ! empty( $parsed['query'] ) ) {
-			@parse_str( $parsed['query'] );
-			if ( isset( $hmw_disable ) ) {
-				if ( $hmw_disable == HMW_Classes_Tools::getOption( 'hmw_disable' ) ) {
-					$_GET[ HMW_Classes_Tools::getOption( 'hmw_disable_name' ) ] = HMW_Classes_Tools::getOption( 'hmw_disable' );
-				}
-			}
-		}
 
 		if ( HMW_Classes_Tools::$default['hmw_admin_url'] <> HMW_Classes_Tools::getOption( 'hmw_admin_url' ) ) {
 			if ( strpos( $redirect, 'wp-admin' ) !== false ) {
@@ -1315,17 +1303,6 @@ class HMW_Models_Rewrite {
 
 		if ( HMW_Classes_Tools::getOption( 'error' ) || HMW_Classes_Tools::getOption( 'logout' ) ) {
 			return $redirect;
-		}
-
-		$parsed = parse_url( $redirect );
-		//Check if there is the safe parameter in the url
-		if ( isset( $parsed['query'] ) && ! empty( $parsed['query'] ) ) {
-			@parse_str( $parsed['query'] );
-			if ( isset( $hmw_disable ) ) {
-				if ( $hmw_disable == HMW_Classes_Tools::getOption( 'hmw_disable' ) ) {
-					$_GET[ HMW_Classes_Tools::getOption( 'hmw_disable_name' ) ] = HMW_Classes_Tools::getOption( 'hmw_disable' );
-				}
-			}
 		}
 
 		//check if disable and do not redirect to login
@@ -1654,7 +1631,7 @@ class HMW_Models_Rewrite {
 	 * @param string $url
 	 */
 	public function getNotFound( $url ) {
-		HMW_Debug::dump( $url );
+
 		if ( HMW_Classes_Tools::getOption( 'hmw_url_redirect' ) == '404' ) {
 			if ( HMW_Classes_Tools::isThemeActive( 'Pro' ) ) {
 				global $wp_query;
@@ -1732,7 +1709,6 @@ class HMW_Models_Rewrite {
 				$findcdns    = array_merge( $findcdns, $findcdn );
 				$replacecdns = array_merge( $replacecdns, $replacecdn );
 
-				//HMW_Debug::dump($cdn, $findcdns, $replacecdns);
 			}
 		}
 
@@ -1938,23 +1914,25 @@ class HMW_Models_Rewrite {
 			$this->_findtextmapping    = $hmw_text_mapping['from'];
 			$this->_replacetextmapping = $hmw_text_mapping['to'];
 
-			if ( HMW_Classes_Tools::getOption( 'hmw_mapping_classes' ) ) {
-				foreach ( $this->_findtextmapping as $index => $from ) {
-					$findtextmapping[] = '/\s(class|id|aria-labelledby|aria-controls)=[\'"][^\'"]*(' . addslashes( $from ) . ')[^\'"]*[\'"]/';
-					$findtextmapping[] = "'<(style|script)((?!src|>).)*>.*?</(style|script)>'is";
-					$findtextmapping[] = "'<(a|div)[^>]*data-" . addslashes( $from ) . "[^>]*[^/]>'is";
+			if ( !empty( $this->_findtextmapping ) && !empty($this->_replacetextmapping) ) {
+				if ( HMW_Classes_Tools::getOption( 'hmw_mapping_classes' ) ) {
+					foreach ( $this->_findtextmapping as $index => $from ) {
+						$findtextmapping[] = '/\s(class|id|aria-labelledby|aria-controls|data-elementor-type|data-widget_type)=[\'"][^\'"]*(' . addslashes( $from ) . ')[^\'"]*[\'"]/';
+						$findtextmapping[] = "'<script((?!src|>).)*>'is";
+						$findtextmapping[] = "'<style[^>]*>.*?</style>'is";
+						$findtextmapping[] = "'<(a|div)[^>]*data-" . addslashes( $from ) . "[^>]*[^/]>'is";
+					}
+
+					if ( ! empty( $findtextmapping ) ) {
+						$content = preg_replace_callback( $findtextmapping, array(
+							$this,
+							'replaceText'
+						), $content );
+					}
+
+				} else {
+					$content = str_ireplace( $this->_findtextmapping, $this->_replacetextmapping, $content );
 				}
-
-				if ( ! empty( $findtextmapping ) ) {
-					$content = preg_replace_callback( $findtextmapping, array(
-						$this,
-						'replaceText'
-					), $content );
-				}
-
-
-			} else {
-				$content = str_ireplace( $this->_findtextmapping, $this->_replacetextmapping, $content );
 			}
 
 			unset( $hmw_text_mapping );
@@ -2048,8 +2026,6 @@ class HMW_Models_Rewrite {
 			     || strpos( $url, '/' . HMW_Classes_Tools::$default['hmw_admin_url'] ) !== false
 			     || strpos( $url, '/' . HMW_Classes_Tools::$default['hmw_login_url'] ) !== false
 			) {
-				HMW_Debug::dump( $url );
-
 				return $found[1] . $this->_rel2abs( $url ) . $found[4];
 			}
 		}

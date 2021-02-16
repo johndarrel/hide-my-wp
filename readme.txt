@@ -1,11 +1,11 @@
 ﻿=== Hide My WP Ghost - Security Plugin ===
 Contributors: johndarrel
-Tags: security, wordpress security, firewall, hide my wp, hide wp-admin, hide wp-login, hide wordpress, hide wp, security plugin, ocultar mi wp, hide my site, hide my wordpress
+Tags: security, wordpress security, firewall, hide my wp, hide wp-admin, hide wp-login, hide wordpress, hide wp, security plugin, ocultar mi wp, hide my site, hide my wordpress, hide, hack, antivirus
 Requires at least: 4.3
 Tested up to: 5.6
 Requires PHP: 5.6
 Stable tag: trunk
-Donate link: https://wpplugins.tips/wordpress
+Donate link: https://hidemywpghost.com/hide-my-wp-pricing/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,7 +15,7 @@ Hide all common paths, wp-admin, wp-login, wp-content, plugins, themes, authors,
 
 **Hide My WP Ghost** is a **WordPress Security plugin**. It's one of the best security through obscurity WordPress plugins.
 
-It has over **50.000 secured websites**, over **1,400,000 brute force attempts protection** and over **5.000 login email alerts**.
+It has over **60.000 secured websites**, over **1,400,000 brute force attempts protection** and over **5.000 login email alerts**.
 
 The plugin **adds filters and security layers** to prevent Scripts and SQL Injections, Brute Force attacks, XML-RPC attacks and more.
 
@@ -62,62 +62,106 @@ Please support us and **translate the plugin in your language**:
 
 Thank you all for your trust, support and positive reviews!
 
-> **Hide My WP Ghost Lite Security Features**:
+> <strong>FREE Hide My WP Ghost - Security Features (over 40 free security options):</strong>
 >
-> *   <strong>Hide WordPress wp-admin</strong> URL and redirect it to 404 page or a custom page
-> *   <strong>Hide WordPress wp-login.php</strong> and redirect it to 404 page or a custom page
-> *   <strong>Change the wp-admin and wp-login</strong> URLs
-> *   <strong>Change lost password</strong> URL
-> *   <strong>Change register</strong> URL
-> *   <strong>Change logout</strong> URL
-> *   <strong>Change admin-ajax</strong> URL
-> *   <strong>Change wp-content</strong> URL
-> *   <strong>Change wp-includes</strong> URL
-> *   <strong>Change comments</strong> URL
-> *   <strong>Change author</strong> URL
-> *   <strong>Change plugins name</strong> URL
-> *   <strong>Change themes name</strong> URL
-> *   <strong>Change category</strong> URL
-> *   <strong>Change tags</strong> URL
+> *   Hide WordPress wp-admin URL and redirect it to 404 page or a custom page
+> *   Hide WordPress wp-login.php and redirect it to 404 page or a custom page
+> *   Change the wp-admin and wp-login URLs
+> *   Change lost password URL
+> *   Change register URL
+> *   Change logout URL
+> *   Change activation URL
+> *   Change admin-ajax URL
+> *   Change wp-content URL
+> *   Change wp-includes URL
+> *   Change uploads URL
+> *   Change comments URL
+> *   Change author URL
+> *   Change plugins name URL
+> *   Change themes name URL
+> *   Change category URL
+> *   Change tags URL
 >
-> **Hidden Paths: **
+> *   Custom login redirects based on useer role
+> *   Custom logout redirects based on useer role
 >
-> *   <strong>Hide WordPress HTML comments</strong>
-> *   <strong>Hide Version and WordPress Tags</strong>
-> *   <strong>Hide DNS Prefetch WordPress link</strong>
-> *   <strong>Hide WordPress Generator Meta</strong>
-> *   <strong>Hide RSD (Really Simple Directory) header</strong>
-> *   <strong>Hide Emojicons if you don't use them</strong>
+> *   Change URLs from Relative to Absolute
+> *   Change URLs in Ajax calls
+> *   Change URLs for Logged Users
+> *   Change paths in Sitemap.xml
+> *   Change paths in Robots.txt
 >
-> **Disable Paths: **
+> <strong>Hidden Paths:</strong>
 >
-> *   <strong>Disable XML-RPC access</strong>
-> *   <strong>Disable Embed scripts</strong>
-> *   <strong>Disable DB-Debug in Frontend</strong>
-> *   <strong>Disable WLW Manifest scripts</strong>
+> *   Hide /wp-admin Path
+> *   Hide /wp-login Path
+> *   Hide /login Path
+> *   Hide plugins Paths
+> *   Hide themes Paths
+> *   Hide REST API wp-json
+> *   Hide WordPress HTML comments
+> *   Hide Version and WordPress Tags
+> *   Hide DNS Prefetch WordPress link
+> *   Hide WordPress Generator Meta
+> *   Hide RSD (Really Simple Directory) header
+> *   Hide Emojicons if you don't use them
 >
-> **Brute Force Protection: **
+> <strong>Disable Paths:</strong>
 >
-> *   <strong>Brute Force</strong> with Math Captcha
+> *   Disable REST API access
+> *   Disable XML-RPC access
+> *   Disable Embed scripts
+> *   Disable DB-Debug in Frontend
+> *   Disable WLW Manifest scripts
 >
-> **Extra Features: **
+> <strong>Brute Force Protection: </strong>
 >
-> *   <strong>Backup and Restore</strong> settings
-> *   <strong>Fix relative URLs</strong>
-> *   <strong>Change classes using Text Mapping</strong> from HTML code
-> *   <strong>Cache CSS, JS and Images</strong> to optimize the loading speed
-> *   <strong>Weekly security check and reports</strong>
+> *   Brute Force with Math Captcha
 >
+> <strong>Extra Features: </strong>
+>
+> *   Backup and Restore settings
+> *   Fix relative URLs
+> *   Change classes using Text Mapping from HTML code
+> *   Cache CSS, JS and Images to optimize the loading speed
+> *   Weekly security check and reports
+>
+> <strong>Integrations:</strong>
+>
+> *   Support for WP Multisite
+> *   Support for Nginx
+> *   Support for IIS
+> *   Support for LiteSpeed
+> *   Support for Apache
+> *   Support for WP Engine
+> *   Support for Inmotion Hosting
+> *   Support for Hostgator Hosting
+> *   Support for Godaddy Hosting
+> *   Support for Host1plus
+> *   Support for Payperhost
+> *   Support for Fastcomet
+> *   Support for Dreamhost
+> *   Support for Bitnami Apache
+> *   Support for Bitnami Nginx
+> *   Support for Google Cloud Hosting
+> *   Support for Litespeed Hosting
+> *   Support for Flyweels Hosting
+>
+> *   Recommended by Wp Rocket
+> *   Recommended by WPML
+>
+> <strong>See All FREE Security Features:</strong>
+> <a href="https://hidemywp.co/security-features/">https://hidemywp.co/security-features/</a>
+
 
 Compatible with: <strong>WP Multisite, Apache, Litespeed, Nginx and IIS</strong>.
 
-Plugins Compatibility updates: **WPML, W3 Total Cache, WP Super Cache, WP Fastest Cache, Hummingbird Cache, Cachify Cache, Litespeed Cache,
+Plugins Compatibility updates: **ManageWP, WPML, W3 Total Cache, WP Super Cache, WP Fastest Cache, Hummingbird Cache, Cachify Cache, Litespeed Cache,
 Cache Enabler, CDN Enabler, WOT Cache, Autoptimize, Jetpack by WordPress, Contact Form 7, bbPress,
 All In One SEO, Yoast SEO, Squirrly SEO, WP-Rocket, Minify HTML, iThemes Security, Sucuri Security,
 Back-Up WordPress, Elementor Page Builder, Weglot Translate, AddToAny Share Btn, WordFence Security, Sucuri Security, Asset CleanUp**
 
-Hosting Compatibility checked: **WP Engine, Inmotion Hosting, Hostgator Hosting, Godaddy Hosting, Host1plus,
-Payperhost, Fastcomet, Dreamhost, Bitnami Apache, Bitnami Nginx, Google Cloud Hosting, Litespeed Hosting**
+Hosting Compatibility checked: **WP Engine, Inmotion Hosting, Hostgator Hosting, Godaddy Hosting, Host1plus, Payperhost, Fastcomet, Dreamhost, Bitnami Apache, Bitnami Nginx, Google Cloud Hosting, Litespeed Hosting, Flyweels Hosting**
 
 
 To **hide all the common WordPress paths** you need Hide My WP Ghost version. Check all the Ghost security features below.
@@ -141,13 +185,13 @@ Note: The plugin requires custom permalinks. Make sure you have it activated at 
 
 <hr />
 
-> **Hide My WP Ghost Premium security features**:
+> <strong>Hide My WP Ghost Premium security features</strong>:
 >
-> *   Hide WordPress /wp-admin
-> *   Hide WordPress /wp-login.php
-> *   Hide WordPress /wp-login/
-> *   Hide WordPress /login URL
-> *   Custom wp-admin and wp-login URLs
+> *   Hide WordPress /wp-admin path
+> *   Hide WordPress /wp-login.php path
+> *   Hide WordPress /wp-login/ path
+> *   Hide WordPress /login path
+> *   Custom wp-admin and wp-login paths
 > *   Custom admin-ajax.php URLs
 > *   Custom lost password URL
 > *   Custom register URL
@@ -155,7 +199,7 @@ Note: The plugin requires custom permalinks. Make sure you have it activated at 
 > *   Custom logout URL
 > *   Custom wp-includes path
 > *   Custom wp-content path
-> *   Custom wp-json API path
+> *   Custom REST API wp-json path
 > *   Custom plugins name
 > *   Custom themes name
 > *   Custom themes style name
@@ -166,24 +210,29 @@ Note: The plugin requires custom permalinks. Make sure you have it activated at 
 > *   Custom category path
 > *   Custom tags path
 >
-> **Hidden Paths: **
+> *   Custom login redirects based on useer role
+> *   Custom logout redirects based on useer role
+>
+> <strong>Hidden Paths: </strong>
 >
 > *   Hide plugins name
 > *   Hide themes name
 > *   Hide style IDs and META IDs
 > *   Hide author by ID URL
-> *   Hide WordPress common paths like: wp-content, wp-includes, /plugins, /themes,upgrade.php
+> *   Hide WordPress common paths like: wp-content, wp-includes, /plugins, /themes, upgrade.php
 > *   Hide WordPress common files like: upgrade.php, install.php, activate.php, wp-config.php, etc.
 > *   Hide RSD (Really Simple Directory) header
 > *   Hide DNS Prefetch WordPress link
 > *   Hide WordPress Generator Meta
 > *   Add Firewall against SQL/Script injection
-> *   Hide wp-image and wp-post classes
+> *   Hide wp-caption, wp-image, wp-blocks, wp-post classes and ids, and more
 > *   Hide Emojicons if you don't use them
-> *   Change URLs in ajax calls
-> *   Change URLs in all caches files
+> *   Change URLs in Ajax calls
+> *   Change URLs in all Caches files
+> *   Change paths in Sitemap.xml
+> *   Change paths in Robots.txt
 >
-> **Mapping Text and URLs: **
+> <strong>Mapping Text and URLs: </strong>
 >
 > *   Change URLs using URL Mapping
 > *   Change classes using Text Mapping
@@ -193,7 +242,7 @@ Note: The plugin requires custom permalinks. Make sure you have it activated at 
 > *   Change paths in the Sitemap XML
 > *   Change paths in the Robots.txt
 >
-> **Disable Paths: **
+> <strong>Disable Paths:</strong>
 >
 > *   Disable XML-RPC access
 > *   Disable Rest API access
@@ -202,14 +251,14 @@ Note: The plugin requires custom permalinks. Make sure you have it activated at 
 > *   Disable WLW Manifest scripts
 > *   Disable directory browsing
 >
-> **Brute Force Protection: **
+> <strong>Brute Force Protection:</strong>
 >
 > *   Brute Force Protection with Math Captcha
 > *   Brute Force Protection with Google reCaptcha
 > *   Custom attempts, timeout, message
 > *   Manage Blacklist and Whitelist IPs
 >
-> **Log Activity: **
+> <strong>Log Activity:</strong>
 >
 > *   Log user activity
 > *   Set security alerts by email if users login from different IPs
@@ -218,20 +267,31 @@ Note: The plugin requires custom permalinks. Make sure you have it activated at 
 > *   Set security alerts by email if users delete articles
 > *   Security Check with over 30 check points
 >
-> **Integrations: **
+> <strong>Integrations:</strong>
 >
 > *   Support for WP Multisite
 > *   Support for Nginx
 > *   Support for IIS
 > *   Support for LiteSpeed
 > *   Support for Apache
-> *   Support for Bitnami Servers
-> *   Support for Inmotion Servers
+> *   Support for WP Engine
+> *   Support for Inmotion Hosting
+> *   Support for Hostgator Hosting
+> *   Support for Godaddy Hosting
+> *   Support for Host1plus
+> *   Support for Payperhost
+> *   Support for Fastcomet
+> *   Support for Dreamhost
+> *   Support for Bitnami Apache
+> *   Support for Bitnami Nginx
+> *   Support for Google Cloud Hosting
+> *   Support for Litespeed Hosting
+> *   Support for Flyweels Hosting
 >
-> *   Recommended by Wp Rocket plugin
->     https://goo.gl/VTPYWV
+> *   Recommended by Wp Rocket
+> *   Recommended by WPML
 >
-> **Protection against: **
+> <strong>Protection against:</strong>
 >
 > * Brute Force Attacks,
 > * SQL Injection Attacks
@@ -239,18 +299,11 @@ Note: The plugin requires custom permalinks. Make sure you have it activated at 
 > * Cross Site Scripting (XSS)
 > * and more
 >
-> See all the **Ghost features**:
+> <strong>See All Premium Security Features:</strong>
 > <a href="https://shrsl.com/2jfym">https://hidemywpghost.com</a>
->
-> Hide My WP Ghost **Knowledge Base**:
-> <a href="https://shrsl.com/2jixr">https://hidemywpghost.com</a>
 >
 > Check the Demo Website:
 > <a href="https://demo.wpplugins.tips/">https://demo.wpplugins.tips/</a>
->
-> Other websites for Hide My WP Ghost Free:
-> <a href="https://hidemywp.app">https://hidemywp.app</a>
-> <a href="https://hidemywp.co">https://hidemywp.co</a>
 
 
 Once you use the Hide My WP Ghost plugin you will get custom upload paths, author paths, plugin paths and so on.
@@ -275,19 +328,19 @@ On the contrary, it will hide the common paths, deliver all the WordPress Securi
 == Installation ==
 Manually install the Hide My WP Ghost Lite plugin:
 Step 1. Log In as an Administrator on your WordPress site.
-Step 2. In the menu displayed on the left, there is a “Plugins” tab. Click it.
-Step 3. Now click “Add New”.
-Step 4. There, you have the “Upload” button. Click the "Upload" button
+Step 2. In the menu displayed on the left, there is a 'Plugins' tab. Click it.
+Step 3. Now click 'Add New'.
+Step 4. There, you have the 'Upload' button. Click the 'Upload' button
 Step 5. Upload the hide-my-wp.zip file.
-Step 6. After the upload it’s finished, click Activate Plugin.
+Step 6. After the upload it's finished, click Activate Plugin.
 Step 7. Connect the plugin using your email to get a free access token
 Step 8. Follow the setup guide from: https://hidemywpghost.com/article/how-to-install-hide-my-wp-ghost-lite/
 Enjoy!
 
 Install Hide My WP Ghost Lite directly from WordPress directory:
 Step 1. Log In as an Administrator on your WordPress site.
-Step 2. In the menu displayed on the left, there is a “Plugins” tab. Click it.
-Step 3. Search for "Hide My WP".
+Step 2. In the menu displayed on the left, there is a 'Plugins' tab. Click it.
+Step 3. Search for 'Hide My WP'.
 Step 4. After the plugin is shown, click Activate Hide My WP Ghost
 Step 5. Connect the plugin using your email to get a free access token
 Step 6. Follow the setup guide from: https://hidemywpghost.com/article/how-to-install-hide-my-wp-ghost-lite/
@@ -295,7 +348,7 @@ Enjoy!
 
 [youtube https://youtu.be/zhvRGHMjKic]
 
-> Hide My WP Ghost **Knowledge Base**:
+> Hide My WP Ghost <strong>Knowledge Base</strong>:
 > <a href="https://hidemywpghost.com/knowledge-base/">https://hidemywpghost.com</a>
 
 
@@ -310,9 +363,24 @@ Enjoy!
 8. Run a security check for your website and see all the vulnerabilities
 
 == Changelog ==
-= 4.1.03 (TBA) =
+= 4.1.05 (15 Feb 2021) =
+* Update - Update Security for the last updates and WP requirements
+* Update - Optimize JS library from third party plugins
+* Update - Let Hide My WP Settings load if the Permalink Structure is /?p=123
+* Fixed - Compatibility with PHP 8.0 with deprecated functions
+* Fixed - Compatibility with the Flywheel hosting server and custom Nginx config location
+* Fixed - Hide My WP > Security Check UI
+
+= 4.1.04 (23 Ian 2021) =
+* Update - Added compatibility for AppThemes Confirm Email
+* Update - Compatibility with PPress plugin on Login Page and Logout Page
+* Update - Compatibility with SiteGround Cache plugin
+* Update - Compatibility warning with W3 Total Cache Lazy Load
+* Update - Security Check to hide readme.html, license.txt and other common files
+
+= 4.1.03 (11 Dec 2020) =
 * Update - The rules update on adding new plugin or theme
-* Update - Compatibility with PPress plugin on Login Page
+* Update - Added compatibility for AppThemes Confirm Email
 * Fixed - Rollback the settings when pressing the Abort button
 * Fixed - Fixed Backup/Restore rules flash
 * Fixed - Add the correct text direction for WPML while in Posts and Pages

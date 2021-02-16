@@ -25,9 +25,9 @@ class HMW_Controllers_SecurityCheck extends HMW_Classes_FrontController {
 		$this->initSecurity();
 
 		//Add the Menu Tabs in variable
-		HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'popper.min' );
-		HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'bootstrap.min' );
-		HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'font-awesome.min' );
+		HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'popper' );
+		HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'bootstrap' );
+		HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'font-awesome' );
 		HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'settings' );
 
 		if ( $this->securitycheck_time = get_option( 'hmw_securitycheck_time' ) ) {
@@ -213,7 +213,7 @@ class HMW_Controllers_SecurityCheck extends HMW_Classes_FrontController {
 				'solution' => __( "Go to the Updates page and update all the plugins to the last version.", _HMW_PLUGIN_NAME_ ),
 			),
 			'checkIncompatiblePlugins' => array(
-				'name'     => __( "Version Incompatible Plugins", _HMW_PLUGIN_NAME_ ),
+				'name'     => __( "Plugins Incompatible with current WordPress Version", _HMW_PLUGIN_NAME_ ),
 				'value'    => false,
 				'valid'    => false,
 				'warning'  => false,
@@ -324,7 +324,7 @@ class HMW_Controllers_SecurityCheck extends HMW_Classes_FrontController {
 				'valid'    => false,
 				'warning'  => false,
 				'message'  => __( "One of the most important files in your WordPress installation is the wp-config.php file. <br />This file is located in the root directory of your WordPress installation, and contains your website's base configuration details, such as database connection information.", _HMW_PLUGIN_NAME_ ),
-				'solution' => sprintf( __( "Try setting chmod to %s0400%s or %s0440%s and if the website works normally that's the best one to use.", _HMW_PLUGIN_NAME_ ), '<a href="http://www.filepermissions.com/directory-permission/0400" target="_blank">', '</a>', '<a href="http://www.filepermissions.com/directory-permission/0440" target="_blank">', '</a>' ),
+				'solution' => sprintf( __( "Try setting chmod to %s0600%s or %s0640%s and if the website works normally that's the best one to use.", _HMW_PLUGIN_NAME_ ), '<a href="http://www.filepermissions.com/directory-permission/0600" target="_blank">', '</a>', '<a href="http://www.filepermissions.com/directory-permission/0640" target="_blank">', '</a>' ),
 			),
 			'checkConfig'              => array(
 				'name'       => __( "wp-config.php & wp-config-sample.php files are accessible ", _HMW_PLUGIN_NAME_ ),
@@ -827,7 +827,6 @@ class HMW_Controllers_SecurityCheck extends HMW_Classes_FrontController {
 			}
 		} // foreach active plugins we have details on
 
-		HMW_Debug::dump( $bad );
 		if ( ! empty( $bad ) ) {
 			$plugins = get_plugins();
 			foreach ( $bad as $plugin_path => $tmp ) {
@@ -923,8 +922,8 @@ class HMW_Controllers_SecurityCheck extends HMW_Classes_FrontController {
 	public function checkSaltKeysAge() {
 		$old = 95;
 
-		if ( file_exists( HMW_Classes_Tools::getRootPath() . 'wp-config.php' ) ) {
-			$age = @filemtime( HMW_Classes_Tools::getRootPath() . 'wp-config.php' );
+		if ( $config_file = HMW_Classes_Tools::getConfigFile() ) {
+			$age = @filemtime( $config_file );
 
 			if ( ! empty( $age ) ) {
 				$diff = time() - $age;
@@ -1003,17 +1002,17 @@ class HMW_Controllers_SecurityCheck extends HMW_Classes_FrontController {
 	 * @return array|bool
 	 */
 	public function checkConfigChmod() {
-		$wp_config = HMW_Classes_Tools::getRootPath() . 'wp-config.php';
+		$config_file = HMW_Classes_Tools::getConfigFile();
 
-		if ( file_exists( $wp_config ) ) {
+		if ( file_exists( $config_file ) ) {
 			if ( HMW_Classes_Tools::isWindows() ) {
 				return array(
-					'value'    => ( ( is_writeable( $wp_config ) ) ? __( 'Yes' ) : __( 'No' ) ),
-					'valid'    => ( ! is_writeable( $wp_config ) ),
+					'value'    => ( ( is_writeable( $config_file ) ) ? __( 'Yes' ) : __( 'No' ) ),
+					'valid'    => ( ! is_writeable( $config_file ) ),
 					'solution' => sprintf( __( "Change the wp-config.php file permission to Read-Only using File Manager.", _HMW_PLUGIN_NAME_ ), '<a href="http://www.filepermissions.com/directory-permission/0400" target="_blank">', '</a>', '<a href="http://www.filepermissions.com/directory-permission/0440" target="_blank">', '</a>' ),
 				);
 			} else {
-				$mode = substr( sprintf( '%o', @fileperms( $wp_config ) ), - 4 );
+				$mode = substr( sprintf( '%o', @fileperms( $config_file ) ), - 4 );
 
 				return array(
 					'value' => ( ( substr( $mode, - 1 ) != 0 ) ? __( 'Yes' ) : __( 'No' ) ),

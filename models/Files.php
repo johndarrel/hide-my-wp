@@ -118,10 +118,13 @@ class HMW_Models_Files {
 			$rewriteModel->buildRedirect();
 		}
 
-		foreach ( $rewriteModel->_replace['from'] as $key => $row ) {
-			if ( $rewriteModel->_replace['rewrite'][$key] ) {
-				$this->_rewrites['from'][] = '#^/' . $rewriteModel->_replace['to'][$key] . (substr( $rewriteModel->_replace['to'][$key], -1 ) == '/' ? "(.*)" : "") . '#i';
-				$this->_rewrites['to'][] = '/' . $rewriteModel->_replace['from'][$key] . (substr( $rewriteModel->_replace['to'][$key], -1 ) == '/' ? "$1" : "");
+
+		if ( !empty( $rewriteModel->_replace['from'] ) && !empty( $rewriteModel->_replace['to'] ) ) {
+			foreach ( $rewriteModel->_replace['from'] as $key => $row ) {
+				if ( $rewriteModel->_replace['rewrite'][ $key ] ) {
+					$this->_rewrites['from'][] = '#^/' . $rewriteModel->_replace['to'][ $key ] . ( substr( $rewriteModel->_replace['to'][ $key ], - 1 ) == '/' ? "(.*)" : "" ) . '#i';
+					$this->_rewrites['to'][]   = '/' . $rewriteModel->_replace['from'][ $key ] . ( substr( $rewriteModel->_replace['to'][ $key ], - 1 ) == '/' ? "$1" : "" );
+				}
 			}
 		}
 	}
@@ -155,7 +158,9 @@ class HMW_Models_Files {
 		}
 
 		$parse_url['query'] = ((isset($parse_url['query']) && $parse_url['query']) ? '?' . $parse_url['query'] : '');
-		$parse_url['path'] = preg_replace( $this->_rewrites['from'], $this->_rewrites['to'], $parse_url['path'] );
+		if ( !empty( $this->_rewrites['from'] ) && !empty( $this->_rewrites['to'] ) ) {
+			$parse_url['path'] = preg_replace( $this->_rewrites['from'], $this->_rewrites['to'], $parse_url['path'] );
+		}
 		$new_url = $parse_url['scheme'] . '://' . $parse_url['host'] . $home_root . $parse_url['path'] . $parse_url['query'];
 		$new_url = str_replace( '/wp-admin/wp-admin/', '/wp-admin/', $new_url ); //remove duplicates
 
@@ -193,7 +198,9 @@ class HMW_Models_Files {
 		}
 
 		$parse_url['query'] = ((isset($parse_url['query']) && $parse_url['query']) ? '?' . $parse_url['query'] : '');
-		$parse_url['path'] = preg_replace( $this->_rewrites['from'], $this->_rewrites['to'], $parse_url['path'] );
+		if ( !empty( $this->_rewrites['from'] ) && !empty( $this->_rewrites['to'] ) ) {
+			$parse_url['path'] = preg_replace( $this->_rewrites['from'], $this->_rewrites['to'], $parse_url['path'] );
+		}
 		$new_url = $parse_url['scheme'] . '://' . $parse_url['host'] . $home_root . $parse_url['path'] . $parse_url['query'];
 		$new_url = str_replace( '/wp-admin/wp-admin/', '/wp-admin/', $new_url ); //remove duplicates
 

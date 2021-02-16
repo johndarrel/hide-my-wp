@@ -80,25 +80,21 @@ class HMW_Controllers_Settings extends HMW_Classes_FrontController {
 
 		//Load the css for Settings
 		if ( is_rtl() ) {
-			HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'popper.min' );
-			HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'bootstrap.rtl.min' );
+			HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'popper' );
+			HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'bootstrap.rtl' );
 			HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'rtl' );
 		} else {
-			HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'popper.min' );
-			HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'bootstrap.min' );
+			HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'popper' );
+			HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'bootstrap' );
 		}
 
-		HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'font-awesome.min' );
-		HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'switchery.min' );
+		HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'font-awesome' );
+		HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'switchery' );
 		HMW_Classes_ObjController::getClass( 'HMW_Classes_DisplayController' )->loadMedia( 'settings' );
 
 		//Show Hide My WP Offer
-		if ( HMW_Classes_Tools::getOption( 'hmw_mode' ) == 'lite' && date( 'Y-m-d' ) >= '2020-11-27' && date( 'Y-m-d' ) < '2020-11-01' ) {
-			HMW_Classes_Error::setError( sprintf( __( '%sBlack Friday!!%s Get Hide My WP Ghost today with the best discounts of the year. %sSee Ofers!%s', _HMW_PLUGIN_NAME_ ), '<strong style="color: red; font-size: 20px;">', '</strong>', '<a href="https://hidemywpghost.com/hide-my-wp-ghost-black-friday-offer/" target="_blank" style="font-weight: bold">', '</a>' ) );
-		} elseif ( HMW_Classes_Tools::getOption( 'hmw_mode' ) == 'lite' && date( 'Y-m-d' ) >= '2020-10-28' && date( 'Y-m-d' ) < '2020-11-01' ) {
-			HMW_Classes_Error::setError( sprintf( __( '%sHalloween Special!!%s Get %s80%% OFF%s on Hide My WP Ghost - Unlimited Websites License until 31 October 2020. %sSee Ofer!%s', _HMW_PLUGIN_NAME_ ), '<strong style="color: red; font-size: 20px;">', '</strong>', '<strong style="color: red">', '</strong>', '<a href="https://hidemywpghost.com/hide-my-wp-ghost-halloween-offer/" target="_blank" style="font-weight: bold">', '</a>' ) );
-		} elseif ( HMW_Classes_Tools::getOption( 'hmw_mode' ) == 'lite' && date( 'm' ) <> 10 && date( 'm' ) <> 11 && ( ( date( 'd' ) >= 15 && date( 'd' ) <= 20 ) || ( date( 'd' ) >= 25 && date( 'd' ) <= 30 ) ) ) {
-			HMW_Classes_Error::setError( sprintf( __( '%sLimited Time Offer%s: Get %s65%% OFF%s today on Hide My WP Ghost 5 Websites License. %sHurry Up!%s', _HMW_PLUGIN_NAME_ ), '<a href="https://wpplugins.tips/buy/5_websites_special" target="_blank" style="font-weight: bold;"><strong style="color: red">', '</strong></a>', '<a href="https://wpplugins.tips/buy/5_websites_special" target="_blank" style="font-weight: bold"><strong style="color: red">', '</strong></a>', '<a href="https://wpplugins.tips/buy/5_websites_special" target="_blank" style="font-weight: bold">', '</a>' ) );
+		if ( HMW_Classes_Tools::getOption( 'hmw_mode' ) == 'lite' && date( 'm' ) <> 10 && date( 'm' ) <> 11 && ( ( date( 'd' ) >= 15 && date( 'd' ) <= 20 ) || ( date( 'd' ) >= 25 && date( 'd' ) <= 30 ) ) ) {
+			HMW_Classes_Error::setError( sprintf( __( '%sLimited Time Offer%s: Save up to %s 77%% %s today on Hide My WP Ghost License. %sHurry Up!%s', _HMW_PLUGIN_NAME_ ), '<a href="https://hidemywpghost.com/hide-my-wp-pricing/?coupon=HIDEMYWP77" target="_blank" style="font-weight: bold;"><strong style="color: red">', '</strong></a>', '<a href="https://hidemywpghost.com/hide-my-wp-pricing/?coupon=5HIDEMYWP65" target="_blank" style="font-weight: bold"><strong style="color: red">', '</strong></a>', '<a href="https://hidemywpghost.com/hide-my-wp-pricing/?coupon=5HIDEMYWP65" target="_blank" style="font-weight: bold">', '</a>' ) );
 		}
 
 		//Show errors on top

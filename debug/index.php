@@ -6,54 +6,10 @@ class HMW_Debug {
     /** @var array */
     private static $debug;
 
-    public function __construct() {
-    }
 
     public function logQueries($query) {
         self::dump($query);
         return $query;
-    }
-
-    public function _isAjax() {
-        if (defined('DOING_AJAX') && DOING_AJAX) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Get a value from $_POST / $_GET
-     * if unavailable, take a default value
-     *
-     * @param string $key Value key
-     * @param mixed $defaultValue (optional)
-     * @return mixed Value
-     */
-    public static function getValue($key, $defaultValue = false) {
-        if (!isset($key) OR empty($key) OR !is_string($key))
-            return false;
-        $ret = (isset($_POST[$key]) ? $_POST[$key] : (isset($_GET[$key]) ? $_GET[$key] : $defaultValue));
-
-        if (is_string($ret) === true)
-            $ret = urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($ret)));
-        return !is_string($ret) ? $ret : stripslashes($ret);
-    }
-
-    public static function setValue($key, $value) {
-        $_POST[$key] = $value;
-        $_GET[$key] = $value;
-    }
-
-    /**
-     * Check if the parameter is set
-     *
-     * @param string $key
-     * @return boolean
-     */
-    public static function getIsset($key) {
-        if (!isset($key) OR empty($key) OR !is_string($key))
-            return false;
-        return isset($_POST[$key]) ? true : (isset($_GET[$key]) ? true : false);
     }
 
     /**
@@ -61,8 +17,8 @@ class HMW_Debug {
      */
     public static function checkDebug() {
         //if debug is called
-        if (self::getIsset('debug')) {
-            if (self::getValue('debug') === 'on' && HMW_DEBUG) {
+        if (HMW_Classes_Tools::getIsset('debug')) {
+            if (HMW_Classes_Tools::getValue('debug') === 'on' && HMW_DEBUG) {
                 error_reporting(E_ALL);
                 @ini_set('display_errors', true);
                 if (function_exists('register_shutdown_function')) {
@@ -81,10 +37,10 @@ class HMW_Debug {
      * @return mixed
      */
     public function getBuffer($buffer) {
-        if (!$this->_isAjax()) {
+        if (!HMW_Classes_Tools::isAjax()) {
             return $buffer;
         }
-        if (!$this->getIsset('debug')) {
+        if (!HMW_Classes_Tools::getIsset('debug')) {
             return $buffer;
         }
 
@@ -98,7 +54,7 @@ class HMW_Debug {
      */
     public static function dump() {
         if (HMW_DEBUG) {
-            if (self::getValue('debug') !== 'on') {
+            if (HMW_Classes_Tools::getValue('debug') !== 'on') {
                 return;
             }
 

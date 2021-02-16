@@ -43,7 +43,7 @@ if ( defined( 'HMW_DISABLE' ) && HMW_DISABLE ) {
                                 </div>
                             </div>
                             <div class="wp-admin_warning col-sm-12 my-2 text-danger p-0 text-center" <?php echo( ( HMW_Classes_Tools::getOption( 'hmw_hide_admin' ) ) ? '' : 'style="display: none;"' ) ?> >
-                                <div class="my-2 small"><?php echo sprintf( __( "%sWARNING:%s The admin path is hidden from visitors. Use the custom login URL to login to admin", _HMW_PLUGIN_NAME_ ), '<span class="font-weight-bold">', '</span>' ); ?></div>
+                                <div class="my-2 small"><?php echo sprintf( __( "%sWARNING:%s The admin path is hidden from visitors. Use the custom login URL to login to admin", _HMW_PLUGIN_NAME_ ), '<span class="font-weight-bold">', '</span>' ); ?>: <br /> <a href="<?php echo site_url() . '/' . HMW_Classes_Tools::getOption( 'hmw_login_url' )?>" target="_blank"><strong><?php echo site_url() . '/' . HMW_Classes_Tools::getOption( 'hmw_login_url' )?></strong></a></div>
                                 <div class="my-3 small"><?php echo sprintf( __( "If you can't login, use this URL: %s and all your changes are roll back to default", _HMW_PLUGIN_NAME_ ), "<strong>" . site_url() . "/wp-login.php?" . HMW_Classes_Tools::getOption( 'hmw_disable_name' ) . "=" . HMW_Classes_Tools::getOption( 'hmw_disable' ) . "</strong><br />" ); ?></div>
                             </div>
 
@@ -255,7 +255,7 @@ if ( defined( 'HMW_DISABLE' ) && HMW_DISABLE ) {
                                         </div>
                                         <div class="col-sm-8 p-0 input-group input-group-lg">
                                             <input type="text" class="form-control bg-input" name="hmw_activate_url" value="<?php echo HMW_Classes_Tools::getOption( 'hmw_activate_url' ) ?>" placeholder="<?php echo HMW_Classes_Tools::$default['hmw_activate_url'] ?>"/>
-                                            <a href="https://hidemywpghost.com/kb/customize-paths-in-hide-my-wp-ghost/#customize_register" target="_blank" class="position-absolute float-right" style="right: 7px;top: 25%;"><i class="fa fa-question-circle"></i></a>
+                                            <a href="https://hidemywpghost.com/kb/customize-paths-in-hide-my-wp-ghost/#customize_activation" target="_blank" class="position-absolute float-right" style="right: 7px;top: 25%;"><i class="fa fa-question-circle"></i></a>
                                         </div>
                                     </div>
 								<?php } ?>
@@ -497,6 +497,22 @@ if ( defined( 'HMW_DISABLE' ) && HMW_DISABLE ) {
                                     </div>
                                 </div>
 
+                                <div class="col-sm-12 row mb-1 ml-1">
+                                    <div class="checker col-sm-12 row my-2 py-1">
+                                        <div class="col-sm-12 p-0 switch switch-sm">
+                                            <div class="hmw_pro">
+                                                <img src="<?php echo _HMW_THEME_URL_ . 'img/pro.png' ?>">
+                                            </div>
+                                            <label for="hmwp_security_header"><?php _e( 'Add Security Headers for XSS and Code Injection Attacks', _HMW_PLUGIN_NAME_ ); ?></label>
+                                            <div class="offset-1 text-black-50"><?php _e( "Add Strict-Transport-Security header", _HMW_PLUGIN_NAME_ ); ?> </div>
+                                            <div class="offset-1 text-black-50"><?php _e( "Add Content-Security-Policy header", _HMW_PLUGIN_NAME_ ); ?> </div>
+                                            <div class="offset-1 text-black-50"><?php _e( "Add X-Frame-Options header", _HMW_PLUGIN_NAME_ ); ?> </div>
+                                            <div class="offset-1 text-black-50"><?php _e( "Add X-XSS-Protection header", _HMW_PLUGIN_NAME_ ); ?> </div>
+                                            <div class="offset-1 text-black-50"><?php _e( "Add X-Content-Type-Options header", _HMW_PLUGIN_NAME_ ); ?> </div>
+                                        </div>
+                                    </div>
+                                </div>
+
 								<?php if ( HMW_Classes_Tools::isNginx() || HMW_Classes_Tools::isApache() || HMW_Classes_Tools::isLitespeed() ) { ?>
 
                                     <div class="col-sm-12 row mb-1 ml-1">
@@ -573,7 +589,7 @@ if ( defined( 'HMW_DISABLE' ) && HMW_DISABLE ) {
 							<?php echo __( 'Check if your website is secured with the current settings.', _HMW_PLUGIN_NAME_ ) ?>
                         </div>
                         <div class="card-text text-info m-3">
-                            <a href="<?php echo HMW_Classes_Tools::getSettingsUrl( 'hmw_securitycheck' ) ?>" class="btn rounded-0 btn-warning btn-lg text-white px-5 securitycheck"><?php _e( 'Security Check', _HMW_PLUGIN_NAME_ ); ?></a>
+                            <a href="<?php echo HMW_Classes_Tools::getSettingsUrl( 'hmw_securitycheck' ) ?>" class="btn rounded-0 btn-warning btn-lg text-white px-4 securitycheck"><?php _e( 'Security Check', _HMW_PLUGIN_NAME_ ); ?></a>
                         </div>
                         <div class="card-text text-muted small">
 							<?php echo __( 'Make sure you save the settings and empty the cache before checking your website with our tool.', _HMW_PLUGIN_NAME_ ) ?>

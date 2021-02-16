@@ -22,6 +22,16 @@ class HMW_Models_Compatibility {
 					$wp_fastest_cache_options->wpFastestCacheStatus = false;
 				}
 			}
+
+			//Compatibility with W3 Total cache
+			if ( HMW_Classes_Tools::isPluginActive( 'w3-total-cache/w3-total-cache.php' ) ) {
+				add_filter( 'w3tc_lazyload_is_embed_script', array( 'HMW_Classes_Tools', 'returnFalse' ), PHP_INT_MAX );
+			}
+
+			//Conpatibility with Confirm Email from AppThemes
+			if ( HMW_Classes_Tools::isPluginActive( 'confirm-email/confirm-email.php' ) ) {
+				add_action( 'init', array( $this, 'checkAppThemesConfirmEmail' ) );
+			}
 		}
 
 		//Check boot compatibility for some plugins and functionalities
@@ -88,7 +98,14 @@ class HMW_Models_Compatibility {
 
 		//Add Compatibility with PPress plugin
 		if ( HMW_Classes_Tools::isPluginActive( 'ppress/profilepress.php' ) ) {
-			add_action( 'hmw_login_init', array( $this, 'ppressCompatibility' ) );
+			if ( 'logout' <> HMW_Classes_Tools::getValue( 'action' ) ) {
+				add_action( 'hmw_login_init', array( $this, 'ppressLoginPage' ) );
+			}
+		}
+
+		//Add compatibility with WP Defender plugin
+		if ( HMW_Classes_Tools::isPluginActive( 'wp-defender/wp-defender.php' ) ) {
+			add_action( 'login_form_defender-verify-otp', array($this, 'wpDefenderLogin'), 9 );
 		}
 
 		if ( ! is_admin() ) {
@@ -431,13 +448,9 @@ class HMW_Models_Compatibility {
 	public function findCDNServers() {
 		$domains = array();
 
-		HMW_Debug::dump( "findCDNServers", HMW_Classes_Tools::isPluginActive( 'wp-rocket/wp-rocket.php' ) );
-
 		if ( HMW_Classes_Tools::isPluginActive( 'wp-rocket/wp-rocket.php' ) && function_exists( 'get_rocket_option' ) ) {
-			HMW_Debug::dump( "wp rocket installed" );
 			$cnames = get_rocket_option( 'cdn_cnames', array() );
 			foreach ( $cnames as $k => $_urls ) {
-				HMW_Debug::dump( $_urls );
 				$_urls = explode( ',', $_urls );
 				$_urls = array_map( 'trim', $_urls );
 
@@ -671,7 +684,8 @@ class HMW_Models_Compatibility {
 	 * Add Compatibility with PPress plugin
 	 * Load the post from Ppress for the login page
 	 */
-	public function ppressCompatibility() {
+	public function ppressLoginPage() {
+
 		//Add compatibility with PPress plugin
 		$data = get_option( 'pp_settings_data' );
 		if ( class_exists( 'WP_Query' ) && isset( $data['set_login_url'] ) && (int) $data['set_login_url'] > 0 ) {
@@ -684,5 +698,33 @@ class HMW_Models_Compatibility {
 			}
 			exit();
 		}
+
+	}
+
+	/**
+	 * Conpatibility with Confirm Email from AppThemes
+	 *
+	 * call the appthemes_confirm_email_template_redirect
+	 * for custom login paths
+	 */
+	public function checkAppThemesConfirmEmail() {
+
+		if ( HMW_Classes_Tools::getIsset( 'action' ) ) {
+			if ( function_exists( 'appthemes_confirm_email_template_redirect' ) ) {
+				appthemes_confirm_email_template_redirect();
+			}
+		}
+
+	}
+
+	/**
+	 * Compatibility with wp-defender login
+	 */
+	public function wpDefenderLogin() {
+		if ( 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+			return;
+		}
+
+		$_POST['_wpnonce'] = wp_create_nonce( 'verify_otp' );
 	}
 }

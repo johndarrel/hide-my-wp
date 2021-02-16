@@ -32,14 +32,14 @@ class HMW_Classes_DisplayController {
         /* if is a custom css file */
         if (strpos($uri, '//') === false) {
             $name = strtolower($uri);
-            if (file_exists(_HMW_THEME_DIR_ . 'css/' . $name . '.css')) {
-                $css_uri = _HMW_THEME_URL_ . 'css/' . $name . '.css?ver=' . HMW_VERSION_ID;
+            if (file_exists(_HMW_THEME_DIR_ . 'css/' . $name . (HMW_DEBUG ? '' : '.min') . '.css')) {
+                $css_uri = _HMW_THEME_URL_ . 'css/' . $name . (HMW_DEBUG ? '' : '.min') . '.css?ver=' . HMW_VERSION_ID;
             }
-            if (file_exists(_HMW_THEME_DIR_ . 'css/' . $name . '.scss')) {
-                $css_uri = _HMW_THEME_URL_ . 'css/' . $name . '.scss?ver=' . HMW_VERSION_ID;
+            if (file_exists(_HMW_THEME_DIR_ . 'css/' . $name . (HMW_DEBUG ? '' : '.min') . '.scss')) {
+                $css_uri = _HMW_THEME_URL_ . 'css/' . $name . (HMW_DEBUG ? '' : '.min') . '.scss?ver=' . HMW_VERSION_ID;
             }
-            if (file_exists(_HMW_THEME_DIR_ . 'js/' . $name . '.js')) {
-                $js_uri = _HMW_THEME_URL_ . 'js/' . $name . '.js?ver=' . HMW_VERSION_ID;
+            if (file_exists(_HMW_THEME_DIR_ . 'js/' . $name . (HMW_DEBUG ? '' : '.min') . '.js')) {
+                $js_uri = _HMW_THEME_URL_ . 'js/' . $name . (HMW_DEBUG ? '' : '.min') . '.js?ver=' . HMW_VERSION_ID;
             }
         } else {
             $name = strtolower(basename($uri));

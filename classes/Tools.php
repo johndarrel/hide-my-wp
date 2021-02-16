@@ -166,8 +166,8 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 			),
 
 			//redirects
-			'hmw_url_redirect'        => '.',
-			'hmw_url_redirects'       => array( 'default' => array( 'login' => '', 'logout' => '' ) ),
+			'hmw_url_redirect'         => '.',
+			'hmw_url_redirects'        => array( 'default' => array( 'login' => '', 'logout' => '' ) ),
 		);
 		self::$default = array(
 			'hmw_mode'             => 'default',
@@ -259,14 +259,14 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 		}
 
 		//Set default hmw_hide_wplogin
-		if ( !isset( $options['hmw_hide_wplogin'] ) && isset($options['hmw_hide_login']) && $options['hmw_hide_login'] ) {
+		if ( ! isset( $options['hmw_hide_wplogin'] ) && isset( $options['hmw_hide_login'] ) && $options['hmw_hide_login'] ) {
 			$options['hmw_hide_wplogin'] = $options['hmw_hide_login'];
 		}
 
 		//upgrade the redirects to the new redirects
 		if ( isset( $options['hmw_logout_redirect'] ) && $options['hmw_logout_redirect'] ) {
 			$options['hmw_url_redirects']['default']['logout'] = $options['hmw_logout_redirect'];
-			unset($options['hmw_logout_redirect']);
+			unset( $options['hmw_logout_redirect'] );
 		}
 
 		if ( is_array( $options ) ) {
@@ -395,11 +395,7 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 	 * Load the multilanguage support from .mo
 	 */
 	public static function loadMultilanguage() {
-		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
-			load_plugin_textdomain( _HMW_PLUGIN_NAME_, _HMW_PLUGIN_NAME_ . '/languages/' );
-		} else {
-			load_plugin_textdomain( _HMW_PLUGIN_NAME_, null, _HMW_PLUGIN_NAME_ . '/languages/' );
-		}
+		load_plugin_textdomain( _HMW_PLUGIN_NAME_, false, _HMW_PLUGIN_NAME_ . '/languages/' );
 	}
 
 	/**
@@ -442,7 +438,7 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 		if ( $relative ) {
 			return 'admin.php?page=' . $page;
 		} else {
-			if ( !is_multisite() ) {
+			if ( ! is_multisite() ) {
 				return admin_url( 'admin.php?page=' . $page );
 			} else {
 				return network_admin_url( 'admin.php?page=' . $page );
@@ -636,12 +632,12 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 	}
 
 	/**
-	 * Returns true if permalink structure
+	 * Returns true for all server types as the new rules are loaded outside the WordPress rules
 	 *
 	 * @return boolean
 	 */
 	public static function isPermalinkStructure() {
-		return get_option( 'permalink_structure' );
+		return true;
 	}
 
 
@@ -687,7 +683,7 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 		global $is_apache;
 
 		//If custom defined
-		if(defined( 'HMW_SERVER_TYPE' ) && strtolower(HMW_SERVER_TYPE) == 'apache'){
+		if ( defined( 'HMW_SERVER_TYPE' ) && strtolower( HMW_SERVER_TYPE ) == 'apache' ) {
 			return true;
 		}
 
@@ -722,7 +718,7 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 		$litespeed = false;
 
 		//If custom defined
-		if(defined( 'HMW_SERVER_TYPE' ) && strtolower(HMW_SERVER_TYPE) == 'litespeed'){
+		if ( defined( 'HMW_SERVER_TYPE' ) && strtolower( HMW_SERVER_TYPE ) == 'litespeed' ) {
 			return true;
 		}
 
@@ -773,7 +769,7 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 		global $is_nginx;
 
 		//If custom defined
-		if(defined( 'HMW_SERVER_TYPE' ) && strtolower(HMW_SERVER_TYPE) == 'nginx'){
+		if ( defined( 'HMW_SERVER_TYPE' ) && strtolower( HMW_SERVER_TYPE ) == 'nginx' ) {
 			return true;
 		}
 
@@ -792,7 +788,7 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 	public static function isWpengine() {
 
 		//If custom defined
-		if(defined( 'HMW_SERVER_TYPE' ) && strtolower(HMW_SERVER_TYPE) == 'wpengine'){
+		if ( defined( 'HMW_SERVER_TYPE' ) && strtolower( HMW_SERVER_TYPE ) == 'wpengine' ) {
 			return true;
 		}
 
@@ -807,7 +803,7 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 	public static function isInmotion() {
 
 		//If custom defined
-		if(defined( 'HMW_SERVER_TYPE' ) && strtolower(HMW_SERVER_TYPE) == 'inmotion'){
+		if ( defined( 'HMW_SERVER_TYPE' ) && strtolower( HMW_SERVER_TYPE ) == 'inmotion' ) {
 			return true;
 		}
 
@@ -822,7 +818,7 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 	public static function isGodaddy() {
 
 		//If custom defined
-		if(defined( 'HMW_SERVER_TYPE' ) && strtolower(HMW_SERVER_TYPE) == 'godaddy'){
+		if ( defined( 'HMW_SERVER_TYPE' ) && strtolower( HMW_SERVER_TYPE ) == 'godaddy' ) {
 			return true;
 		}
 
@@ -837,7 +833,7 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 	public static function isFlywheel() {
 
 		//If custom defined
-		if(defined( 'HMW_SERVER_TYPE' ) && strtolower(HMW_SERVER_TYPE) == 'flywheel'){
+		if ( defined( 'HMW_SERVER_TYPE' ) && strtolower( HMW_SERVER_TYPE ) == 'flywheel' ) {
 			return true;
 		}
 
@@ -854,7 +850,7 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 		global $is_IIS, $is_iis7;
 
 		//If custom defined
-		if(defined( 'HMW_SERVER_TYPE' ) && strtolower(HMW_SERVER_TYPE) == 'iis'){
+		if ( defined( 'HMW_SERVER_TYPE' ) && strtolower( HMW_SERVER_TYPE ) == 'iis' ) {
 			return true;
 		}
 
@@ -899,8 +895,6 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 			if ( is_multisite() ) {
 				self::$active_plugins = array_merge( array_values( self::$active_plugins ), array_keys( get_site_option( 'active_sitewide_plugins' ) ) );
 			}
-
-			HMW_Debug::dump( self::$active_plugins );
 
 		}
 
@@ -955,7 +949,29 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 	 * @return string Full filesystem path to the root of the WordPress installation
 	 */
 	public static function getRootPath() {
-		return ABSPATH;
+		if ( defined( '_HMW_CONFIGPATH' ) ) {
+			return _HMW_CONFIGPATH;
+		} elseif ( self::isFlywheel() && defined( 'WP_CONTENT_DIR' ) && dirname( WP_CONTENT_DIR ) ) {
+			return str_replace( '\\', '/', dirname( WP_CONTENT_DIR ) ) . '/';
+		} else {
+			return ABSPATH;
+		}
+	}
+
+	/**
+	 * Get the config file for WordPress
+	 * @return string
+	 */
+	public static function getConfigFile() {
+		if ( file_exists( self::getRootPath() . 'wp-config.php' ) ) {
+			return self::getRootPath() . 'wp-config.php';
+		}
+
+		if ( file_exists( dirname( ABSPATH ) . '/wp-config.php' ) ) {
+			return dirname( ABSPATH ) . '/wp-config.php';
+		}
+
+		return false;
 	}
 
 	/**
@@ -979,8 +995,6 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 				$url = trim( $url, '/' );
 			}
 		}
-
-		HMW_Debug::dump( $url );
 
 		return $url;
 	}
@@ -1050,6 +1064,13 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 			}
 			if ( method_exists( 'WpeCommon', 'purge_varnish_cache' ) ) {
 				WpeCommon::purge_varnish_cache();
+			}
+		}
+
+		if ( self::isPluginActive( 'sg-cachepress/sg-cachepress.php' ) && class_exists( 'Supercacher' ) ) {
+			if ( method_exists( 'Supercacher', 'purge_cache' ) && method_exists( 'Supercacher', 'delete_assets' ) ) {
+				Supercacher::purge_cache();
+				Supercacher::delete_assets();
 			}
 		}
 
@@ -1278,7 +1299,7 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 		$message = "Thank you for using Hide My WP Ghost!" . "\n\n";
 		$message .= $line;
 		$message .= "SPECIAL OFFER: Get Hide My WP Ghost with just $10/website if you buy a 5 Websites License pack." . "\n";
-		$message .= "https://shrsl.com/2jixw" . "\n";
+		$message .= "https://hidemywpghost.com/hide-my-wp-pricing/?coupon=5HIDEMYWP65" . "\n";
 		$message .= $line . "\n";
 		$message .= "Your new website URLs are:" . "\n";
 		$message .= "Admin URL: " . admin_url() . "\n";
@@ -1313,27 +1334,29 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 
 	/**
 	 * Set the current user role for later use
+	 *
 	 * @param $user
 	 *
 	 * @return string
 	 */
-	public static function setCurrentUserRole($user = null){
+	public static function setCurrentUserRole( $user = null ) {
 		$roles = array();
 
-		if (!$user && function_exists('wp_get_current_user') ) {
+		if ( ! $user && function_exists( 'wp_get_current_user' ) ) {
 			$user = wp_get_current_user();
 		}
 
-		if(isset($user->roles)) {
-			$roles = ( array )$user->roles;
+		if ( isset( $user->roles ) ) {
+			$roles = ( array ) $user->roles;
 		}
 
-		if(!empty($roles)) {
+		if ( ! empty( $roles ) ) {
 			self::$current_user_role = current( $roles );
 		}
 
 		return self::$current_user_role;
 	}
+
 	/**
 	 * Get the user main Role or default
 	 * @return mixed|string
@@ -1344,15 +1367,17 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 
 	/**
 	 * Customize the redirect for the logout process
+	 *
 	 * @param $redirect
+	 *
 	 * @return mixed
 	 */
 	public static function getCustomLogoutURL( $redirect ) {
 		//Get Logout based on user Role
-		$role = self::getUserRole();
+		$role         = self::getUserRole();
 		$urlRedirects = self::getOption( 'hmw_url_redirects' );
-		if ( isset( $urlRedirects[$role]['logout'] ) && $urlRedirects[$role]['logout'] <> '' ) {
-			$redirect = $urlRedirects[$role]['logout'];
+		if ( isset( $urlRedirects[ $role ]['logout'] ) && $urlRedirects[ $role ]['logout'] <> '' ) {
+			$redirect = $urlRedirects[ $role ]['logout'];
 		} elseif ( isset( $urlRedirects['default']['logout'] ) && $urlRedirects['default']['logout'] <> '' ) {
 			$redirect = $urlRedirects['default']['logout'];
 		}
@@ -1362,17 +1387,19 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 
 	/**
 	 * Customize the redirect for the login process
+	 *
 	 * @param $redirect
 	 * @param $user
+	 *
 	 * @return mixed
 	 */
 	public static function getCustomLoginURL( $redirect ) {
 
 		//Get Logout based on user Role
-		$role = self::getUserRole();
+		$role         = self::getUserRole();
 		$urlRedirects = self::getOption( 'hmw_url_redirects' );
-		if ( isset( $urlRedirects[$role]['login'] ) && $urlRedirects[$role]['login'] <> '' ) {
-			$redirect = $urlRedirects[$role]['login'];
+		if ( isset( $urlRedirects[ $role ]['login'] ) && $urlRedirects[ $role ]['login'] <> '' ) {
+			$redirect = $urlRedirects[ $role ]['login'];
 		} elseif ( isset( $urlRedirects['default']['login'] ) && $urlRedirects['default']['login'] <> '' ) {
 			$redirect = $urlRedirects['default']['login'];
 		}
@@ -1419,10 +1446,10 @@ class HMW_Classes_Tools extends HMW_Classes_FrontController {
 	 */
 	public static function movePluginFirst() {
 		//Make sure the plugin is loaded first
-		$plugin = _HMW_PLUGIN_NAME_ . '/index.php';
+		$plugin         = _HMW_PLUGIN_NAME_ . '/index.php';
 		$active_plugins = get_option( 'active_plugins' );
 
-		if ( !empty( $active_plugins ) ) {
+		if ( ! empty( $active_plugins ) ) {
 
 			$this_plugin_key = array_search( $plugin, $active_plugins );
 

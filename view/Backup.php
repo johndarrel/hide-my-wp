@@ -12,8 +12,8 @@
                         <form action="" target="_blank" method="POST">
                             <?php wp_nonce_field('hmw_backup', 'hmw_nonce'); ?>
                             <input type="hidden" name="action" value="hmw_backup"/>
-                            <input type="submit" class="btn rounded-0 btn-default" name="hmw_backup" value="<?php _e('Backup Settings', _HMW_PLUGIN_NAME_) ?>"/>
-                            <input type="button" class="btn rounded-0 btn-default hmw_restore" onclick="jQuery('.hmw_settings_restore').modal()" name="hmw_restore" value="<?php _e('Restore Settings', _HMW_PLUGIN_NAME_) ?>"/>
+                            <input type="submit" class="btn rounded-0 btn-light" name="hmw_backup" value="<?php _e('Backup Settings', _HMW_PLUGIN_NAME_) ?>"/>
+                            <input type="button" class="btn rounded-0 btn-light hmw_restore" onclick="jQuery('.hmw_settings_restore').modal()" name="hmw_restore" value="<?php _e('Restore Settings', _HMW_PLUGIN_NAME_) ?>"/>
                         </form>
                     </div>
 

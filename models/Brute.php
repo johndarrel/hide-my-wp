@@ -110,11 +110,11 @@ class HMW_Models_Brute {
         }
 
         //Check out our transients
-        if (isset($transient_value) && $transient_value['status'] == 'ok') {
+        if (isset($transient_value['status']) && $transient_value['status'] == 'ok') {
             return $transient_value;
         }
 
-        if (isset($transient_value) && $transient_value['status'] == 'blocked') {
+        if (isset($transient_value['status']) && $transient_value['status'] == 'blocked') {
             //there is a current block-- prevent login
             $this->brute_kill_login();
         }
@@ -355,7 +355,7 @@ class HMW_Models_Brute {
         $ips = array();
         $pattern = '_transient_timeout_hmw_brute_';
         //check 20 keyword at one time
-        $sql = "SELECT `option_name`  FROM `" . $wpdb->options . "`  WHERE (`option_name` like '$pattern%')  ORDER BY `option_id` DESC";
+        $sql = $wpdb->prepare("SELECT `option_name`  FROM `" . $wpdb->options . "`  WHERE (`option_name` like '%%s%')  ORDER BY `option_id` DESC", $pattern);
 
         if ($rows = $wpdb->get_results($sql)) {
             foreach ($rows as $row) {

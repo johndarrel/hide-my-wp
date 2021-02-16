@@ -145,11 +145,11 @@ class HMW_Controllers_Brute extends HMW_Classes_FrontController {
                         <td>{$ip['ip']}</td>
                         <td>{$ip['attempts']}</td>
                         <td>{$ip['host']}</td>
-                        <td class=\"col-md-2 \"> <form method=\"POST\">
+                        <td> <form method=\"POST\">
                                 " . wp_nonce_field('hmw_deleteip', 'hmw_nonce', true, false) . "
                                 <input type=\"hidden\" name=\"action\" value=\"hmw_deleteip\" />
                                 <input type=\"hidden\" name=\"transient\" value=\"" . $transient . "\" />
-                                <input type=\"submit\" class=\"btn rounded-0 btn-default save no-p-v\" value=\"Unlock\" />
+                                <input type=\"submit\" class=\"btn rounded-0 btn-light save no-p-v\" value=\"Unlock\" />
                             </form>
                         </td>
                      </tr>";

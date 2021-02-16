@@ -239,41 +239,17 @@ class HMW_Models_Rules {
      * @return bool
      */
     public function isConfigAdminCookie() {
-        if (file_exists(ABSPATH . 'wp-config.php')) {
-            $global_config_file = ABSPATH . 'wp-config.php';
-        } else {
-            $global_config_file = dirname(ABSPATH) . '/wp-config.php';
-        }
+	    $config_file = HMW_Classes_Tools::getConfigFile();
 
-        $lines = file($global_config_file);
+        $lines = file($config_file);
 
         foreach ((array)$lines as $line) {
-            if (preg_match("/ADMIN_COOKIE_PATH/", $line)) {
+            if (preg_match("/ADMIN_COOKIE_PATH/", $line) && !preg_match("/^\/\//", $line)) {
                 return true;
             }
         }
 
         return false;
-    }
-
-
-
-    /**
-     * Remove the config cookie in case another plugin add this
-     * @return bool
-     */
-    public function removeConfigCookie() {
-        if (file_exists(ABSPATH . 'wp-config.php')) {
-            $global_config_file = ABSPATH . 'wp-config.php';
-        } else {
-            $global_config_file = dirname(ABSPATH) . '/wp-config.php';
-        }
-
-        if (!$this->replaceToFile('define *\( *[\'|\"]ADMIN_COOKIE_PATH[\'|\"]', '', $global_config_file)) {
-            return false;
-        }
-
-        return true;
     }
 
 }

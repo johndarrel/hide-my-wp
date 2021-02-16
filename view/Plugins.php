@@ -17,7 +17,7 @@
                             <?php if (!HMW_Classes_Tools::isPluginActive($plugin['path'])) { ?>
                                 <a href="<?php echo $plugin['url']; ?>" target="_blank" class="btn rounded-0 btn-info"><?php _e('Go To Plugin', _HMW_PLUGIN_NAME_) ?></a>
                             <?php } else { ?>
-                                <button class="btn rounded-0 plugin btn-default" disabled><?php _e('Plugin Installed', _HMW_PLUGIN_NAME_) ?></button>
+                                <button class="btn rounded-0 plugin btn-light" disabled><?php _e('Plugin Installed', _HMW_PLUGIN_NAME_) ?></button>
                             <?php } ?>
                         </div>
                     </div>

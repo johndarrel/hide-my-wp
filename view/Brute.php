@@ -121,11 +121,11 @@
                 <div class="card-body">
                     <h3 class="card-title"><?php _e('Blocked IPs', _HMW_PLUGIN_NAME_); ?>:</h3>
                     <div class="mt-3 mb-1" style="display: block;">
-                        <div class="offset-10 col-md-2 py-1">
+                        <div class="float-right py-1">
                             <form method="POST">
                                 <?php wp_nonce_field('hmw_deleteallips', 'hmw_nonce') ?>
                                 <input type="hidden" name="action" value="hmw_deleteallips"/>
-                                <button type="submit" class="btn rounded-0 btn-default save py-0"><?php _e('Unlock all', _HMW_PLUGIN_NAME_); ?></button>
+                                <button type="submit" class="btn rounded-0 btn-light save py-0"><?php _e('Unlock all', _HMW_PLUGIN_NAME_); ?></button>
                             </form>
                         </div>
                         <div id="hmw_blockedips" class="col-sm-12 p-0"></div>

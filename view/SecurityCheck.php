@@ -107,7 +107,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <button class="btn btn-default" type="button"  data-toggle="modal" data-target="#hmw_securitydetail' . $index . '">' . __('Info', _HMW_PLUGIN_NAME_) . '</button>
+                                                    <button class="btn btn-light" type="button"  data-toggle="modal" data-target="#hmw_securitydetail' . $index . '">' . __('Info', _HMW_PLUGIN_NAME_) . '</button>
                                                     ' . ((!$row['valid'] && isset($row['javascript']) && $row['javascript'] <> '') ? (isset($row['pro']) ? $row['pro'] : '<button class="btn btn-success mx-0" onclick="' . $row['javascript'] . '">' . __('Fix it', _HMW_PLUGIN_NAME_) . '</button>') : '') . '
                                                     <button type="button" class="close m-1" aria-label="Close" style="display: none" onclick="if (confirm(\'' . __('Are you sure you want to ignore this task in the future?') . '\')) {jQuery(this).hmw_securityExclude(\'' . $index . '\');}">
                                                       <span aria-hidden="true">&times;</span>
@@ -122,7 +122,7 @@
                             ?>
                         </div>
                         <div class="col-sm-12 text-right">
-                            <button class="btn btn-default hmw_resetexclude" type="button"><?php echo __('Reset all ingnored tasks', _HMW_PLUGIN_NAME_) ?></button>
+                            <button class="btn btn-light hmw_resetexclude" type="button"><?php echo __('Reset all ingnored tasks', _HMW_PLUGIN_NAME_) ?></button>
                         </div>
                     </div>
                     <?php if (!HMW_Classes_Tools::getOption('api_token') <> '') { ?>
