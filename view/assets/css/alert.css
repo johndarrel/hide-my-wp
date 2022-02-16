@@ -1,0 +1,99 @@
+.hmwp_notice {
+    background: #c6c6c6!important;
+    padding: 1em;
+    margin: 5px 5px 0 0;
+    width: auto;
+}
+
+.hmwp_notice_fixed{
+    position: fixed;
+    left: 0;
+    margin: 0;
+    width: 100%;
+    z-index: 1;
+}
+
+.hmwp_notice.success {
+    font-size: 1rem;
+    background: #188a18 !important;
+    color: white;
+}
+
+.hmwp_notice.danger {
+    font-size: 1rem;
+    background-color: #dc3545!important;
+    color: white;
+}
+
+.hmwp_notice.notice {
+    font-size: 1rem;
+    background: #ffffe2 !important;
+    color: #444;
+    border-left: 2px solid #ffffe2;
+    border-bottom: 2px solid #e5765c;
+}
+
+.hmwp_notice.notice  pre{
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #686f76;
+}
+
+.hmwp_notice.bg-danger {
+    font-size: 1rem;
+    background-color: #dc3545!important;
+}
+
+.hmwp_notice p {
+
+    display: block;
+    font-size: 1rem;
+    font-weight: normal;
+    letter-spacing: normal;
+    line-height: 30px;
+    margin: 0 0 10px 0;
+    font-style: normal;
+    white-space: normal;
+}
+
+.hmwp_confirm {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.hmwp_btn {
+    font-size: 1rem;
+    border-radius: 0;
+    outline: none !important;
+    display: inline-block;
+    padding: 10px 15px;
+    margin-bottom: 0;
+    font-weight: normal;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+}
+
+.hmwp_btn-success {
+    color: #fff;
+    background-color: #01815b;
+    border-color: transparent;
+}
+
+.hmwp_btn-cancel,
+.hmwp_btn-secondary{
+    background-color: transparent;
+    border-color: #b5b5b5;
+    color: #555555;
+    box-shadow: none;
+}

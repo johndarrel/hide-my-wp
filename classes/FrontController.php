@@ -1,49 +1,71 @@
 <?php
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
-
 /**
  * The main class for controllers
  *
+ * @package HMWP/Main
+ * @file The Front Controller file
+ *
  */
-class HMW_Classes_FrontController {
 
-    /** @var object of the model class */
+defined('ABSPATH') || die('Cheatin\' uh?');
+
+class HMWP_Classes_FrontController
+{
+
+    /**
+     * The class Model from /models
+     *
+     * @var object of the model class 
+     */
     public $model;
 
-    /** @var object of the view class */
+    /**
+     * The class view from /views
+     *
+     * @var object of the view class 
+     */
     public $view;
 
-    /** @var string name of theclass */
+    /**
+     * The class name
+     *
+     * @var string name of theclass 
+     */
     protected $name;
 
-    public function __construct() {
-
-        /* Load error class */
-        HMW_Classes_ObjController::getClass('HMW_Classes_Error');
-
-        /* Load Tools */
-        HMW_Classes_ObjController::getClass('HMW_Classes_Tools');
+    /**
+     * HMWP_Classes_FrontController constructor.
+     *
+     * @throws Exception
+     */
+    public function __construct()
+    {
 
         /* get the name of the current class */
         $this->name = get_class($this);
 
-        /* load the model and hooks here for wordpress actions to take efect */
+        /* load the model and hooks here for WordPress actions to take efect */
         /* create the model and view instances */
         $model_classname = str_replace('Controllers', 'Models', $this->name);
-        if(HMW_Classes_ObjController::getClassPath($model_classname)) {
-            $this->model = HMW_Classes_ObjController::getClass($model_classname);
+        if(HMWP_Classes_ObjController::getClassByPath($model_classname)) {
+            $this->model = HMWP_Classes_ObjController::getClass($model_classname);
         }
 
         //IMPORTANT TO LOAD HOOKS HERE
         /* check if there is a hook defined in the controller clients class */
-        HMW_Classes_ObjController::getClass('HMW_Classes_HookController')->setHooks($this);
+        HMWP_Classes_ObjController::getClass('HMWP_Classes_HookController')->setHooks($this);
+
+        /* Set the debug if activated */
+        if (defined('HMWP_DEBUG') && HMWP_DEBUG) {
+            HMWP_Classes_ObjController::getClass('HMWP_Classes_Debug');
+        }
 
         /* Load the rewrite */
-        HMW_Classes_ObjController::getClass('HMW_Controllers_Rewrite');
+        HMWP_Classes_ObjController::getClass('HMWP_Controllers_Rewrite');
 
         /* Load the Main classes Actions Handler */
-        HMW_Classes_ObjController::getClass('HMW_Classes_Action');
-        HMW_Classes_ObjController::getClass('HMW_Classes_DisplayController');
+        HMWP_Classes_ObjController::getClass('HMWP_Classes_Action');
+        HMWP_Classes_ObjController::getClass('HMWP_Classes_DisplayController');
 
     }
 
@@ -51,31 +73,38 @@ class HMW_Classes_FrontController {
      * load sequence of classes
      * Function called usualy when the controller is loaded in WP
      *
-     * @return HMW_Classes_FrontController
+     * @return HMWP_Classes_FrontController
+     * @throws Exception
      */
-    public function init() {
+    public function init()
+    {
         return $this;
     }
 
     /**
      * Get the block view
      *
-     * @param mixed $view
-     * @param mixed $obj
+     * @param  string $view
+     * @param  stdClass $obj
      * @return string HTML
+     * @throws Exception
      */
-    public function getView($view = null, $obj = null) {
-        if(!isset($obj)){
+    public function getView($view = null, $obj = null)
+    {
+        if(!isset($obj)) {
             $obj = $this;
         }
+
+        //Get the view class name if not defined
         if (!isset($view)) {
-            if ($class = HMW_Classes_ObjController::getClassPath($this->name)) {
+            if ($class = HMWP_Classes_ObjController::getClassByPath($this->name)) {
                 $view = $class['name'];
             }
         }
 
+        //Call the display class to load the view
         if (isset($view)) {
-            $this->view = HMW_Classes_ObjController::getClass('HMW_Classes_DisplayController');
+            $this->view = HMWP_Classes_ObjController::getClass('HMWP_Classes_DisplayController');
             return $this->view->getView($view, $obj);
         }
 
@@ -85,17 +114,20 @@ class HMW_Classes_FrontController {
     /**
      * Called as menu callback to show the block
      *
+     * @param  string $view
+     * @throws Exception
      */
-    public function show() {
-        echo $this->init()->getView();
+    public function show($view = null)
+    {
+        echo $this->getView($view);
     }
 
     /**
-     * first function call for any class
-     *
+     * first function call for any class on form submit
      */
-    protected function action() {
-        // generated nonce we created
+    protected function action()
+    {
+        // called within each class with the action
     }
 
 
@@ -105,13 +137,17 @@ class HMW_Classes_FrontController {
      *
      * @return void
      */
-    public function hookInit() { }
+    public function hookInit()
+    { 
+    }
 
 
     /**
      * Called on frontend. For disconnected users
      */
-    public function hookFrontinit() { }
+    public function hookFrontinit()
+    { 
+    }
 
     /**
      * Hook the admin head
@@ -119,6 +155,8 @@ class HMW_Classes_FrontController {
      *
      * @return void
      */
-    public function hookHead() { }
+    public function hookHead()
+    { 
+    }
 
 }

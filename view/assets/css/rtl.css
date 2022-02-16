@@ -1,0 +1,40 @@
+#hmwp_wrap *{
+    direction: rtl;
+    unicode-bidi: embed;
+}
+
+#wpwrap #wpcontent{
+    padding: 0 !important;
+}
+
+#hmwp_wrap  a.position-absolute.float-right{
+    left: 7px ;
+    right: auto !important;
+}
+
+#hmwp_wrap .card-title{
+    text-align: right;
+}
+
+#hmwp_wrap .hmwp_nav .hmwp_nav_item:before{
+    left: 18px !important;
+    right: auto !important;
+}
+
+.switch.switch-sm input+label::after,
+.switch.switch-lg input+label::after{
+    right: 2px;
+    left: auto;
+}
+.switch.switch-sm input:checked+label::after{
+    right: calc(1.9875rem * .8);
+    left: auto;
+}
+.switch.switch-lg input:checked+label::after{
+    right: calc(calc(1.5rem * .8) * 2);
+    left: auto;
+}
+
+#hmwp_wrap h3 {
+    font-size: 1.5rem
+}

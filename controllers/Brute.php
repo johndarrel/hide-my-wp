@@ -1,37 +1,60 @@
 <?php
+/**
+ * Brute Force Protection
+ * Called when the Brute Force Protection is activated
+ *
+ * @file  The Brute Force file
+ * @package HMWP/BruteForce
+ * @since 4.2.0
+ */
+
 defined('ABSPATH') || die('Cheatin\' uh?');
 
-class HMW_Controllers_Brute extends HMW_Classes_FrontController {
+class HMWP_Controllers_Brute extends HMWP_Classes_FrontController
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
-        add_action('admin_init', array($this, 'hmw_update_trusted_headers'), 99);
-        add_filter('authenticate', array($this, 'hmw_check_preauth'), 99, 1);
+        add_filter('authenticate', array($this, 'hmwp_check_preauth'), 99, 1);
+        add_action('admin_init', array($this, 'hmwp_update_trusted_headers'), 99);
 
-        if (HMW_Classes_Tools::getOption('brute_use_math')) {
-            add_action('wp_login_failed', array($this, 'hmw_failed_attempt'), 99);
+        if (HMWP_Classes_Tools::getOption('brute_use_math')) {
+            add_action('wp_login_failed', array($this, 'hmwp_failed_attempt'), 99);
             add_action('login_form', array($this->model, 'brute_math_form'), 99);
-            add_filter('woocommerce_login_form', array($this->model, 'brute_math_form'), 99);
+        }elseif (HMWP_Classes_Tools::getOption('brute_use_captcha')) {
+            add_action('wp_login_failed', array($this, 'hmwp_failed_attempt'), 99);
+            add_action('login_head', array($this->model, 'brute_recaptcha_head'), 99);
+            add_action('login_form', array($this->model, 'brute_recaptcha_form'), 99);
+        }elseif (HMWP_Classes_Tools::getOption('brute_use_captcha_v3')) {
+            add_action('wp_login_failed', array($this, 'hmwp_failed_attempt'), 99);
+            add_action('login_head', array($this->model, 'brute_recaptcha_head_v3'), 99);
+            add_action('login_form', array($this->model, 'brute_recaptcha_form_v3'), 99);
         }
+
     }
 
-    public function hookFrontinit() {
-        if (!is_user_logged_in()) {
+    public function hookFrontinit()
+    {
+        if (function_exists('is_user_logged_in') && !is_user_logged_in()) {
+
             //Load the Multilanguage
-            HMW_Classes_Tools::loadMultilanguage();
+            HMWP_Classes_Tools::loadMultilanguage();
 
             $this->bruteBlockCheck();
         }
     }
 
-    public function bruteBlockCheck() {
+    public function bruteBlockCheck()
+    {
         $response = $this->model->brute_call('check_ip');
         if ($response['status'] == 'blocked') {
             if (!$this->model->check_whitelisted_ip($this->model->brute_get_ip())) {
                 wp_ob_end_flush_all();
-                wp_die(HMW_Classes_Tools::getOption('hmw_brute_message'),
-                    __('IP Blocked by Hide My WordPress Brute Force Protection', _HMW_PLUGIN_NAME_),
+                wp_die(
+                    HMWP_Classes_Tools::getOption('hmwp_brute_message'),
+                    esc_html__('IP Blocked', 'hide-my-wp'),
                     array('response' => 403)
                 );
             }
@@ -43,99 +66,127 @@ class HMW_Controllers_Brute extends HMW_Classes_FrontController {
      *
      * @return void
      */
-    public function action() {
+    public function action()
+    {
         parent::action();
 
-        switch (HMW_Classes_Tools::getValue('action')) {
+        switch (HMWP_Classes_Tools::getValue('action')) {
 
-            case 'hmw_brutesettings':
-                HMW_Classes_Tools::saveOptions('hmw_bruteforce', HMW_Classes_Tools::getValue('hmw_bruteforce'));
+        case 'hmwp_brutesettings':
+            HMWP_Classes_Tools::saveOptions('hmwp_bruteforce', HMWP_Classes_Tools::getValue('hmwp_bruteforce'));
 
-                //whitelist_ip
-                $whitelist = HMW_Classes_Tools::getValue('whitelist_ip', '', true);
-                $ips = explode(PHP_EOL, $whitelist);
-                foreach ($ips as &$ip) {
-                    $ip = $this->model->clean_ip($ip);
+            //whitelist_ip
+            $whitelist = HMWP_Classes_Tools::getValue('whitelist_ip', '', true);
+            $ips = explode(PHP_EOL, $whitelist);
+            foreach ($ips as &$ip) {
+                $ip = $this->model->clean_ip($ip);
 
-                    // If the IP is in a private or reserved range, keep looking
-                    if ($ip == '127.0.0.1' || $ip == '::1') {
-                        HMW_Classes_Error::setError(__("Add only real IPs. No local ips needed.", _HMW_PLUGIN_NAME_));
-                    }
+                // If the IP is in a private or reserved range, keep looking
+                if ($ip == '127.0.0.1' || $ip == '::1') {
+                    HMWP_Classes_Error::setError(esc_html__("Add only real IPs. No local ips needed.", 'hide-my-wp'));
                 }
-                if (!empty($ips)) {
-                    $ips = array_unique($ips);
-                    HMW_Classes_Tools::saveOptions('whitelist_ip', json_encode($ips));
+            }
+            if (!empty($ips)) {
+                $ips = array_unique($ips);
+                HMWP_Classes_Tools::saveOptions('whitelist_ip', json_encode($ips));
+            }
+
+            //banlist_ip
+            $banlist = HMWP_Classes_Tools::getValue('banlist_ip', '', true);
+            $ips = explode(PHP_EOL, $banlist);
+            foreach ($ips as &$ip) {
+                $ip = $this->model->clean_ip($ip);
+
+                // If the IP is in a private or reserved range, keep looking
+                if ($ip == '127.0.0.1' || $ip == '::1') {
+                    HMWP_Classes_Error::setError(esc_html__("Add only real IPs. No local ips allowed.", 'hide-my-wp'));
+                }
+            }
+            if (!empty($ips)) {
+                $ips = array_unique($ips);
+                HMWP_Classes_Tools::saveOptions('banlist_ip', json_encode($ips));
+            }
+
+            //Brute force math option
+            HMWP_Classes_Tools::saveOptions('brute_use_math', HMWP_Classes_Tools::getValue('brute_use_math', 0));
+            if (HMWP_Classes_Tools::getValue('hmwp_bruteforce', 0)) {
+                $attempts = HMWP_Classes_Tools::getValue('brute_max_attempts');
+                if ((int)$attempts <= 0) {
+                    $attempts = 3;
+                    HMWP_Classes_Error::setError(esc_html__('You need to set a positive number of attempts.', 'hide-my-wp'));
+
+                }
+                HMWP_Classes_Tools::saveOptions('brute_max_attempts', (int)$attempts);
+
+                $timeout = HMWP_Classes_Tools::getValue('brute_max_timeout');
+                if ((int)$timeout <= 0) {
+                    $timeout = 3600;
+                    HMWP_Classes_Error::setError(esc_html__('You need to set a positive waiting time.', 'hide-my-wp'));
+
+                }
+                HMWP_Classes_Tools::saveOptions('hmwp_brute_message', HMWP_Classes_Tools::getValue('hmwp_brute_message', '', true));
+                HMWP_Classes_Tools::saveOptions('brute_max_timeout', $timeout);
+            }
+
+            //For reCaptcha option
+            HMWP_Classes_Tools::saveOptions('brute_use_captcha', HMWP_Classes_Tools::getValue('brute_use_captcha', 0));
+            if (HMWP_Classes_Tools::getValue('brute_use_captcha', 0)) {
+                HMWP_Classes_Tools::saveOptions('brute_captcha_site_key', HMWP_Classes_Tools::getValue('brute_captcha_site_key', ''));
+                HMWP_Classes_Tools::saveOptions('brute_captcha_secret_key', HMWP_Classes_Tools::getValue('brute_captcha_secret_key', ''));
+                HMWP_Classes_Tools::saveOptions('brute_captcha_theme', HMWP_Classes_Tools::getValue('brute_captcha_theme', 'light'));
+                HMWP_Classes_Tools::saveOptions('brute_captcha_language', HMWP_Classes_Tools::getValue('brute_captcha_language', ''));
+            }
+
+            HMWP_Classes_Tools::saveOptions('brute_use_captcha_v3', HMWP_Classes_Tools::getValue('brute_use_captcha_v3', 0));
+            if (HMWP_Classes_Tools::getValue('brute_use_captcha_v3', 0)) {
+                HMWP_Classes_Tools::saveOptions('brute_captcha_site_key_v3', HMWP_Classes_Tools::getValue('brute_captcha_site_key_v3', ''));
+                HMWP_Classes_Tools::saveOptions('brute_captcha_secret_key_v3', HMWP_Classes_Tools::getValue('brute_captcha_secret_key_v3', ''));
+            }
+
+            //Clear the cache if there are no errors
+            if (!HMWP_Classes_Tools::getOption('error') ) {
+
+                if (!HMWP_Classes_Tools::getOption('logout') ) {
+                    HMWP_Classes_Tools::saveOptionsBackup();
                 }
 
-                //banlist_ip
-                $banlist = HMW_Classes_Tools::getValue('banlist_ip', '', true);
-                $ips = explode(PHP_EOL, $banlist);
-                foreach ($ips as &$ip) {
-                    $ip = $this->model->clean_ip($ip);
+                HMWP_Classes_Tools::emptyCache();
+                HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
+            }
 
-                    // If the IP is in a private or reserved range, keep looking
-                    if ($ip == '127.0.0.1' || $ip == '::1') {
-                        HMW_Classes_Error::setError(__("Add only real IPs. No local ips allowed.", _HMW_PLUGIN_NAME_));
-                    }
-                }
-                if (!empty($ips)) {
-                    $ips = array_unique($ips);
-                    HMW_Classes_Tools::saveOptions('banlist_ip', json_encode($ips));
-                }
+            break;
+        case 'hmwp_deleteip':
+            $transient = HMWP_Classes_Tools::getValue('transient', null);
+            if (isset($transient)) {
+                $this->model->delete_ip($transient);
+            }
 
-                //Brute force math option
-                HMW_Classes_Tools::saveOptions('brute_use_math', HMW_Classes_Tools::getValue('brute_use_math', 0));
-                if (HMW_Classes_Tools::getValue('brute_use_math', 0)) {
-                    $attempts = HMW_Classes_Tools::getValue('brute_max_attempts');
-                    if ((int)$attempts <= 0) {
-                        $attempts = 3;
-                        HMW_Classes_Error::setError(__('You need to set a positive number of attempts ', _HMW_PLUGIN_NAME_));
+            break;
+        case 'hmwp_deleteallips':
+            $this->clearBlockedIPs();
+            break;
 
-                    }
-                    HMW_Classes_Tools::saveOptions('brute_max_attempts', (int)$attempts);
-
-                    $timeout = HMW_Classes_Tools::getValue('brute_max_timeout');
-                    if ((int)$timeout <= 0) {
-                        $timeout = 3600;
-                        HMW_Classes_Error::setError(__('You need to set a positive waiting time', _HMW_PLUGIN_NAME_));
-
-                    }
-                    HMW_Classes_Tools::saveOptions('hmw_brute_message', HMW_Classes_Tools::getValue('hmw_brute_message', '', true));
-                    HMW_Classes_Tools::saveOptions('brute_max_timeout', $timeout);
-                }
-
-                HMW_Classes_Error::setError(__('Saved'), 'success');
-
-                HMW_Classes_Tools::emptyCache();
-                break;
-            case 'hmw_deleteip':
-                $transient = HMW_Classes_Tools::getValue('transient', null);
-                if (isset($transient)) {
-                    $this->model->delete_ip($transient);
-                }
-
-                break;
-            case 'hmw_deleteallips':
-                $this->clearBlockedIPs();
-                break;
-
-            case 'hmw_blockedips':
-                HMW_Classes_Tools::setHeader('json');
+        case 'hmwp_blockedips':
+            if(HMWP_Classes_Tools::isAjax()) {
+                HMWP_Classes_Tools::setHeader('json');
                 $data = $this->getBlockedIps();
                 echo json_encode(array('data' => $data));
                 exit();
+            }
+            break;
         }
     }
 
-    public function getBlockedIps() {
+    public function getBlockedIps()
+    {
         $data = '<table class="table table-striped" >';
         $ips = $this->model->get_blocked_ips();
         $data .= "<tr>
-                    <th>" . __('Cnt', _HMW_PLUGIN_NAME_) . "</th>
-                    <th>" . __('IP', _HMW_PLUGIN_NAME_) . "</th>
-                    <th>" . __('Fail Attempts', _HMW_PLUGIN_NAME_) . "</th>
-                    <th>" . __('Hostname', _HMW_PLUGIN_NAME_) . "</th>
-                    <th>" . __('Options', _HMW_PLUGIN_NAME_) . "</th>
+                    <th>" . esc_html__('Cnt', 'hide-my-wp') . "</th>
+                    <th>" . esc_html__('IP', 'hide-my-wp') . "</th>
+                    <th>" . esc_html__('Fail Attempts', 'hide-my-wp') . "</th>
+                    <th>" . esc_html__('Hostname', 'hide-my-wp') . "</th>
+                    <th>" . esc_html__('Options', 'hide-my-wp') . "</th>
                  </tr>";
         if (!empty($ips)) {
             $cnt = 1;
@@ -145,11 +196,11 @@ class HMW_Controllers_Brute extends HMW_Classes_FrontController {
                         <td>{$ip['ip']}</td>
                         <td>{$ip['attempts']}</td>
                         <td>{$ip['host']}</td>
-                        <td> <form method=\"POST\">
-                                " . wp_nonce_field('hmw_deleteip', 'hmw_nonce', true, false) . "
-                                <input type=\"hidden\" name=\"action\" value=\"hmw_deleteip\" />
+                        <td class='p-2'> <form method=\"POST\">
+                                " . wp_nonce_field('hmwp_deleteip', 'hmwp_nonce', true, false) . "
+                                <input type=\"hidden\" name=\"action\" value=\"hmwp_deleteip\" />
                                 <input type=\"hidden\" name=\"transient\" value=\"" . $transient . "\" />
-                                <input type=\"submit\" class=\"btn rounded-0 btn-light save no-p-v\" value=\"Unlock\" />
+                                <input type=\"submit\" class=\"btn rounded-0 btn-sm btn-light save no-p-v\" value=\"Unlock\" />
                             </form>
                         </td>
                      </tr>";
@@ -167,7 +218,7 @@ class HMW_Controllers_Brute extends HMW_Classes_FrontController {
 
 
     /**
-     * Checks for loginability BEFORE authentication so that bots don't get to go around the log in form.
+     * Checks for loginability BEFORE authentication so that bots don't get to go around the login form.
      *
      * If we are using our math fallback, authenticate via math-fallback.php
      *
@@ -175,7 +226,14 @@ class HMW_Controllers_Brute extends HMW_Classes_FrontController {
      *
      * @return bool True, if WP_Error. False, if not WP_Error., $user Containing the auth results
      */
-    function hmw_check_preauth($user = '') {
+    function hmwp_check_preauth($user = '')
+    {
+
+        //Check if Woocommerce login support is loaded
+        if(HMWP_Classes_Tools::getValue('woocommerce-login-nonce')) {
+	        return $user;
+        }
+
         if (is_wp_error($user)) {
             if (method_exists($user, 'get_error_codes')) {
                 $errors = $user->get_error_codes();
@@ -192,18 +250,32 @@ class HMW_Controllers_Brute extends HMW_Classes_FrontController {
 
         $response = $this->model->brute_check_loginability();
 
-        if (!HMW_Classes_Tools::getOption('brute_use_math')) {
-            if (is_wp_error($user)) {
-                if (!isset($response['attempts'])) {
-                    $response['attempts'] = 0;
-                }
-                $left = max(((int)HMW_Classes_Tools::getOption('brute_max_attempts') - (int)$response['attempts']), 0);
-                $user = new WP_Error('authentication_failed',
-                    sprintf(__('<strong>ERROR:</strong> Email or Password is incorrect. <br /> %d attempts left before lockout', _HMW_PLUGIN_NAME_), $left)
+        if (is_wp_error($user)) {
+
+            //ignore whitelist ips
+            if(isset($response['status']) && $response['status'] <> 'whitelist') {
+
+                //initiate first attempt
+                $attempts = (isset($response['attempts']) ? (int)$response['attempts'] : 0);
+
+                //show how many attempts remained
+                $left = max(((int)HMWP_Classes_Tools::getOption('brute_max_attempts') - $attempts - 1), 0);
+                $user = new WP_Error(
+                    'authentication_failed',
+                    sprintf(esc_html__('%sERROR:%s Email or Password is incorrect. %s %d attempts left before lockout', 'hide-my-wp'), '<strong>', '</strong>', '<br />', $left)
                 );
             }
-        } elseif (HMW_Classes_Tools::getOption('brute_use_math')) {
+
+        }
+
+        if (HMWP_Classes_Tools::getOption('brute_use_math')) {
+
             $user = $this->model->brute_math_authenticate($user, $response);
+
+        } elseif (HMWP_Classes_Tools::getOption('brute_use_captcha') || HMWP_Classes_Tools::getOption('brute_use_captcha_v3')) {
+
+            $user = $this->model->brute_catpcha_authenticate($user, $response);
+
         }
 
         if (!is_wp_error($user)) {
@@ -218,14 +290,19 @@ class HMW_Controllers_Brute extends HMW_Classes_FrontController {
      *
      * @return void
      */
-    function hmw_failed_attempt() {
+    function hmwp_failed_attempt()
+    {
         $this->model->brute_call('failed_attempt');
     }
 
-    public function hmw_update_trusted_headers() {
+    /**
+     * Add the current admin header to trusted
+     */
+    public function hmwp_update_trusted_headers()
+    {
         $updated_recently = $this->model->get_transient('brute_headers_updated_recently');
 
-        // check that current user is admin so we prevent a lower level user from adding
+        // check that current user is admin, so we prevent a lower level user from adding
         // a trusted header, allowing them to brute force an admin account
         if (!$updated_recently && current_user_can('update_plugins')) {
 
@@ -264,11 +341,15 @@ class HMW_Controllers_Brute extends HMW_Classes_FrontController {
                     break;
                 }
             }
-            HMW_Classes_Tools::saveOptions('trusted_ip_header', $trusted_header);
+            HMWP_Classes_Tools::saveOptions('trusted_ip_header', $trusted_header);
         }
     }
 
-    public function clearBlockedIPs() {
+    /**
+     * Clear the block IP table
+     */
+    public function clearBlockedIPs()
+    {
         $ips = $this->model->get_blocked_ips();
         if (!empty($ips)) {
             foreach ($ips as $transient => $ip) {

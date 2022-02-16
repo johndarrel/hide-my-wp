@@ -1,0 +1,55 @@
+.hmwp-admin-notice {
+  background: #fff;
+  color: #555;
+  border: 4px;
+  display: block;
+  min-height: 68px;
+  padding: 10px 40px 10px 125px;
+  position: relative;
+}
+.hmwp-admin-notice a {
+  color: #10738B;
+}
+.hmwp-notice-logo {
+  clear: both;
+  content: "";
+  display: block;
+  background-image: url("../img/logo.png");
+  background-size: 77px auto;
+  background-repeat: no-repeat;
+  background-position: 0 45%;
+  width: 125px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 15px;
+}
+.hmwp-admin-notice > .dashicons {
+  color: #424242;
+  position: absolute;
+  right: 20px;
+  top: 40%;
+}
+.hmwp-notice-title {
+  font-size: 1.4rem;
+  margin: 0;
+}
+.hmwp-notice-body {
+  font-weight: normal;
+  margin: 5px 0;
+}
+.hmwp-notice-body:after {
+  clear: both;
+  content: "";
+  display: block;
+}
+.hmwp-notice-body li {
+  float: left;
+  margin-right: 20px;
+}
+.hmwp-notice-body .dashicons {
+  font-size: 1.4rem;
+}
+.hmwp-blue {
+  color: #10738B;
+}

@@ -1,210 +1,135 @@
-<?php if ( HMW_Classes_Tools::isPermalinkStructure() ) { ?>
-    <div id="hmw_wrap" class="d-flex flex-row my-3 bg-light">
-		<?php echo $view->getAdminTabs( HMW_Classes_Tools::getValue( 'tab', 'hmw_permalinks' ) ); ?>
-        <div class="hmw_row d-flex flex-row bg-white px-3">
-            <div class="hmw_col flex-grow-1 mr-3">
+<?php if(!isset($view)) return; ?>
+<noscript> <style>#hmwp_wrap .tab-panel:not(.tab-panel-first){display: block}</style> </noscript>
+<div id="hmwp_wrap" class="d-flex flex-row p-0 my-3">
+<?php echo $view->getAdminTabs(HMWP_Classes_Tools::getValue('page', 'hmwp_advanced')); ?>
+    <div class="hmwp_row d-flex flex-row p-0 m-0">
+        <div class="hmwp_col flex-grow-1 px-3 py-3 mr-2 mb-3 bg-white">
                 <form method="POST">
-					<?php wp_nonce_field( 'hmw_advsettings', 'hmw_nonce' ) ?>
-                    <input type="hidden" name="action" value="hmw_advsettings"/>
+                    <?php wp_nonce_field('hmwp_advsettings', 'hmwp_nonce') ?>
+                    <input type="hidden" name="action" value="hmwp_advsettings"/>
 
-                    <div class="card p-0 col-sm-12 tab-panel">
-                        <h3 class="card-title bg-brown text-white p-2"><?php _e( 'Rollback Settings', _HMW_PLUGIN_NAME_ ); ?>:</h3>
+                    <div id="rollback" class="card col-sm-12 p-0 m-0 tab-panel tab-panel-first">
+                        <h3 class="card-title hmwp_header p-2 m-0"><?php echo esc_html__('Custom Safe URL', 'hide-my-wp'); ?></h3>
                         <div class="card-body">
 
                             <div class="col-sm-12 row border-bottom border-light py-3 mx-0 my-3">
                                 <div class="col-sm-4 p-0 font-weight-bold">
-									<?php _e( 'Custom Safe URL Param', _HMW_PLUGIN_NAME_ ); ?>:
-                                    <div class="small text-black-50"><?php _e( "eg. disable_url, safe_url", _HMW_PLUGIN_NAME_ ); ?></div>
+                                    <?php echo esc_html__('Custom Safe URL Param', 'hide-my-wp'); ?>:
+                                    <div class="small text-black-50"><?php echo esc_html__("eg. disable_url, safe_url", 'hide-my-wp'); ?></div>
                                 </div>
                                 <div class="col-sm-8 p-0 input-group">
-                                    <input type="text" class="form-control bg-input" name="hmw_disable_name" value="<?php echo HMW_Classes_Tools::getOption( 'hmw_disable_name' ) ?>" placeholder="<?php echo HMW_Classes_Tools::getOption( 'hmw_disable_name' ) ?>"/>
+                                    <input type="text" class="form-control bg-input" name="hmwp_disable_name" value="<?php echo HMWP_Classes_Tools::getOption('hmwp_disable_name') ?>" placeholder="<?php echo HMWP_Classes_Tools::getOption('hmwp_disable_name') ?>"/>
+                                    <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/advanced-wp-security/#custom_safe_url') ?>" target="_blank" class="position-absolute float-right" style="right: 7px;top: 20%;"><i class="dashicons dashicons-editor-help"></i></a>
                                 </div>
-                                <div class="col-sm-12 pt-4">
-                                    <div class="small text-black-50 text-center"><?php _e( "The Safe URL will set all the settings to default. Use it only if you're locked out", _HMW_PLUGIN_NAME_ ); ?></div>
-                                    <div class="text-danger text-center"><?php echo '<strong>' . __( "Safe URL:", _HMW_PLUGIN_NAME_ ) . '</strong>' . ' ' . site_url() . "/wp-login.php?" . HMW_Classes_Tools::getOption( 'hmw_disable_name' ) . "=" . HMW_Classes_Tools::getOption( 'hmw_disable' ) ?></div>
+                                <div class="col-sm-12 py-3">
+                                    <div class="small text-black-50 text-center my-2"><?php echo esc_html__("The Safe URL will deactivate all the custom paths. Use it only if you can't login.", 'hide-my-wp'); ?></div>
+                                    <div class="alert-danger p-3 text-center"><?php echo '<strong>' . esc_html__("Safe URL:", 'hide-my-wp') . '</strong>' . ' <a href="'.site_url() . "/wp-login.php?" . HMWP_Classes_Tools::getOption('hmwp_disable_name') . "=" . HMWP_Classes_Tools::getOption('hmwp_disable').'" target="_blank">' . site_url() . "/wp-login.php?" . HMWP_Classes_Tools::getOption('hmwp_disable_name') . "=" . HMWP_Classes_Tools::getOption('hmwp_disable') . '</a>' ?></div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="card p-0 col-sm-12 tab-panel">
-                        <h3 class="card-title bg-brown text-white p-2"><?php _e( 'Loading Speed Settings', _HMW_PLUGIN_NAME_ ); ?>:</h3>
-                        <div class="card-body">
 
-							<?php if ( HMW_Classes_Tools::getOption( 'hmw_mode' ) == 'default' ) { ?>
-                                <div class="col-sm-12 border-bottom border-light py-3 mx-0 my-3 text-black-50 text-center">
-									<?php echo __( 'First, you need to switch Hide My Wp from Default mode to Safe Mode or Ghost Mode.', _HMW_PLUGIN_NAME_ ) ?>
-                                </div>
-							<?php } else { ?>
-								<?php if ( ! HMW_Classes_Tools::isPluginActive( 'wp-rocket/wp-rocket.php' ) &&
-								           ! HMW_Classes_Tools::isPluginActive( 'wp-super-cache/wp-cache.php' ) &&
-								           ! HMW_Classes_Tools::isPluginActive( 'wp-fastest-cache/wpFastestCache.php' ) &&
-								           ! HMW_Classes_Tools::isPluginActive( 'powered-cache/powered-cache.php' ) &&
-								           ! HMW_Classes_Tools::isPluginActive( 'w3-total-cache/w3-total-cache.php' ) &&
-								           ! HMW_Classes_Tools::isPluginActive( 'autoptimize/autoptimize.php' ) ) { ?>
-                                    <div class="col-sm-12 row mb-1 ml-1">
-                                        <div class="checker col-sm-12 row my-2 py-1">
-                                            <div class="col-sm-12 p-0 switch switch-sm">
-                                                <input type="hidden" name="hmw_file_cache" value="0"/>
-                                                <input type="checkbox" id="hmw_file_cache" name="hmw_file_cache" class="switch" <?php echo( HMW_Classes_Tools::getOption( 'hmw_file_cache' ) ? 'checked="checked"' : '' ) ?> value="1"/>
-                                                <label for="hmw_file_cache"><?php _e( 'Optimize CSS and JS files', _HMW_PLUGIN_NAME_ ); ?></label>
-                                                <div class="offset-1 text-black-50"><?php echo __( 'Cache CSS, JS and Images to increase the frontend loading speed.', _HMW_PLUGIN_NAME_ ); ?></div>
-                                                <div class="offset-1 text-black-50"><?php echo sprintf( __( 'Check the website loading speed with %sPingdom Tool%s', _HMW_PLUGIN_NAME_ ), '<a href="https://tools.pingdom.com/" target="_blank">', '</a>' ); ?></div>
-                                            </div>
-                                        </div>
-                                    </div>
-								<?php } ?>
-							<?php } ?>
-                        </div>
-                    </div>
-                    <div class="card p-0 col-sm-12 tab-panel">
-                        <h3 class="card-title bg-brown text-white p-2"><?php _e( 'Compatibility Settings', _HMW_PLUGIN_NAME_ ); ?>:</h3>
-                        <div class="card-body">
-
-							<?php if ( HMW_Classes_Tools::getOption( 'hmw_mode' ) == 'default' ) { ?>
-                                <div class="col-sm-12 border-bottom border-light py-3 mx-0 my-3 text-black-50 text-center">
-									<?php echo __( 'First, you need to switch Hide My Wp from Default mode to Safe Mode or Ghost Mode.', _HMW_PLUGIN_NAME_ ) ?>
-                                </div>
-							<?php } else { ?>
-                                <div class="col-sm-12 row mb-1 ml-1">
-                                    <div class="checker col-sm-12 row my-2 py-1">
-                                        <div class="col-sm-12 p-0 switch switch-sm">
-                                            <input type="hidden" name="hmw_firstload" value="0"/>
-                                            <input type="checkbox" id="hmw_firstload" name="hmw_firstload" class="switch" <?php echo(HMW_Classes_Tools::getOption( 'hmw_firstload' ) ? 'checked="checked"' : '') ?> value="1"/>
-                                            <label for="hmw_firstload"><?php _e( 'Load As Must Use Plugin', _HMW_PLUGIN_NAME_ ); ?></label>
-                                            <a href="https://hidemywpghost.com/kb/advanced-wp-security/#firstload" target="_blank" class="d-inline-block ml-2"><i class="fa fa-question-circle"></i></a>
-                                            <div class="offset-1 text-black-50"><?php _e( 'Force Hide My WP Ghost to load as a Must Use plugin.', _HMW_PLUGIN_NAME_ ); ?></div>
-                                            <div class="offset-1 text-black-50"><?php _e( '(compatibility with Manage WP plugin and Token based login plugins)', _HMW_PLUGIN_NAME_ ); ?></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-sm-12 row mb-1 ml-2">
-                                    <div class="checker col-sm-12 row my-2 py-1">
-                                        <div class="col-sm-12 p-0 switch switch-sm">
-                                            <input type="hidden" name="hmw_laterload" value="0"/>
-                                            <input type="checkbox" id="hmw_laterload" name="hmw_laterload" class="switch" <?php echo( HMW_Classes_Tools::getOption( 'hmw_laterload' ) ? 'checked="checked"' : '' ) ?> value="1"/>
-                                            <label for="hmw_laterload"><?php _e( 'Late Loading', _HMW_PLUGIN_NAME_ ); ?></label>
-                                            <a href="https://hidemywpghost.com/kb/advanced-wp-security/#late_loading" target="_blank" class="d-inline-block ml-2"><i class="fa fa-question-circle"></i></a>
-                                            <div class="offset-1 text-black-50"><?php echo __( 'Load HMW after all plugins are loaded. Useful for CDN plugins (eg. CDN Enabler).', _HMW_PLUGIN_NAME_ ); ?></div>
-                                            <div class="offset-1 text-black-50"><?php echo __( '(only if other cache plugins request this)', _HMW_PLUGIN_NAME_ ); ?></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-sm-12 row mb-1 ml-2">
-                                    <div class="checker col-sm-12 row my-2 py-1">
-                                        <div class="col-sm-12 p-0 switch switch-sm">
-                                            <input type="hidden" name="hmw_remove_third_hooks" value="0"/>
-                                            <input type="checkbox" id="hmw_remove_third_hooks" name="hmw_remove_third_hooks" class="switch" <?php echo( HMW_Classes_Tools::getOption( 'hmw_remove_third_hooks' ) ? 'checked="checked"' : '' ) ?> value="1"/>
-                                            <label for="hmw_remove_third_hooks"><?php _e( 'Clean Login Page', _HMW_PLUGIN_NAME_ ); ?></label>
-                                            <a href="https://hidemywpghost.com/kb/advanced-wp-security/#clean_login_page" target="_blank" class="d-inline-block ml-2"><i class="fa fa-question-circle"></i></a>
-                                            <div class="offset-1 text-black-50"><?php _e( 'Cancel the login hooks from other plugins and themes to prevent them from changing the Hide My WordPress redirects.', _HMW_PLUGIN_NAME_ ); ?><?php _e( '(not recommended)', _HMW_PLUGIN_NAME_ ); ?></div>
-                                        </div>
-                                    </div>
-                                </div>
-							<?php } ?>
-
-
-                        </div>
-                    </div>
-                    <div class="card p-0 col-sm-12 tab-panel">
-                        <h3 class="card-title bg-brown text-white p-2"><?php _e( 'Notification Settings', _HMW_PLUGIN_NAME_ ); ?>:</h3>
-                        <div class="card-body">
-                            <div class="col-sm-12 row mb-1 ml-1">
+                            <div class="col-sm-12 row mb-1 ml-1 p-2">
                                 <div class="checker col-sm-12 row my-2 py-1">
                                     <div class="col-sm-12 p-0 switch switch-sm">
-                                        <input type="hidden" name="hmw_security_alert" value="0"/>
-                                        <input type="checkbox" id="hmw_security_alert" name="hmw_security_alert" class="switch" <?php echo( HMW_Classes_Tools::getOption( 'hmw_security_alert' ) ? 'checked="checked"' : '' ) ?> value="1"/>
-                                        <label for="hmw_security_alert"><?php _e( 'Security Check Notification', _HMW_PLUGIN_NAME_ ); ?></label>
-                                        <a href="https://hidemywpghost.com/kb/advanced-wp-security/#email_notification" target="_blank" class="d-inline-block ml-2"><i class="fa fa-question-circle"></i></a>
-                                        <div class="offset-1 text-black-50"><?php echo __( "Show Security Check notification when it's not checked every week.", _HMW_PLUGIN_NAME_ ); ?></div>
+                                        <input type="hidden" name="prevent_slow_loading" value="0"/>
+                                        <input type="checkbox" id="prevent_slow_loading" name="prevent_slow_loading" class="switch" <?php echo(HMWP_Classes_Tools::getOption('prevent_slow_loading') ? 'checked="checked"' : '') ?> value="1"/>
+                                        <label for="prevent_slow_loading"><?php echo esc_html__('Prevent Slow Loading Website', 'hide-my-wp'); ?></label>
+                                        <a href="https://hidemywpghost.com/kb/advanced-wp-security/#prevent_slow_loading" target="_blank" class="d-inline-block ml-2"><i class="fa fa-question-circle"></i></a>
+                                        <div class="offset-1 text-black-50"><?php echo esc_html__("Don't load the plugin if the rewrite rules are not loading correctly in the config file.", 'hide-my-wp'); ?></div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-sm-12 row mb-1 ml-2">
+                        </div>
+                    </div>
+                    <div id="compatibility" class="card col-sm-12 p-0 m-0 tab-panel">
+                        <h3 class="card-title hmwp_header p-2 m-0"><?php echo esc_html__('Compatibility Settings', 'hide-my-wp'); ?></h3>
+                        <div class="card-body">
+
+                            <div class="col-sm-12 row mb-1 ml-1 p-2">
                                 <div class="checker col-sm-12 row my-2 py-1">
                                     <div class="col-sm-12 p-0 switch switch-sm">
-                                        <input type="hidden" name="hmw_send_email" value="0"/>
-                                        <input type="checkbox" id="hmw_send_email" name="hmw_send_email" class="switch" <?php echo( HMW_Classes_Tools::getOption( 'hmw_send_email' ) ? 'checked="checked"' : '' ) ?> value="1"/>
-                                        <label for="hmw_send_email"><?php _e( 'Email notification', _HMW_PLUGIN_NAME_ ); ?></label>
-                                        <div class="offset-1 text-black-50"><?php _e( 'Send me an email with the changed admin and login URLs', _HMW_PLUGIN_NAME_ ); ?></div>
+                                        <input type="hidden" name="hmwp_firstload" value="0"/>
+                                        <input type="checkbox" id="hmwp_firstload" name="hmwp_firstload" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_firstload') ? 'checked="checked"' : '') ?> value="1"/>
+                                        <label for="hmwp_firstload"><?php echo esc_html__('Compatibility with Manage WP plugin', 'hide-my-wp'); ?></label>
+                                        <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/advanced-wp-security/#firstload') ?>" target="_blank" class="d-inline-block ml-2"><i class="dashicons dashicons-editor-help"></i></a>
+                                        <div class="offset-1 text-black-50"><?php echo esc_html__('Load the plugin as a Must Use plugin.', 'hide-my-wp'); ?></div>
+                                        <div class="offset-1 text-black-50"><?php echo esc_html__('(compatibility with Token based login plugins)', 'hide-my-wp'); ?></div>
                                     </div>
                                 </div>
-
-
                             </div>
 
-                            <div class="col-sm-12 row border-bottom border-light py-3 mx-0 my-3">
+                            <div class="col-sm-12 row mb-1 ml-1 p-2">
+                                <div class="checker col-sm-12 row my-2 py-1">
+                                    <div class="col-sm-12 p-0 switch switch-sm">
+                                        <input type="hidden" name="hmwp_laterload" value="0"/>
+                                        <input type="checkbox" id="hmwp_laterload" name="hmwp_laterload" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_laterload') ? 'checked="checked"' : '') ?> value="1"/>
+                                        <label for="hmwp_laterload"><?php echo esc_html__('Late Loading', 'hide-my-wp'); ?></label>
+                                        <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/advanced-wp-security/#late_loading') ?>" target="_blank" class="d-inline-block ml-2"><i class="dashicons dashicons-editor-help"></i></a>
+                                        <div class="offset-1 text-black-50"><?php echo esc_html__('Load HMWP after all plugins are loaded.', 'hide-my-wp'); ?></div>
+                                        <div class="offset-1 text-black-50"><?php echo esc_html__('(compatibility with CDN Enabler and other cache plugins)', 'hide-my-wp'); ?></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12 row mb-1 ml-1 p-2">
+                                <div class="checker col-sm-12 row my-2 py-1">
+                                    <div class="col-sm-12 p-0 switch switch-sm">
+                                        <input type="hidden" name="hmwp_remove_third_hooks" value="0"/>
+                                        <input type="checkbox" id="hmwp_remove_third_hooks" name="hmwp_remove_third_hooks" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_remove_third_hooks') ? 'checked="checked"' : '') ?> value="1"/>
+                                        <label for="hmwp_remove_third_hooks"><?php echo esc_html__('Clean Login Page', 'hide-my-wp'); ?></label>
+                                        <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/advanced-wp-security/#clean_login_page') ?>" target="_blank" class="d-inline-block ml-2"><i class="dashicons dashicons-editor-help"></i></a>
+                                        <div class="offset-1 text-black-50"><?php echo esc_html__('Cancel the login hooks from other plugins and themes to prevent unwanted login redirects.', 'hide-my-wp'); ?></div>
+                                        <div class="offset-1 text-black-50"><?php echo esc_html__('(useful when the theme is adding wrong admin redirects or infinite redirects)', 'hide-my-wp'); ?></div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                    <div id="notification" class="card col-sm-12 p-0 m-0 tab-panel">
+                        <h3 class="card-title hmwp_header p-2 m-0"><?php echo esc_html__('Notification Settings', 'hide-my-wp'); ?></h3>
+                        <div class="card-body">
+
+                            <div class="col-sm-12 row mb-1 ml-1 p-2">
+                                <div class="checker col-sm-12 row my-2 py-1">
+                                    <div class="col-sm-12 p-0 switch switch-sm">
+                                        <input type="hidden" name="hmwp_send_email" value="0"/>
+                                        <input type="checkbox" id="hmwp_send_email" name="hmwp_send_email" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_send_email') ? 'checked="checked"' : '') ?> value="1"/>
+                                        <label for="hmwp_send_email"><?php echo esc_html__('Email Notification', 'hide-my-wp'); ?></label>
+                                        <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/advanced-wp-security/#email_notification') ?>" target="_blank" class="d-inline-block ml-2"><i class="dashicons dashicons-editor-help"></i></a>
+                                        <div class="offset-1 text-black-50"><?php echo esc_html__('Send me an email with the changed admin and login URLs', 'hide-my-wp'); ?></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12 row border-bottom border-light py-3 mx-0 my-3 hmwp_send_email">
                                 <div class="col-sm-4 p-1 font-weight-bold">
-									<?php _e( 'Email Address', _HMW_PLUGIN_NAME_ ); ?>:
+                                    <?php echo esc_html__('Email Address', 'hide-my-wp'); ?>:
                                 </div>
                                 <div class="col-sm-8 p-0 input-group input-group">
-									<?php
-									$email = HMW_Classes_Tools::getOption( 'hmw_email_address' );
-									if ( $email == '' ) {
-										global $current_user;
-										$email = $current_user->user_email;
-									}
-									?>
-                                    <input type="text" class="form-control bg-input" name="hmw_email_address" value="<?php echo $email ?>" placeholder="Email address ..."/>
+                                    <?php
+                                    $email = HMWP_Classes_Tools::getOption('hmwp_email_address');
+                                    if ($email == '' ) {
+                                        global $current_user;
+                                        $email = $current_user->user_email;
+                                    }
+                                    ?>
+                                    <input type="text" class="form-control bg-input" name="hmwp_email_address" value="<?php echo esc_attr($email) ?>" placeholder="Email address ..."/>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-12 m-0 p-2 bg-light text-center" style="position: fixed; bottom: 0; right: 0; z-index: 100; box-shadow: 0px 0px 8px -3px #444;">
-                        <button type="submit" class="btn rounded-0 btn-success btn-lg px-5 mr-5 save"><?php _e( 'Save', _HMW_PLUGIN_NAME_ ); ?></button>
-                        <a href="https://wordpress.org/support/plugin/hide-my-wp/reviews/?rate=5#new-post" target="_blank" style="color: #ff005e;"><?php echo sprintf( __( 'Love Hide My WP %s? Show us ;)', _HMW_PLUGIN_NAME_ ), _HMW_VER_NAME_ ); ?></a>
+
+                    <div class="col-sm-12 m-0 p-2 bg-light text-center" style="position: fixed; bottom: 0; right: 0; z-index: 100; box-shadow: 0 0 8px -3px #444;">
+                        <button type="submit" class="btn rounded-0 btn-success px-5 mr-5 save"><?php echo esc_html__('Save', 'hide-my-wp'); ?></button>
                     </div>
                 </form>
+
             </div>
-            <div class="hmw_col hmw_col_side">
-                <div class="card col-sm-12 p-0">
-                    <div class="card-body f-gray-dark text-center">
-                        <h3 class="card-title"><?php echo __( 'Love Hide My WP?', _HMW_PLUGIN_NAME_ ); ?></h3>
-                        <div class="card-text text-muted">
-                            <h1>
-                                <a href="https://wordpress.org/support/plugin/hide-my-wp/reviews/?rate=5#new-post" target="_blank" style="font-size: 80px"><i class="fa fa-heart text-danger"></i></a>
-                            </h1>
-							<?php echo __( 'Please help us and support our plugin on WordPress.org', _HMW_PLUGIN_NAME_ ) ?>
-                        </div>
-                        <div class="card-text text-info m-3">
-                            <a href="https://wordpress.org/support/plugin/hide-my-wp/reviews/?rate=5#new-post" target="_blank" class="btn rounded-0 btn-success btn-lg px-4"><?php echo __( 'Rate Hide My WP', _HMW_PLUGIN_NAME_ ); ?></a>
-                        </div>
-                        <div class="card-text text-muted">
-							<?php echo __( 'Contact us after you left the review cause we have a surprise for you.', _HMW_PLUGIN_NAME_ ) ?>
-                            <h1>
-                                <a href="https://hidemywpghost.com/contact/" target="_blank" style="font-size: 80px"><i class="fa fa-gift text-info"></i></a>
-                            </h1>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="hmw_col hmw_col_side">
-                    <div class="card col-sm-12 p-0">
-                        <div class="card-body f-gray-dark text-center">
-                            <h3 class="card-title"><?php _e( 'Check Your Website', _HMW_PLUGIN_NAME_ ); ?></h3>
-                            <div class="card-text text-muted">
-								<?php echo __( 'Check if your website is secured with the current settings.', _HMW_PLUGIN_NAME_ ) ?>
-                            </div>
-                            <div class="card-text text-info m-3">
-                                <a href="<?php echo HMW_Classes_Tools::getSettingsUrl( 'hmw_securitycheck' ) ?>" class="btn rounded-0 btn-warning btn-lg text-white px-4 securitycheck"><?php _e( 'Security Check', _HMW_PLUGIN_NAME_ ); ?></a>
-                            </div>
-                            <div class="card-text text-muted small">
-								<?php echo __( 'Make sure you save the settings and empty the cache before checking your website with our tool.', _HMW_PLUGIN_NAME_ ) ?>
-                            </div>
-
-                            <div class="card-text m-3 ">
-                                <a class="bigbutton text-center" href="https://hidemywpghost.com/knowledge-base/" target="_blank"><?php echo __( "Learn more about Hide My WP", _HMW_PLUGIN_NAME_ ); ?></a>
-                            </div>
-                        </div>
-                    </div>
-
-
-					<?php echo $view->getView( 'Support' ) ?>
-
-                </div>
-            </div>
+        <div class="hmwp_col hmwp_col_side p-0 m-0 mr-2">
+            <?php $view->show('blocks/ChangeCacheFiles'); ?>
+            <?php $view->show('blocks/SecurityCheck'); ?>
         </div>
-    </div>
-<?php }
+</div>

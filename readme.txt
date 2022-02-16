@@ -2,9 +2,9 @@
 Contributors: johndarrel
 Tags: security, wordpress security, firewall, hide my wp, hide wp-admin, hide wp-login, hide wordpress, hide wp, security plugin, ocultar mi wp, hide my site, hide my wordpress, hide, hack, antivirus
 Requires at least: 4.3
-Tested up to: 5.6
+Tested up to: 5.9
 Requires PHP: 5.6
-Stable tag: trunk
+Stable tag: 4.1.11
 Donate link: https://hidemywpghost.com/hide-my-wp-pricing/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -15,7 +15,7 @@ Hide all common paths, wp-admin, wp-login, wp-content, plugins, themes, authors,
 
 **Hide My WP Ghost** is a **WordPress Security plugin**. It's one of the best security through obscurity WordPress plugins.
 
-It has over **60.000 secured websites**, over **1,400,000 brute force attempts protection** and over **5.000 login email alerts**.
+It has over **100.000 secured websites**, over **1,600,000 brute force attempts protection** and over **9.000 email alerts**.
 
 The plugin **adds filters and security layers** to prevent Scripts and SQL Injections, Brute Force attacks, XML-RPC attacks and more.
 
@@ -156,7 +156,7 @@ Thank you all for your trust, support and positive reviews!
 
 Compatible with: <strong>WP Multisite, Apache, Litespeed, Nginx and IIS</strong>.
 
-Plugins Compatibility updates: **ManageWP, WPML, W3 Total Cache, WP Super Cache, WP Fastest Cache, Hummingbird Cache, Cachify Cache, Litespeed Cache,
+Plugins Compatibility updates: **ManageWP, WPML, W3 Total Cache, Gravity, WP Super Cache, WP Fastest Cache, Hummingbird Cache, Cachify Cache, Litespeed Cache,
 Cache Enabler, CDN Enabler, WOT Cache, Autoptimize, Jetpack by WordPress, Contact Form 7, bbPress,
 All In One SEO, Yoast SEO, Squirrly SEO, WP-Rocket, Minify HTML, iThemes Security, Sucuri Security,
 Back-Up WordPress, Elementor Page Builder, Weglot Translate, AddToAny Share Btn, WordFence Security, Sucuri Security, Asset CleanUp**
@@ -225,6 +225,7 @@ Note: The plugin requires custom permalinks. Make sure you have it activated at 
 > *   Hide DNS Prefetch WordPress link
 > *   Hide WordPress Generator Meta
 > *   Add Firewall against SQL/Script injection
+> *   Add Security Headers against XSS & Code Injections
 > *   Hide wp-caption, wp-image, wp-blocks, wp-post classes and ids, and more
 > *   Hide Emojicons if you don't use them
 > *   Change URLs in Ajax calls
@@ -239,28 +240,35 @@ Note: The plugin requires custom permalinks. Make sure you have it activated at 
 > *   Change text in CSS and JS files
 > *   Change CDN URLs using CDN Mapping
 > *   Change paths in the cache files
+> *   Change paths in the Feed link
 > *   Change paths in the Sitemap XML
 > *   Change paths in the Robots.txt
 >
 > <strong>Disable Paths:</strong>
 >
-> *   Disable XML-RPC access
-> *   Disable Rest API access
+> *   Hide/Disable XML-RPC access
+> *   Hide/Disable Rest API access
 > *   Disable Embed scripts
 > *   Disable DB-Debug in Frontend
 > *   Disable WLW Manifest scripts
-> *   Disable directory browsing
+> *   Disable Right Click
+> *   Disable Copy-Paste
+> *   Disable Drag-Drop
+> *   Disable Inspect Element
+> *   Disable View Source
+> *   Disable Directory Browsing
 >
 > <strong>Brute Force Protection:</strong>
 >
 > *   Brute Force Protection with Math Captcha
-> *   Brute Force Protection with Google reCaptcha
+> *   Brute Force Protection with Google reCaptcha V2
+> *   Brute Force Protection with Google reCaptcha V3
 > *   Custom attempts, timeout, message
 > *   Manage Blacklist and Whitelist IPs
 >
-> <strong>Log Activity:</strong>
+> <strong>Events Log:</strong>
 >
-> *   Log user activity
+> *   Log users activity
 > *   Set security alerts by email if users login from different IPs
 > *   Set security alerts by email on Brute Force attacks
 > *   Set security alerts by email if users delete articles
@@ -353,23 +361,161 @@ Enjoy!
 
 
 == Screenshots ==
-1. Choose the desired level of Security for your site
-2. Change the URLs wp-admin and wp-login.php to different URLs. This is a very important WordPress Security step.
-3. Choose to hide the wp-admin and wp-login.php to increase the WordPress Security and hackers will get 404 errors
-4. Login to your site with the new Hide My WP login URL
-5. You'll be redirected to the new Hide My WP admin URL
-6. Activate the Brute Force Protection with Math reCaptcha
-7. Add custom paths for wp-content, wp-includes, plugins, themes and more
-8. Run a security check for your website and see all the vulnerabilities
+1. Change wp-admin and wp-login.php paths and show 404 Error instead. This is a very important WordPress Security step.
+2. Change all WordPress Common paths wp-content, wp-includes, uploads, plugins, themes, etc.
+3. Change Class names and ID names from the source-code to hide WordPress default classes.
+4. Setup login and logout redirects based on the user role.
+5. Setup Brite Force Math protection on your custom login page.
+6. Run Security Check to check over 35 security signals with detailed solutions.
+7. Set custom plugins name and themes name to be able to hide the WordPress Common Paths
+8. Change the login path and protect your website from hacker bots
+9. Customize the wp-admin path while logged in as administrator
 
 == Changelog ==
+= 5.0.02 (16 Feb 2022)=
+* Update - Added the option to prevent slow loading websites
+* Fix - Debug parameters number hook error
+
+= 5.0.01 (14 Feb 2022)=
+* Update - Added new option in Login Security: Hide the language switcher option on the login page
+* Update - Added the option to reset all settings to default
+* Update - Added the Ctrl + Shift + C restriction when Inspect Element option is active
+* Update - Added the features text for translation
+* Update - Added Firewall & Headers option
+* Update - Added the option to ignore the notifications and avoid repeating alerts
+* Update - Added the option to disable Right-Click for logged users and user roles
+* Update - Added the option to disable Inspect Element for logged users and user roles
+* Update - Added the option to disable View Source for logged users and user roles
+* Update - Added the option to disable Copy/Paste for logged users and user roles
+* Update - Added the option to disable Drag/Drop for logged users and user roles
+* Update - Add the option to hide the wp-admin path for non-admin users
+* Update - Compatibility with Namecheap hosting
+* Update - Compatibility with Ploi.io
+* Update - Compatibility with WordPress 5.9
+* Update - Compatibility with Coming Soon & Maintenance Mode PRO
+* Update - Compatibility with Advanced Access Manager (AAM) plugin
+* Update - Compatibility with WPS Hide Login
+* Update - Compatibility with JobCareer theme
+* Update - Compatibility with Wordfence Security Scan when the wp-admin is hidden
+* Update - Compatibility with the Temporary Login Without Password plugin to work with the passwordless connection on custom admin
+* Update - Compatibility with the LoginPress plugin to work with the passwordless connection on custom admin
+* Update - Compatibility with WordPress Sitemap, Rank Math SEO, SEOPress, XML Sitemaps to hide the paths and style on Nginx servers
+* Update - Compatibility with Nitropack
+* Update - Compatibility with OptimizePress Dashboard
+* Update - Compatibility with Bricks Builder
+* Update - Compatibility with Zion Builder
+* Update - Compatibility with MainWP
+* Update - Compatibility with Limit Login Attempts Reloaded
+* Update - Compatibility with Loginizer
+* Update - Compatibility with Shield Security
+* Update - Compatibility with iThemes Security
+* Update - Compatibility with Smush plugin
+* Update - Compatibility with Wordfence 2FA when reCaptcha is active
+* Update - Added compatibility with JCH Optimize 3 plugin
+* Update - Added compatibility with Oxygen 3.8 plugin
+* Update - Added compatibility with WP Bakery plugin
+* Update - Added compatibility with Bunny CDN plugin
+* Update - Update compatibility with Manage WP plugin
+* Update - Update compatibility with Autoptimize plugin
+* Update - Update compatibility with Breeze plugin
+* Update - Update compatibility with Cache Enabler plugin
+* Update - Update compatibility with CDN Enabler plugin
+* Update - Update compatibility with Comet Cache plugin
+* Update - Update compatibility with Hummingbird plugin
+* Update - Update compatibility with Hyper Cache plugin
+* Update - Update compatibility with Litespeed Cache plugin
+* Update - Update compatibility with Power Cache plugin
+* Update - Update compatibility with W3 Total Cache plugin
+* Update - Update compatibility with WP Fastest Cache plugin
+* Update - Update compatibility with iThemes plugin
+* Update - Added compatibility with Hummingbird Performance plugin
+* Update - Advanced Text Mapping to work with Page Builders in admin
+* Update - Changing the paths in sitemap.xml and robots.txt to work with all SEO plugins
+* Update - Translate the plugin in more languages
+* Update - Select the cache directory if there is a custom cache directory set in the cache plugin
+* Update - Show the change in cache files option for more cache plugins
+* Update - Removed the WordPress title tag from login/register pages
+* Fix - Brute Force blocking Wordfence Cron Job
+* Fix - Infinit loop when POST action on unknown paths
+* Fix - Remove the login URL from the logo on the custom login page
+* Fix - Set Filesystem to direct connection for file management
+* Fix - Don't show the rewrite alert messages if nothing was changed in HMWP
+
+= 4.1.11 (24 Ian 2022)=
+* Update - Compatibility with WordPress 5.9
+* Fix compatibility with other plugins
+
+= 4.1.10 (24 Nov 2021)=
+* Update - Compatibility with WordPress 5.8.2
+* Update - Remove the style in Sitemap XML for Nginx Servers
+* Update - Compatibility with Zion Builder
+* Update - Compatibility with Bricks builder
+* Fix - Don't load the paths while in Theme Customization
+
+= 4.1.09 (08 Sept 2021)=
+* Update - Compatibility with WordPress 5.8
+* Update - Website information https://hidemywpghost.com
+* Update - Set website logo on login page when option Hide My WP > Advanced > Clean Login is set
+* Update - Set change paths to work with different domain ports
+* Update - Compatibility with MainWP
+* Update - Compatibility with Limit Login Attempts Reloaded
+* Update - Compatibility with Loginizer
+* Update - Compatibility with Shield Security
+* Update - Compatibility with iThemes Security
+* Update - Added compatibility with JCH Optimize 3 plugin
+* Update - Added compatibility with Oxygen 3.8 plugin
+* Update - Added compatibility with WP Bakery plugin
+* Update - Added compatibility with Bunny CDN plugin
+* Update - Update compatibility with Manage WP plugin
+* Update - Update compatibility with Autoptimize plugin
+* Update - Update compatibility with Breeze plugin
+* Update - Update compatibility with Cache Enabler plugin
+* Update - Update compatibility with CDN Enabler plugin
+* Update - Update compatibility with Comet Cache plugin
+* Update - Update compatibility with Hummingbird plugin
+* Update - Update compatibility with Hyper Cache plugin
+* Update - Update compatibility with Litespeed Cache plugin
+* Update - Update compatibility with Power Cache plugin
+* Update - Update compatibility with W3 Total Cache plugin
+* Update - Update compatibility with WP Fastest Cache plugin
+* Update - Update compatibility with iThemes plugin
+* Fix - Password strength error on custom login reset password
+* Fix - Remove only the wordpress prefetch from source code and not other domains
+* Fix - Plugin uninstall issue because of missing contact HMW_VERSION
+
+= 4.1.08 (18 June 2021)=
+* Fix - Update the jetPack tracking script
+* Fix - Show plugin settings calling the plugin hook correctly
+* Fix - Warning: Constants may only evaluate to scalar values in hide-my-wp/config/config.php on line 107
+* Fix - Removed the memory limit verification
+* Fix - Add a warning for memory under 64MB
+* Fix - Fixed the <?PHP warning in Permalinks at the end of the file
+
+= 4.1.07 (19 May 2021)=
+* Update - Compatibility with WordPress 5.7.2
+* Update - Added compatibility with Oxygen Builder
+* Update - Added compatibility with Thrive Architect Builder
+* Update - Added compatibility with Gravity
+
+= 4.1.06 (26 April 2021)=
+* Update - Added compatibility with builders Oxygen, Elementor, Thrive, Bricks
+* Update - Added extra security in backend
+* Update - Added the option to prevent WordPress redirects and slow the website speed when the config rules are not loading
+* Fix - Brute Force warning when blocks the IP in function get_blocked_ips
+* Fix - Changed the form submittion action read due to config.json file permission on some servers
+
 = 4.1.05 (15 Feb 2021) =
 * Update - Update Security for the last updates and WP requirements
 * Update - Optimize JS library from third party plugins
 * Update - Let Hide My WP Settings load if the Permalink Structure is /?p=123
+* Update - Added 403 Error Code option for the wp-admin and wp-login.php redirects
 * Fixed - Compatibility with PHP 8.0 with deprecated functions
 * Fixed - Compatibility with the Flywheel hosting server and custom Nginx config location
 * Fixed - Hide My WP > Security Check UI
+* Fixed - Filesystem error when the library is not correctly loaded
+* Fixed - Change paths in Login page when Late Loading is active
+* Fixed - Change the WordPress login logo when Clean Login Page is active
+* Fixed - Compatibility with WordPress 5.7
 
 = 4.1.04 (23 Ian 2021) =
 * Update - Added compatibility for AppThemes Confirm Email
@@ -834,7 +980,7 @@ Yes. The Lite features of Hide My WP Ghost plugin will always be free.
 
 We will include all the required WordPress Security updates.
 
-To unlock all the features, please visit: <a href="https://wpplugins.tips/wordpress">https://wpplugins.tips/wordpress</a>
+To unlock all the features, please visit: <a href="https://hidemywpghost.com/hide-my-wp-pricing/">https://hidemywpghost.com/hide-my-wp-pricing/</a>
 
 = How to set the plugin on Nginx server? =
 

@@ -1,44 +1,114 @@
 <?php
+/**
+ * Widget Class
+ * Called on WP Dashboard
+ *
+ * @file The Widget file
+ * @package HMWP/Widget
+ * @since 6.0.0
+ */
+
 defined('ABSPATH') || die('Cheatin\' uh?');
 
-class HMW_Controllers_Widget extends HMW_Classes_FrontController {
+class HMWP_Controllers_Widget extends HMWP_Classes_FrontController
+{
 
+    /**
+     * Array of security tasks from Security Check
+     * @var array
+     */
     public $riskreport = array();
     public $risktasks;
+    public $stats = false;
 
-    public function dashboard() {
-        $this->risktasks = HMW_Classes_ObjController::getClass('HMW_Controllers_SecurityCheck')->getRiskTasks();
-        $this->riskreport =HMW_Classes_ObjController::getClass('HMW_Controllers_SecurityCheck')->getRiskReport();
+    /**
+     * Called when dashboard is loaded
+     *
+     * @throws Exception
+     */
+    public function dashboard()
+    {
+        //Get the stats
+        $args = $urls = array();
+        //If it's multisite
+        if(is_multisite()) {
+            if (function_exists('get_sites') && class_exists('WP_Site_Query') ) {
+                $sites = get_sites();
+                if(!empty($sites)) {
+                    foreach ($sites as $site) {
+                        $urls[] = (_HMWP_CHECK_SSL_ ? 'https://' : 'http://') . rtrim($site->domain . $site->path, '/');
+                    }
+                }
+            }
+        }else{
+            $urls[] = home_url();
+        }
+        //pack the urls
+        $args['urls'] = json_encode(array_unique($urls));
 
+        //call the stats
+        $stats = HMWP_Classes_Tools::hmwp_remote_get(_HMWP_API_SITE_ . '/api/log/stats', $args);
 
-	    //Show Hide My WP Offer
-	    if ( HMW_Classes_Tools::getOption( 'hmw_mode' ) == 'lite' && date( 'm' ) <> 10 && date( 'm' ) <> 11 && ((date( 'd' ) >= 15 && date( 'd' ) <= 20) || (date( 'd' ) >= 25 && date( 'd' ) <= 30))  ) {
-		    HMW_Classes_Error::setError( sprintf( __( '%sLimited Time Offer%s: Save up to %s 77%% %s today on Hide My WP Ghost License. %sHurry Up!%s', _HMW_PLUGIN_NAME_ ), '<a href="https://hidemywpghost.com/hide-my-wp-pricing/?coupon=HIDEMYWP77" target="_blank" style="font-weight: bold;"><strong style="color: red">', '</strong></a>', '<a href="https://hidemywpghost.com/hide-my-wp-pricing/?coupon=5HIDEMYWP65" target="_blank" style="font-weight: bold"><strong style="color: red">', '</strong></a>', '<a href="https://hidemywpghost.com/hide-my-wp-pricing/?coupon=5HIDEMYWP65" target="_blank" style="font-weight: bold">', '</a>' ) );
-	    }
+        if ($stats = json_decode($stats, true)) {
+            if(isset($stats['data'])) {
+                $this->stats = $stats['data'];
+            }
+        }
 
-	    echo '<script>var hmwQuery = {"ajaxurl": "' . admin_url( 'admin-ajax.php' ) . '","nonce": "' . wp_create_nonce( _HMW_NONCE_ID_ ) . '"}</script>';
-        echo $this->getView('Dashboard');
+        $this->risktasks = HMWP_Classes_ObjController::getClass('HMWP_Controllers_SecurityCheck')->getRiskTasks();
+        $this->riskreport = HMWP_Classes_ObjController::getClass('HMWP_Controllers_SecurityCheck')->getRiskReport();
+
+        $this->show('Dashboard');
     }
 
-    public function action() {
+    /**
+     * Called when an action is triggered
+     *
+     * @throws Exception
+     */
+    public function action()
+    {
         parent::action();
 
-        if (!current_user_can('manage_options')) {
+        if (!HMWP_Classes_Tools::userCan('hmwp_manage_settings')) {
             return;
         }
 
-        switch (HMW_Classes_Tools::getValue('action')) {
-            case 'hmw_widget_securitycheck':
-                HMW_Classes_ObjController::getClass('HMW_Controllers_SecurityCheck')->doSecurityCheck();
+        if (HMWP_Classes_Tools::getValue('action') == 'hmwp_widget_securitycheck') {
+            HMWP_Classes_ObjController::getClass('HMWP_Controllers_SecurityCheck')->doSecurityCheck();
 
-                ob_start();
-                $this->dashboard();
-                $output = ob_get_clean();
+            //Get the stats
+            $args = $urls = array();
+            //If it's multisite
+            if (is_multisite()) {
+                if (function_exists('get_sites') && class_exists('WP_Site_Query')) {
+                    $sites = get_sites();
+                    if (!empty($sites)) {
+                        foreach ($sites as $site) {
+                            $urls[] = (_HMWP_CHECK_SSL_ ? 'https://' : 'http://') . rtrim($site->domain . $site->path, '/');
+                        }
+                    }
+                }
+            } else {
+                $urls[] = home_url();
+            }
+            //pack the urls
+            $args['urls'] = json_encode(array_unique($urls));
+            //call the stats
+            $stats = HMWP_Classes_Tools::hmwp_remote_get(_HMWP_API_SITE_ . '/api/log/stats', $args);
 
-                HMW_Classes_Tools::setHeader('json');
-                echo json_encode(array('data' => $output));
-                exit;
+            if ($stats = json_decode($stats, true)) {
+                if (isset($stats['data'])) {
+                    $this->stats = $stats['data'];
+                }
+            }
 
+            $this->risktasks = HMWP_Classes_ObjController::getClass('HMWP_Controllers_SecurityCheck')->getRiskTasks();
+            $this->riskreport = HMWP_Classes_ObjController::getClass('HMWP_Controllers_SecurityCheck')->getRiskReport();
+
+            HMWP_Classes_Tools::setHeader('json');
+            echo json_encode(array('data' => $this->getView('Dashboard')));
+            exit();
         }
     }
 }

@@ -1,120 +1,223 @@
 <?php
+/**
+ * Set the ajax action and call for WordPress
+ *
+ * @file The Actions file
+ * @package HMWP/Action
+ * @since 4.0.0
+ */
+
 defined('ABSPATH') || die('Cheatin\' uh?');
 
-/**
- * Set the ajax action and call for wordpress
- */
-class HMW_Classes_Action extends HMW_Classes_FrontController {
+class HMWP_Classes_Action extends HMWP_Classes_FrontController
+{
 
-    /** @var array with all form and ajax actions */
+    /**
+     * 
+     * All the registered actions
+     * @var array with all form and ajax actions
+     */
     var $actions = array();
-
-    /** @var array from core config */
-    private static $config;
-
 
     /**
      * The hookAjax is loaded as custom hook in hookController class
      *
      * @return void
+     * @throws Exception
      */
-    public function hookInit() {
-        if (HMW_Classes_Tools::isAjax()) {
+    public function hookInit()
+    {
+        if (HMWP_Classes_Tools::isAjax()) {
             $this->getActions(true);
-        }
-    }
-
-    function hookFrontinit() {
-        /* Only if post */
-        if (HMW_Classes_Tools::isAjax()) {
-            $this->getActions();
         }
     }
 
     /**
      * The hookSubmit is loaded when action si posted
      *
+     * @throws Exception
      * @return void
      */
-    function hookMenu() {
+    function hookMenu()
+    {
         /* Only if post */
-        if (!HMW_Classes_Tools::isAjax()) {
+        if (!HMWP_Classes_Tools::isAjax()) {
             $this->getActions();
         }
     }
 
-    function hookMultisiteMenu() {
+    /**
+     * Hook the Multisite Menu
+     *
+     * @throws Exception
+     */
+    function hookMultisiteMenu()
+    {
         /* Only if post */
-        if (!HMW_Classes_Tools::isAjax()) {
+        if (!HMWP_Classes_Tools::isAjax()) {
             $this->getActions();
         }
+    }
+
+    /**
+     * Get the list with all the plugin actions
+     *
+     * @since 6.1.1
+     * @return array
+     */
+    public function getActionsTable()
+    {
+        return array(
+            array(
+                "name" => "HMWP_Controllers_Settings",
+                "actions" => array(
+                    "action" => array(
+                        "hmwp_settings",
+                        "hmwp_tweakssettings",
+                        "hmwp_confirm",
+                        "hmwp_newpluginschange",
+                        "hmwp_abort",
+                        "hmwp_ignore_errors",
+                        "hmwp_restore_settings",
+                        "hmwp_manualrewrite",
+                        "hmwp_mappsettings",
+                        "hmwp_advsettings",
+                        "hmwp_devsettings",
+                        "hmwp_devdownload",
+                        "hmwp_changepathsincache",
+                        "hmwp_savecachepath",
+                        "hmwp_backup",
+                        "hmwp_restore",
+                        "hmwp_rollback",
+                        "hmwp_rollback_stable",
+                        "hmwp_download_settings"
+                    )
+                ),
+            ),
+            array(
+                "name" => "HMWP_Controllers_Overview",
+                "actions" => array(
+                    "action" => array(
+                        "hmwp_feature_save"
+                    )
+                ),
+            ),
+            array(
+                "name" => "HMWP_Controllers_SecurityCheck",
+                "actions" => array(
+                    "action" => array(
+                        "hmwp_securitycheck",
+                        "hmwp_frontendcheck",
+                        "hmwp_fixsettings",
+                        "hmwp_fixconfig",
+                        "hmwp_securityexclude",
+                        "hmwp_resetexclude"
+                    )
+                ),
+            ),
+            array(
+                "name" => "HMWP_Controllers_Brute",
+                "actions" => array(
+                    "action" => array(
+                        "hmwp_brutesettings",
+                        "hmwp_blockedips",
+                        "hmwp_deleteip",
+                        "hmwp_deleteallips"
+                    )
+                ),
+            ),
+            array(
+                "name" => "HMWP_Controllers_Log",
+                "actions" => array(
+                    "action" => array(
+                        "hmwp_logsettings"
+                    )
+                ),
+            ),
+            array(
+                "name" => "HMWP_Controllers_Widget",
+                "actions" => array(
+                    "action" => "hmwp_widget_securitycheck"
+                ),
+            ),
+           array(
+               "name" => "HMWP_Controllers_Connect",
+               "actions" => array(
+                   "action" => array(
+                       "hmwp_connect",
+                       "hmwp_dont_connect"
+                   )
+               ),
+           ),
+           array(
+               "name" => "HMWP_Classes_Error",
+               "actions" => array(
+                   "action" => array(
+                       "hmwp_ignoreerror"
+                   )
+               ),
+           ),
+        );
     }
 
 
     /**
      * Get all actions from config.json in core directory and add them in the WP
      *
-     * @param boolean $ajax
-     * @return void
+     * @since 4.0.0
+     * @param  bool $ajax
+     * @throws Exception
      */
-    public function getActions($ajax = false) {
-	    global $wp_filesystem;
-	    require_once ( ABSPATH . '/wp-admin/includes/file.php' );
-	    WP_Filesystem();
+    public function getActions($ajax = false)
+    {
+        //Proceed only if logged in and in dashboard
+        if (! is_admin() && ! is_network_admin() ) {
+            return;
+        }
 
         $this->actions = array();
-        $action = HMW_Classes_Tools::getValue('action');
-        $nonce = HMW_Classes_Tools::getValue('hmw_nonce');
+        $action = HMWP_Classes_Tools::getValue('action');
+        $nonce = HMWP_Classes_Tools::getValue('hmwp_nonce');
 
         if ($action == '' || $nonce == '') {
             return;
         }
 
-        /* if config allready in cache */
-        if (!isset(self::$config)) {
-            $config_file = _HMW_ROOT_DIR_ . '/config.json';
+        //Get all the plugin actions
+        $actions = $this->getActionsTable();
 
-	        if ( !$wp_filesystem->exists( $config_file ) )
-		        return;
+        foreach ( $actions as $block ) {
+            //If there is a single action
+            if (isset($block['actions']['action']) ) {
 
-	        /* load configuration blocks data from core config files */
-	        self::$config = json_decode( $wp_filesystem->get_contents( $config_file ), 1 );
-        }
-
-        if (is_array(self::$config))
-            foreach (self::$config['blocks']['block'] as $block) {
-                if (isset($block['active']) && $block['active'] == 1)
-                    if (isset($block['admin']) &&
-                        (($block['admin'] == 1 && (is_admin() || is_network_admin())) ||
-                            $block['admin'] == 0)
-                    ) {
-                        /* if there is a single action */
-                        if (isset($block['actions']['action']))
-
-                            /* if there are more actions for the current block */
-                            if (!is_array($block['actions']['action'])) {
-                                /* add the action in the actions array */
-                                if ($block['actions']['action'] == $action)
-                                    $this->actions[] = array('class' => $block['name']);
-                            } else {
-                                /* if there are more actions for the current block */
-                                foreach ($block['actions']['action'] as $value) {
-                                    /* add the actions in the actions array */
-                                    if ($value == $action)
-                                        $this->actions[] = array('class' => $block['name']);
-                                }
-                            }
+                //If there are more actions for the current block
+                if (! is_array($block['actions']['action']) ) {
+                    //Add the action in the actions array
+                    if ($block['actions']['action'] == $action ) {
+                        $this->actions[] = array( 'class' => $block['name'] );
                     }
+                } else {
+                    //If there are more actions for the current block
+                    foreach ( $block['actions']['action'] as $value ) {
+                        //Add the actions in the actions array
+                        if ($value == $action ) {
+                            $this->actions[] = array( 'class' => $block['name'] );
+                        }
+                    }
+                }
             }
-
-        if ($ajax) {
-            check_ajax_referer(_HMW_NONCE_ID_, 'hmw_nonce');
-        } else {
-            check_admin_referer($action, 'hmw_nonce');
         }
-        /* add the actions in WP */
+
+        //Validate referer based on the call type
+        if ($ajax) {
+            check_ajax_referer($action, 'hmwp_nonce');
+        } else {
+            check_admin_referer($action, 'hmwp_nonce');
+        }
+
+        //Add the actions in WP.
         foreach ($this->actions as $actions) {
-            HMW_Classes_ObjController::getClass($actions['class'])->action();
+            HMWP_Classes_ObjController::getClass($actions['class'])->action();
         }
     }
 

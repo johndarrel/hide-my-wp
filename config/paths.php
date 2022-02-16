@@ -1,24 +1,38 @@
 <?php
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+/**
+ * Definition of all the paths from the plugin
+ *
+ * @file The paths configuration file
+ *
+ * @package HMWP\Paths
+ */
 
-$currentDir = dirname( __FILE__ );
+defined('ABSPATH') || die('Cheatin\' uh?');
 
-define( '_HMW_NAMESPACE_', 'HMW' );
-define( '_HMW_VER_NAME_', 'Lite' );
-define( '_HMW_PLUGIN_NAME_', 'hide-my-wp' );
-defined( '_HMW_SUPPORT_SITE_' ) || define( '_HMW_SUPPORT_SITE_', 'https://wpplugins.tips' );
-defined( '_HMW_ACCOUNT_SITE_' ) || define( '_HMW_ACCOUNT_SITE_', 'https://account.wpplugins.tips' );
-defined( '_HMW_API_SITE_' ) || define( '_HMW_API_SITE_', _HMW_ACCOUNT_SITE_ );
-define( '_HMW_SUPPORT_EMAIL_', 'contact@wpplugins.tips' );
+$currentDir = dirname(__FILE__);
 
-/* Directories */
-define( '_HMW_ROOT_DIR_', realpath( $currentDir . '/..' ) );
-define( '_HMW_CLASSES_DIR_', _HMW_ROOT_DIR_ . '/classes/' );
-define( '_HMW_CONTROLLER_DIR_', _HMW_ROOT_DIR_ . '/controllers/' );
-define( '_HMW_MODEL_DIR_', _HMW_ROOT_DIR_ . '/models/' );
-define( '_HMW_TRANSLATIONS_DIR_', _HMW_ROOT_DIR_ . '/languages/' );
-define( '_HMW_THEME_DIR_', _HMW_ROOT_DIR_ . '/view/' );
+define('_HMWP_NAMESPACE_', 'HMWP');
+define('_HMWP_PLUGIN_FULL_NAME_', 'Hide My WP Ghost');
+define('_HMWP_ACCOUNT_SITE_', 'https://account.hidemywpghost.com');
+define('_HMWP_API_SITE_', _HMWP_ACCOUNT_SITE_);
+define('_HMWP_SUPPORT_EMAIL_', 'contact@hidemywpghost.com');
+define('_HMWP_CHECK_SSL_', (((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === "on") || (defined('FORCE_SSL_ADMIN') && FORCE_SSL_ADMIN) || (function_exists('is_ssl') && is_ssl())) ? true : false));
 
-/* URLS */
-define( '_HMW_URL_', plugins_url() . '/' . _HMW_PLUGIN_NAME_ );
-define( '_HMW_THEME_URL_', _HMW_URL_ . '/view/' );
+/**
+ * Directories
+ */
+define('_HMWP_ROOT_DIR_', realpath($currentDir . '/..'));
+define('_HMWP_CLASSES_DIR_', _HMWP_ROOT_DIR_ . '/classes/');
+define('_HMWP_CONTROLLER_DIR_', _HMWP_ROOT_DIR_ . '/controllers/');
+define('_HMWP_MODEL_DIR_', _HMWP_ROOT_DIR_ . '/models/');
+define('_HMWP_TRANSLATIONS_DIR_', _HMWP_ROOT_DIR_ . '/languages/');
+define('_HMWP_THEME_DIR_', _HMWP_ROOT_DIR_ . '/view/');
+define('_HMWP_ASSETS_DIR_', _HMWP_THEME_DIR_ . 'assets/');
+
+/**
+ * URLS paths
+ */
+define('_HMWP_URL_', plugins_url() . '/' . plugin_basename(_HMWP_ROOT_DIR_));
+define('_HMWP_THEME_URL_', _HMWP_URL_ . '/view/');
+define('_HMWP_ASSETS_URL_', _HMWP_THEME_URL_ . 'assets/');
+define('_HMWP_WPLOGIN_URL_', _HMWP_THEME_URL_ . 'wplogin/');

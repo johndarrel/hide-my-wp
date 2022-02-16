@@ -1,37 +1,96 @@
 <?php
+/**
+ * The Menu function
+ * Loaded when the user is logged in
+ *
+ * @file The Menu file
+ * @package HMWP/Menu
+ * @since 4.0.0
+ */
+
 defined('ABSPATH') || die('Cheatin\' uh?');
 
-class HMW_Controllers_Menu extends HMW_Classes_FrontController {
-
-    public $alert = '';
+class HMWP_Controllers_Menu extends HMWP_Classes_FrontController
+{
 
     /**
      * Hook the Admin load
+     *
+     * @since 4.0.0
+     * @throws Exception
      */
-    public function hookInit() {
-        /* add the plugin menu in admin */
-        if (current_user_can('manage_options')) {
-            //check if activated
-            if (get_transient('hmw_activate') == 1) {
-                // Delete the redirect transient
-                delete_transient('hmw_activate');
+    public function hookInit()
+    {
 
-	            //Check if there are expected upgrades
-	            HMW_Classes_Tools::checkUpgrade();
+        //On error or when plugin disabled.
+        if (defined('HMWP_DISABLE') && HMWP_DISABLE ) {  return;
+        }
+
+        //Add the plugin menu in admin.
+        if (HMWP_Classes_Tools::userCan('manage_options') ) {
+
+            //Check if activated.
+            if (get_transient('hmwp_activate') ) {
+
+                //Delete the redirect transient.
+                delete_transient('hmwp_activate');
+
+                //Initialize WordPress Filesystem.
+                $wp_filesystem = HMWP_Classes_ObjController::initFilesystem();
+
+                //Make sure HideMyWP in the loading first.
+                HMWP_Classes_Tools::movePluginFirst();
             }
 
-			//Make sure HideMyWP in the loading first
-	        HMW_Classes_Tools::movePluginFirst();
+            //Show Dashboard Box.
+            if(!is_multisite()) {
+                add_action('wp_dashboard_setup', array($this, 'hookDashboardSetup'));
+            }
 
-            //Load notice class in admin
-            HMW_Classes_ObjController::getClass('HMW_Controllers_Notice');
+            if (strpos(HMWP_Classes_Tools::getValue('page'), 'hmwp_') !== false ) {
+                add_action('admin_enqueue_scripts', array( $this->model, 'fixEnqueueErrors' ), PHP_INT_MAX);
+            }
 
-            //Show Dashboard Box
-            add_action('wp_dashboard_setup', array($this, 'hookDashboardSetup'));
+            //Get the error count from security check.
+            add_filter('hmwp_alert_count', array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_SecurityCheck'), "getRiskErrorCount"));
 
+            //Change the plugin name on customization.
+            if(HMWP_Classes_Tools::getOption('hmwp_plugin_name') <> _HMWP_PLUGIN_FULL_NAME_) {
 
-            if (HMW_Classes_Tools::getValue('page', false) == 'hmw_settings') {
-                add_action('admin_enqueue_scripts', array($this->model, 'fixEnqueueErrors'), PHP_INT_MAX);
+                //Hook plugin details.
+                add_filter(
+                    'gettext', function ($string) {
+
+                        //Change the plugin name in the plugins list.
+                        $string =  str_replace(_HMWP_PLUGIN_FULL_NAME_, HMWP_Classes_Tools::getOption('hmwp_plugin_name'), $string);
+                        //Return the changed text
+                        return str_replace('WPPlugins', HMWP_Classes_Tools::getOption('hmwp_plugin_name'), $string);
+
+                    }, 11, 1
+                );
+
+                //Hook plugin row metas.
+                add_filter(
+                    'plugin_row_meta', function ($plugin_meta) {
+                        foreach ($plugin_meta as $key => &$string){
+                            //Change the author URL.
+                            $string =  str_replace('https://wpplugins.tips', HMWP_Classes_Tools::getOption('hmwp_plugin_website'), $string);
+                            //Change the plugin details.
+                            if(stripos($string, 'plugin=' . dirname(HMWP_BASENAME)) !== false) {
+                                //Unset the plugin meta is plugin found
+                                unset($plugin_meta[$key]);
+                            }
+                        }
+
+                        return $plugin_meta;
+                    }, 11, 1
+                );
+
+            }
+
+            //Hook the show account option in admin.
+            if(!HMWP_Classes_Tools::getOption('hmwp_plugin_account_show')) {
+                add_filter('hmwp_showaccount', '__return_false');
             }
         }
 
@@ -39,199 +98,183 @@ class HMW_Controllers_Menu extends HMW_Classes_FrontController {
 
     /**
      * Creates the Setting menu in WordPress
+     *
+     * @since 4.0.0
+     * @throws Exception
      */
-    public function hookMenu() {
-        if (!is_multisite() && current_user_can('manage_options')) {
-            $this->model->addMenu(array(ucfirst(_HMW_PLUGIN_NAME_),
-                'Hide My WP' . $this->alert,
-                'manage_options',
-                'hmw_settings',
-                null,
-                _HMW_THEME_URL_ . 'img/logo_16.png'
-            ));
+    public function hookMenu()
+    {
 
-            /* add the Hide My WP admin menu */
-            $this->model->addSubmenu(array('hmw_settings',
-                __('Hide My WP - Customize Permalinks', _HMW_PLUGIN_NAME_),
-                __('Change Paths', _HMW_PLUGIN_NAME_),
-                'manage_options',
-                'hmw_settings',
-                array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-            ));
+        //On error or when plugin disabled.
+        if (defined('HMWP_DISABLE') && HMWP_DISABLE ) {  return; }
 
-	        $this->model->addSubmenu(array('hmw_settings',
-		        __('Hide My WP - Mapping', _HMW_PLUGIN_NAME_),
-		        __('Mapping', _HMW_PLUGIN_NAME_),
-		        'manage_options',
-		        'hmw_settings-hmw_mapping',
-		        array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-	        ));
+        if(!HMWP_Classes_Tools::isMultisites() ) {
 
-            $this->model->addSubmenu(array('hmw_settings',
-                __('Hide My WP - Tweaks', _HMW_PLUGIN_NAME_),
-                __('Tweaks', _HMW_PLUGIN_NAME_),
-                'manage_options',
-                'hmw_settings-hmw_tweaks',
-                array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-            ));
+            //If the capability hmwp_manage_settings exists.
+            if(HMWP_Classes_Tools::userCan('hmwp_manage_settings') ) {
 
+                $this->model->addMenu(
+                    array(
+                    HMWP_Classes_Tools::getOption('hmwp_plugin_name'),
+                    HMWP_Classes_Tools::getOption('hmwp_plugin_menu'),
+                    'hmwp_manage_settings',
+                    'hmwp_settings',
+                    array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Overview'), 'init'),
+                    HMWP_Classes_Tools::getOption('hmwp_plugin_icon')
+                    )
+                );
 
-            $this->model->addSubmenu(array('hmw_settings',
-                __('Hide My WP - Brute Force Protection', _HMW_PLUGIN_NAME_),
-                __('Brute Force Protection', _HMW_PLUGIN_NAME_),
-                'manage_options',
-                'hmw_settings-hmw_brute',
-                array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-            ));
+                /* add the admin menu */
+                $tabs = $this->model->getMenu();
+                foreach ($tabs as $slug => $tab) {
+                    $this->model->addSubmenu(
+                        array(
+                        $tab['parent'],
+                        $tab['title'],
+                        $tab['name'],
+                        $tab['capability'],
+                        $slug,
+                        $tab['function'],
+                        )
+                    );
+                }
 
+            }else{
+                //if the manage_options capability exists
+                $this->model->addMenu(
+                    array(
+                    HMWP_Classes_Tools::getOption('hmwp_plugin_name'),
+                    HMWP_Classes_Tools::getOption('hmwp_plugin_menu') ,
+                    'manage_options',
+                    'hmwp_settings',
+                    array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Overview'), 'init'),
+                    HMWP_Classes_Tools::getOption('hmwp_plugin_icon')
+                    ) 
+                );
 
-	        $this->model->addSubmenu(array('hmw_settings',
-                __('Hide My WP - Log Events', _HMW_PLUGIN_NAME_),
-                __('Log Events', _HMW_PLUGIN_NAME_),
-                'manage_options',
-                'hmw_settings-hmw_log',
-                array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-            ));
+                /* add the admin menu */
+                $tabs = $this->model->getMenu();
+                foreach ($tabs as $slug => $tab){
+                    $this->model->addSubmenu(
+                        array(
+                        $tab['parent'],
+                        $tab['title'],
+                        $tab['name'],
+                        'manage_options',
+                        $slug,
+                        $tab['function'],
+                        ) 
+                    );
+                }
 
-            /* add the security check in menu */
-            $this->model->addSubmenu(array('hmw_settings',
-                __('Hide My WP - Security Check', _HMW_PLUGIN_NAME_),
-                __('Security Check', _HMW_PLUGIN_NAME_) . $this->alert,
-                'manage_options',
-                'hmw_securitycheck',
-                array(HMW_Classes_ObjController::getClass('HMW_Controllers_SecurityCheck'), 'show')
-            ));
+            }
 
-            $this->model->addSubmenu(array('hmw_settings',
-                __('Hide My WP - Recommended Plugins', _HMW_PLUGIN_NAME_),
-                __('Install Plugins', _HMW_PLUGIN_NAME_),
-                'manage_options',
-                'hmw_settings-hmw_plugins',
-                array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-            ));
+            //Update the external links in the menu
+            global $submenu;
+            if (!empty($submenu['hmwp_settings'])) {
+                foreach ($submenu['hmwp_settings'] as &$item) {
 
-            $this->model->addSubmenu(array('hmw_settings',
-                __('Hide My WP - Backup & Restore', _HMW_PLUGIN_NAME_),
-                __('Backup/Restore', _HMW_PLUGIN_NAME_),
-                'manage_options',
-                'hmw_settings-hmw_backup',
-                array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-            ));
-
-            $this->model->addSubmenu(array('hmw_settings',
-                __('Hide My WP - Advanced Settings', _HMW_PLUGIN_NAME_),
-                __('Advanced', _HMW_PLUGIN_NAME_),
-                'manage_options',
-                'hmw_settings-hmw_advanced',
-                array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-            ));
-
-
+                    if (isset($tabs[$item[2]]['href']) && $tabs[$item[2]]['href'] !== false) {
+                        if (parse_url($tabs[$item[2]]['href'], PHP_URL_HOST) !== parse_url(home_url(), PHP_URL_HOST)) {
+                            $item[0] .= '<i class="dashicons dashicons-external" style="font-size:12px;vertical-align:-2px;height:10px;"></i>';
+                        }
+                        $item[2] = $tabs[$item[2]]['href'];
+                    }
+                }
+            }
         }
     }
 
-    public function hookDashboardSetup(){
+    /**
+     * Load the dashboard widget
+     *
+     * @since 5.1.0
+     * @throws Exception
+     */
+    public function hookDashboardSetup()
+    {
         wp_add_dashboard_widget(
-            'hmw_dashboard_widget',
-            __('Hide My WP',_HMW_PLUGIN_NAME_),
-            array(HMW_Classes_ObjController::getClass('HMW_Controllers_Widget'), 'dashboard')
+            'hmwp_dashboard_widget',
+            HMWP_Classes_Tools::getOption('hmwp_plugin_name'),
+            array( HMWP_Classes_ObjController::getClass('HMWP_Controllers_Widget'), 'dashboard' )
         );
 
         // Move our widget to top.
         global $wp_meta_boxes;
 
-        $dashboard = $wp_meta_boxes['dashboard']['normal']['core'];
-        $ours      = array( 'hmw_dashboard_widget' => $dashboard['hmw_dashboard_widget'] );
-        $wp_meta_boxes['dashboard']['normal']['core'] = array_merge( $ours, $dashboard );
+        $dashboard                                    = $wp_meta_boxes['dashboard']['normal']['core'];
+        $ours                                         = array( 'hmwp_dashboard_widget' => $dashboard['hmwp_dashboard_widget'] );
+        $wp_meta_boxes['dashboard']['normal']['core'] = array_merge($ours, $dashboard);
     }
 
 
     /**
      * Creates the Setting menu in Multisite WordPress
+     *
+     * @since 5.2.1
+     * @throws Exception
      */
-    public function hookMultisiteMenu() {
+    public function hookMultisiteMenu()
+    {
 
-        $this->model->addMenu(array(ucfirst(_HMW_PLUGIN_NAME_),
-            'Hide My WP' . $this->alert,
-            'manage_options',
-            'hmw_settings',
-            null,
-            _HMW_THEME_URL_ . 'img/logo_16.png'
-        ));
+        //If the capability hmwp_manage_settings exists
+        if(HMWP_Classes_Tools::userCan('hmwp_manage_settings') ) {
+            $this->model->addMenu(
+                array(
+                HMWP_Classes_Tools::getOption('hmwp_plugin_name'),
+                HMWP_Classes_Tools::getOption('hmwp_plugin_menu'),
+                'hmwp_manage_settings',
+                'hmwp_settings',
+                null,
+                HMWP_Classes_Tools::getOption('hmwp_plugin_icon')
+                )
+            );
 
-        /* add the Hide My WP admin menu */
-        $this->model->addSubmenu(array('hmw_settings',
-            __('Hide My WP - Customize Permalinks', _HMW_PLUGIN_NAME_),
-            __('Change Paths', _HMW_PLUGIN_NAME_),
-            'manage_options',
-            'hmw_settings',
-            array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-        ));
+            /* add the admin menu */
+            $tabs = $this->model->getMenu();
+            foreach ($tabs as $slug => $tab) {
+                $this->model->addSubmenu(
+                    array(
+                    $tab['parent'],
+                    $tab['title'],
+                    $tab['name'],
+                    $tab['capability'],
+                    $slug,
+                    $tab['function'],
+                    )
+                );
 
-	    $this->model->addSubmenu(array('hmw_settings',
-		    __('Hide My WP - Mapping', _HMW_PLUGIN_NAME_),
-		    __('Mapping', _HMW_PLUGIN_NAME_),
-		    'manage_options',
-		    'hmw_settings-hmw_mapping',
-		    array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-	    ));
+            }
+        }else{
+            //if the manage options capability exists
+            $this->model->addMenu(
+                array(
+                HMWP_Classes_Tools::getOption('hmwp_plugin_name'),
+                HMWP_Classes_Tools::getOption('hmwp_plugin_menu'),
+                'manage_options',
+                'hmwp_settings',
+                null,
+                HMWP_Classes_Tools::getOption('hmwp_plugin_icon')
+                )
+            );
 
-	    $this->model->addSubmenu(array('hmw_settings',
-            __('Hide My WP - Tweaks', _HMW_PLUGIN_NAME_),
-            __('Tweaks', _HMW_PLUGIN_NAME_),
-            'manage_options',
-            'hmw_settings-hmw_tweaks',
-            array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-        ));
+            /* add the admin menu */
+            $tabs = $this->model->getMenu();
+            foreach ($tabs as $slug => $tab) {
+                $this->model->addSubmenu(
+                    array(
+                    $tab['parent'],
+                    $tab['title'],
+                    $tab['name'],
+                    'manage_options',
+                    $slug,
+                    $tab['function'],
+                    )
+                );
+
+            }
+        }
 
 
-        $this->model->addSubmenu(array('hmw_settings',
-            __('Hide My WP - Brute Force Protection', _HMW_PLUGIN_NAME_),
-            __('Brute Force Protection', _HMW_PLUGIN_NAME_),
-            'manage_options',
-            'hmw_settings-hmw_brute',
-            array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-        ));
-
-        $this->model->addSubmenu(array('hmw_settings',
-            __('Hide My WP - Log Events', _HMW_PLUGIN_NAME_),
-            __('Log Events', _HMW_PLUGIN_NAME_),
-            'manage_options',
-            'hmw_settings-hmw_log',
-            array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-        ));
-
-        /* add the security check in menu */
-        $this->model->addSubmenu(array('hmw_settings',
-            __('Hide My WP - Security Check', _HMW_PLUGIN_NAME_),
-            __('Security Check', _HMW_PLUGIN_NAME_) . $this->alert,
-            'manage_options',
-            'hmw_securitycheck',
-            array(HMW_Classes_ObjController::getClass('HMW_Controllers_SecurityCheck'), 'show')
-        ));
-
-        $this->model->addSubmenu(array('hmw_settings',
-            __('Hide My WP - Recommended Plugins', _HMW_PLUGIN_NAME_),
-            __('Install Plugins', _HMW_PLUGIN_NAME_),
-            'manage_options',
-            'hmw_settings-hmw_plugins',
-            array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-        ));
-
-        $this->model->addSubmenu(array('hmw_settings',
-            __('Hide My WP - Backup & Restore', _HMW_PLUGIN_NAME_),
-            __('Backup/Restore', _HMW_PLUGIN_NAME_),
-            'manage_options',
-            'hmw_settings-hmw_backup',
-            array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-        ));
-
-        $this->model->addSubmenu(array('hmw_settings',
-            __('Hide My WP - Advanced Settings', _HMW_PLUGIN_NAME_),
-            __('Advanced', _HMW_PLUGIN_NAME_),
-            'manage_options',
-            'hmw_settings-hmw_advanced',
-            array(HMW_Classes_ObjController::getClass('HMW_Controllers_Settings'), 'init')
-        ));
     }
 }
