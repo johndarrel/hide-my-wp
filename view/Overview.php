@@ -80,7 +80,7 @@ if(!$sorted) {
                                                         <div id="hmwp_feature_<?php echo esc_attr($index) ?>" class="hmwp_feature card h-100 p-0 shadow-0 rounded-0 <?php echo ($feature['free'] ?  (!$feature['active'] ? 'bg-light' : 'active') :  'hmwp_pro') ?>">
                                                             <div class="card-body m-0 p-0">
                                                                 <div class="m-0 p-0 text-center">
-                                                                    <div class="m-0 py-4 <?php echo esc_url($feature['logo']) ?>"  style="font-size: 1.9rem; line-height: 30px; color:#71512794"></div>
+                                                                    <div class="m-0 py-4 <?php echo esc_attr($feature['logo']) ?>"  style="font-size: 1.9rem; line-height: 30px; color:#71512794"></div>
                                                                     <h5 class="py-0  m-0">
                                                                         <?php if($feature['link'] ) { ?>
                                                                             <a href="<?php echo esc_url($feature['link']) ?>" class="text-dark" style="text-decoration: none"><?php echo wp_kses_post($feature['title']) ?></a>

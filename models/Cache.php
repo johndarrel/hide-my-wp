@@ -132,11 +132,13 @@ class HMWP_Models_Cache
                             continue;
                         }
 
-                        //find replace the content
-                        $content = $this->findReplace($content);
-
-                        //write into file
-                        $this->writeFile($file, $content);
+	                    //find replace the content
+	                    $newcontent = $this->findReplace($content);
+	                    if($newcontent <> $content){
+		                    //echo $newcontent;exit();
+		                    //write into file
+		                    $this->writeFile($file, $newcontent);
+	                    }
 
                     }
                 }
@@ -174,12 +176,13 @@ class HMWP_Models_Cache
                             continue;
                         }
 
-                        //find replace the content
-                        $content = $this->findReplace($content);
-
-                        //write into file
-                        $this->writeFile($file, $content);
-
+	                    //find replace the content
+	                    $newcontent = $this->findReplace($content);
+	                    if($newcontent <> $content){
+		                    //echo $newcontent;exit();
+		                    //write into file
+		                    $this->writeFile($file, $newcontent);
+	                    }
                     }
                 }
             }
@@ -228,11 +231,13 @@ class HMWP_Models_Cache
                         //get the file content
                         $content = $wp_filesystem->get_contents($file);
 
-                        //find replace the content
-                        $content = $this->findReplace($content);
-
-                        //write into file
-                        $this->writeFile($file, $content);
+	                    //find replace the content
+	                    $newcontent = $this->findReplace($content);
+	                    if($newcontent <> $content){
+		                    //echo $newcontent;exit();
+		                    //write into file
+		                    $this->writeFile($file, $newcontent);
+	                    }
                     }
                 }
             }
@@ -273,7 +278,7 @@ class HMWP_Models_Cache
                 //Text Mapping for all css files - Experimental
                 if (HMWP_Classes_Tools::getOption('hmwp_mapping_file')) {
                     $hmwp_text_mapping = json_decode(HMWP_Classes_Tools::getOption('hmwp_text_mapping'), true);
-                    if (isset($hmwp_text_mapping['from']) && !empty($hmwp_text_mapping['from']) 
+                    if (isset($hmwp_text_mapping['from']) && !empty($hmwp_text_mapping['from'])
                         && isset($hmwp_text_mapping['to']) && !empty($hmwp_text_mapping['to'])
                     ) {
 

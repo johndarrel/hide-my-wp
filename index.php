@@ -6,7 +6,7 @@
   Plugin Name: Hide My WP Ghost Lite
   Plugin URI: https://wordpress.org/plugins/hide-my-wp/
   Description: The best solution for WordPress Security. Hide wp-admin, wp-login, wp-content, plugins, themes etc. Add Firewall, Brute Force protection & more. <br /> <a href="https://hidemywpghost.com/wordpress" target="_blank"><strong>Unlock all features</strong></a>
-  Version: 5.0.02
+  Version: 5.0.13
   Author: WPPlugins - WordPress Security Plugins
   Author URI: https://hidemywp.co
   License: GPLv2 or later
@@ -22,10 +22,10 @@
 if ( defined( 'ABSPATH' ) && !defined( 'HMW_VERSION' ) ) {
 
     //Set current plugin version
-    define( 'HMWP_VERSION', '5.0.02' );
+    define( 'HMWP_VERSION', '5.0.13' );
 
     //Set the last stable version of the plugin
-    define( 'HMWP_STABLE_VERSION', '4.1.11' );
+    define( 'HMWP_STABLE_VERSION', '5.0.12' );
 
     //Set the plugin basename
     define( 'HMWP_BASENAME',  plugin_basename(__FILE__) );
@@ -36,46 +36,39 @@ if ( defined( 'ABSPATH' ) && !defined( 'HMW_VERSION' ) ) {
     //Set the HMWP id for later verification
     defined( 'HMWP_VERSION_ID' ) || define( 'HMWP_VERSION_ID', (int)str_replace( '.', '', HMWP_VERSION ) );
 
-    /* important to check the PHP version */
     try {
 
-        /* Call config files */
+        //Call config files
         require(dirname( __FILE__ ) . '/config/config.php');
 
-        /* inport main classes */
+        //inport main classes
         require_once(_HMWP_CLASSES_DIR_ . 'ObjController.php');
 
         if(class_exists('HMWP_Classes_ObjController')) {
 
-            /* Load Exception, Error and Tools class */
+            //Load Exception, Error and Tools class
             HMWP_Classes_ObjController::getClass('HMWP_Classes_Error');
             HMWP_Classes_ObjController::getClass('HMWP_Classes_Tools');
 
-            /* Load Front Controller */
+            //Load Front Controller
             HMWP_Classes_ObjController::getClass('HMWP_Classes_FrontController');
 
-            /* if the disable signal is on, return */
-            if (defined('HMWP_DISABLE') && HMWP_DISABLE) {
+            //if the disable signal is on, return
+	        //don't run cron hooks and update if there are installs
+	        if (defined('HMWP_DISABLE') && HMWP_DISABLE) {
                 return;
-            }
-
-            //don't run cron hooks and update if there are installs
-            if (!is_multisite() && defined('WP_INSTALLING') && WP_INSTALLING) {
+            }elseif (!is_multisite() && defined('WP_INSTALLING') && WP_INSTALLING) {
                 return;
             } elseif (is_multisite() && defined('WP_INSTALLING_NETWORK') && WP_INSTALLING_NETWORK) {
                 return;
             }
 
-            //don't load bruteforce and activity log in cron jobs
-            if ( defined( 'DOING_CRON' ) && DOING_CRON ){
-                //don't hide the paths. Compatibility with Wordfence virus scan
-                add_filter('hmwp_process_hide_urls', '__return_false' );
-            }else {
-	            //If Brute Force is activated
-	            if (HMWP_Classes_Tools::getOption('hmwp_bruteforce')) {
-		            HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute');
-	            }
-            }
+	        if(!defined('DOING_CRON') || !DOING_CRON) {
+				//If Brute Force is activated
+		        if ( HMWP_Classes_Tools::getOption( 'hmwp_bruteforce' ) ) {
+			        HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Brute' );
+		        }
+	        }
 
             if (is_admin() || is_network_admin()) {
 
@@ -105,7 +98,7 @@ if ( defined( 'ABSPATH' ) && !defined( 'HMW_VERSION' ) ) {
                 if (HMWP_Classes_Tools::getOption('hmwp_change_in_cache') || HMWP_Classes_Tools::getOption('hmwp_mapping_file')) {
                     //Run the HMWP crons
                     HMWP_Classes_ObjController::getClass('HMWP_Controllers_Cron');
-                    add_action('hmwp_cron_process', array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Cron'), 'processCron'));
+                    add_action(HMWP_CRON, array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Cron'), 'processCron'));
                 }
             }
 

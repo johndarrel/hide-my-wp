@@ -345,11 +345,12 @@
             if ($.hmwp_getHashParam('tab')) {
                 var $current = $.hmwp_getHashParam('tab');
 
-                $this.find('.tab-panel').hide();
-                $this.find('.hmwp_nav_item').removeClass('active');
-                $this.find('#'+$current).show();
-                $this.find(".hmwp_nav_item[data-tab=" + $current + "]").addClass('active');
-
+                if($current !== '' && $this.find('#'+$current).length > 0) {
+                    $this.find('.tab-panel').hide();
+                    $this.find('.hmwp_nav_item').removeClass('active');
+                    $this.find('#' + $current).show();
+                    $this.find(".hmwp_nav_item[data-tab=" + $current + "]").addClass('active');
+                }
             } else {
                 $this.find("a.hmwp_nav_item:first").addClass('active');
                 $this.find("a.hmwp_nav_item:first").trigger('click');

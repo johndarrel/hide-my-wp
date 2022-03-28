@@ -113,6 +113,7 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController
             //If the capability hmwp_manage_settings exists.
             if(HMWP_Classes_Tools::userCan('hmwp_manage_settings') ) {
 
+
                 $this->model->addMenu(
                     array(
                     HMWP_Classes_Tools::getOption('hmwp_plugin_name'),
@@ -138,6 +139,18 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController
                         )
                     );
                 }
+
+	            //Avoid blank page after upgrade
+	            $this->model->addSubmenu(
+		            array(
+			            'hmw_settings',
+			            HMWP_Classes_Tools::getOption('hmwp_plugin_name'),
+			            HMWP_Classes_Tools::getOption('hmwp_plugin_menu'),
+			            'hmwp_manage_settings',
+			            'hmw_settings',
+			            array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Overview'), 'init')
+		            )
+	            );
 
             }else{
                 //if the manage_options capability exists
@@ -167,9 +180,23 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController
                     );
                 }
 
+	            //Avoid blank page after upgrade
+	            $this->model->addSubmenu(
+		            array(
+			            'hmw_settings',
+			            HMWP_Classes_Tools::getOption('hmwp_plugin_name'),
+			            HMWP_Classes_Tools::getOption('hmwp_plugin_menu'),
+			            'manage_options',
+			            'hmw_settings',
+			            array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Overview'), 'init')
+		            )
+	            );
+
             }
 
-            //Update the external links in the menu
+
+
+	        //Update the external links in the menu
             global $submenu;
             if (!empty($submenu['hmwp_settings'])) {
                 foreach ($submenu['hmwp_settings'] as &$item) {
@@ -243,8 +270,19 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController
                     $tab['function'],
                     )
                 );
-
             }
+
+	        //Avoid blank page after upgrade
+	        $this->model->addSubmenu(
+		        array(
+			        'hmw_settings',
+			        HMWP_Classes_Tools::getOption('hmwp_plugin_name'),
+			        HMWP_Classes_Tools::getOption('hmwp_plugin_menu'),
+			        'hmwp_manage_settings',
+			        'hmw_settings',
+			        array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Overview'), 'init')
+		        )
+	        );
         }else{
             //if the manage options capability exists
             $this->model->addMenu(
@@ -273,6 +311,18 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController
                 );
 
             }
+
+	        //Avoid blank page after upgrade
+	        $this->model->addSubmenu(
+		        array(
+			        'hmw_settings',
+			        HMWP_Classes_Tools::getOption('hmwp_plugin_name'),
+			        HMWP_Classes_Tools::getOption('hmwp_plugin_menu'),
+			        'manage_options',
+			        'hmw_settings',
+			        array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Overview'), 'init')
+		        )
+	        );
         }
 
 

@@ -59,13 +59,13 @@
                 <div class="card-body f-gray-dark text-left border-bottom">
                     <h3 class="card-title"><?php echo esc_html__('Activation Help', 'hide-my-wp'); ?></h3>
                     <div class="text-info">
-		                <?php echo sprintf( esc_html__( "By activating the Free version of Hide My WP you agree with our %sTerms of Use%s and %sPrivacy Policy%s", 'hide-my-wp' ), '<a href="https://hidemywpghost.com/terms-of-use/" target="_blank">', '</a>', '<a href="https://hidemywpghost.com/privacy-policy/" target="_blank">', '</a>' ); ?>
+		                <?php echo sprintf( esc_html__( "By activating the Free version of %s you agree with our %sTerms of Use%s and %sPrivacy Policy%s", 'hide-my-wp' ), HMWP_Classes_Tools::getOption('hmwp_plugin_name'), '<a href="https://hidemywpghost.com/terms-of-use/" target="_blank">', '</a>', '<a href="https://hidemywpghost.com/privacy-policy/" target="_blank">', '</a>' ); ?>
                     </div>
                     <div class="text-info mt-3">
 		                <?php echo esc_html__( 'Note! If you add your email you will receive a free token which will activate the plugin.', 'hide-my-wp' ); ?>
                     </div>
                     <div class="text-danger mt-2">
-		                <?php echo sprintf( esc_html__( "If you bought Hide My WP Ghost please remove this plugin and install the one from %sYour Account%s", 'hide-my-wp' ), '<a href="https://account.hidemywpghost.com/user/" target="_blank">', '</a>' ); ?>
+		                <?php echo sprintf( esc_html__( "If you bought %s please remove this plugin and install the one from %sYour Account%s", 'hide-my-wp' ), HMWP_Classes_Tools::getOption('hmwp_plugin_name'), '<a href="https://account.hidemywpghost.com/user/" target="_blank">', '</a>' ); ?>
                     </div>
                 </div>
             </div>

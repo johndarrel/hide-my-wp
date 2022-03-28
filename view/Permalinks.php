@@ -72,9 +72,7 @@
                                             $('.hmwp_nav_item').not(':first').hide();
 
                                             $('.tab-panel_tutorial').show();
-                                            $('.hmwp_emulate_cms').hide();
                                             $('.hmwp_disable_url').hide();
-                                            $('select[name="hmwp_emulate_cms"] option[value="<?php echo HMWP_Classes_Tools::$default['hmwp_emulate_cms']?>"]').prop('selected', 'selected');
                                         });
 
                                         $(".safe_confirmation").on('click', function () {
@@ -94,9 +92,7 @@
                                             $('.tab-panel_tutorial').hide();
                                             $('.hmwp_nav_item').show();
 
-                                            $('.hmwp_emulate_cms').show();
                                             $('.hmwp_disable_url').hide();
-                                            $('select[name="hmwp_emulate_cms"] option[value="<?php echo esc_attr($lite['hmwp_emulate_cms']) ?>"]').prop('selected', 'selected');
                                         });
 
                                         if ($('input[name=hmwp_mode]').val() == 'default'){
@@ -957,8 +953,24 @@
                                         </label>
                                         <div class="offset-1 text-black-50"><?php echo esc_html__('Most WordPress installations are hosted on the popular Apache, Nginx and IIS web servers.', 'hide-my-wp'); ?></div>
                                         <div class="offset-1 text-black-50"><?php echo esc_html__('A thorough set of rules can prevent many types of SQL Injection and URL hacks from being interpreted.', 'hide-my-wp'); ?></div>
+                                        <div class="offset-1 text-black-50 mt-2"><?php echo esc_html__('The firewall rules are added in the config file to block suspicious calls on your website.', 'hide-my-wp'); ?></div>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="col-sm-12 row border-bottom border-light py-2 mx-3 my-3 hmwp_sqlinjection border-bottom">
+                                <div class="col-sm-4 p-1">
+                                    <div class="font-weight-bold"><?php echo esc_html__('Firewall Strength', 'hide-my-wp'); ?>:</div>
+                                    <div class="text-black-50"><?php echo sprintf(esc_html__('Learn more about %s 7G firewall %s.', 'hide-my-wp'), '<a href="https://perishablepress.com/7g-firewall/" target="_blank">', '</a>'); ?></div>
+                                </div>
+                                <div class="col-sm-8 p-0 input-group mb-1">
+                                    <select name="hmwp_sqlinjection_level" class="form-control bg-input">
+                                        <option value="1" <?php echo selected(1, HMWP_Classes_Tools::getOption('hmwp_sqlinjection_level')) ?>><?php echo esc_html__('Minimal', 'hide-my-wp'); ?></option>
+                                        <option value="2" <?php echo selected(2, HMWP_Classes_Tools::getOption('hmwp_sqlinjection_level')) ?>><?php echo esc_html__('Medium', 'hide-my-wp'); ?></option>
+                                        <option value="3" <?php echo selected(3, HMWP_Classes_Tools::getOption('hmwp_sqlinjection_level')) ?>><?php echo esc_html__('7G Firewall', 'hide-my-wp'); ?></option>
+                                    </select>
+                                </div>
+
                             </div>
 
                         <?php } ?>

@@ -21,10 +21,15 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController
     {
         parent::__construct();
 
-        //If the plugin is set to be deactivated
-        if (defined('HMWP_DISABLE') && HMWP_DISABLE ) {
-            return;
-        }
+	    //If the plugin is set to be deactivated, return
+	    if (defined('HMWP_DISABLE') && HMWP_DISABLE ) {
+		    return;
+	    }
+
+	    //If doing cron, return
+	    if(defined('DOING_CRON') && DOING_CRON){
+		    return;
+	    }
 
         //If safe parameter is set, clear the banned IPs and let the default paths
         if (HMWP_Classes_Tools::getIsset(HMWP_Classes_Tools::getOption('hmwp_disable_name')) ) {
@@ -39,7 +44,7 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController
         }
 
 	    //prevent slow websites due to misconfiguration in the config file
-	    if(HMWP_Classes_Tools::getOption( 'prevent_slow_loading' ) && !empty(HMWP_Classes_Tools::getOption( 'file_mappings' ))){
+	    if(HMWP_Classes_Tools::getOption( 'prevent_slow_loading' ) && count((array)HMWP_Classes_Tools::getOption( 'file_mappings' )) > 1){
 		    return;
 	    }
 

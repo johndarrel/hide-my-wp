@@ -310,16 +310,18 @@ class HMWP_Models_Files
                 if (!HMW_DYNAMIC_FILES && !HMWP_Classes_Tools::getOption('hmwp_mapping_file') ) {
                     //if file is loaded through WordPress rewrites and not through config file
                     if ( parse_url($url) && $url <> $new_url && in_array($ext, array('png', 'jpg', 'jpeg', 'webp', 'gif'))) {
-                        //if it's a valid URL
-                        //add the url in the WP rewrite list
-                        $mappings = (array)HMWP_Classes_Tools::getOption('file_mappings');
-                        if(count($mappings) < 10 ) {
-                            $mappings[md5($url)] = $url;
-                            HMWP_Classes_Tools::saveOptions('file_mappings', $mappings);
-                        }
+	                    if(stripos($new_url,'wp-admin') === false) {
+							//if it's a valid URL
+		                    //add the url in the WP rewrite list
+		                    $mappings = (array) HMWP_Classes_Tools::getOption( 'file_mappings' );
+		                    if ( count( $mappings ) < 10 ) {
+			                    $mappings[ md5( $url ) ] = $url;
+			                    HMWP_Classes_Tools::saveOptions( 'file_mappings', $mappings );
+		                    }
 
-                        //for debug
-                        do_action('hmwp_debug_files', $url);
+		                    //for debug
+		                    do_action( 'hmwp_debug_files', $url );
+	                    }
                     }
 
                 }
@@ -394,8 +396,8 @@ class HMWP_Models_Files
                     if (HMWP_Classes_Tools::getOption('hmwp_mapping_file') && !is_admin() && (function_exists('is_user_logged_in') && !is_user_logged_in() )) {
 
                         $hmwp_text_mapping = json_decode(HMWP_Classes_Tools::getOption('hmwp_text_mapping'), true);
-                        if (isset($hmwp_text_mapping['from']) && !empty($hmwp_text_mapping['from']) 
-                            && isset($hmwp_text_mapping['to']) && !empty($hmwp_text_mapping['to']) 
+                        if (isset($hmwp_text_mapping['from']) && !empty($hmwp_text_mapping['from'])
+                            && isset($hmwp_text_mapping['to']) && !empty($hmwp_text_mapping['to'])
                         ) {
 
                             foreach ( $hmwp_text_mapping['to'] as &$value ) {
@@ -500,6 +502,13 @@ class HMWP_Models_Files
 
         } elseif ($url <> $new_url ) {
             if (!HMWP_Classes_Tools::getValue('noredirect') ) {
+
+	            $uri = parse_url($url, PHP_URL_QUERY);
+
+	            if($uri && strpos($new_url, '?') === false){
+		            $new_url .= '?' . $uri;
+	            }
+
                 wp_safe_redirect(add_query_arg(array('noredirect' => true), $new_url), 301);
                 exit();
             }

@@ -256,15 +256,15 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
         $subtabs = HMWP_Classes_ObjController::getClass('HMWP_Models_Menu')->getSubMenu($current);
 
         $content = '<div class="hmwp_nav d-flex flex-column bd-highlight mb-3">';
-        $content .= '<div  class="m-0 px-3 py-4 font-dark font-weight-bold text-logo"><a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'" target="_blank"><img src="' . (HMWP_Classes_Tools::getOption('hmwp_plugin_logo') ? HMWP_Classes_Tools::getOption('hmwp_plugin_logo') :  _HMWP_ASSETS_URL_ . 'img/logo.png') . '" class="ml-0 mr-2" style="height:35px; max-width: 180px;" alt=""></a></div>';
+        $content .= '<div  class="m-0 px-3 py-4 font-dark font-weight-bold text-logo"><a href="'.esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website')).'" target="_blank"><img src="' . esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_logo') ? HMWP_Classes_Tools::getOption('hmwp_plugin_logo') :  _HMWP_ASSETS_URL_ . 'img/logo.png') . '" class="ml-0 mr-2" style="height:35px; max-width: 180px;" alt=""></a></div>';
         //$content .= '<ul>';
         foreach ( $subtabs as $tab ) {
-            $content .= '<a href="#' . $tab['tab'] . '" class="m-0 px-3 py-3 font-dark hmwp_nav_item" data-tab="' . $tab['tab'] . '">' . $tab['title'] . '</a>';
+            $content .= '<a href="#' . esc_attr($tab['tab']) . '" class="m-0 px-3 py-3 font-dark hmwp_nav_item" data-tab="' . esc_attr($tab['tab']) . '">' . wp_kses_post($tab['title']) . '</a>';
         }
 
         $content .= '</div>';
 
-        return wp_kses_post($content);
+        return $content;
     }
 
     /**

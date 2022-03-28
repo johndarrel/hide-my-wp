@@ -149,7 +149,7 @@ class HMWP_Classes_Tools
             'test_frontend' => false,
             'changes' => false,
             'admin_notice' => array(),
-			'prevent_slow_loading' => 1,
+			'prevent_slow_loading' => 0,
             //--
             'hmwp_firstload' => 0, //load the plugin as Must Use Plugin
             'hmwp_laterload' => 0, //load the plugin on template redirect
@@ -314,6 +314,7 @@ class HMWP_Classes_Tools
 
             //--secure headers
             'hmwp_sqlinjection' => 0,
+            'hmwp_sqlinjection_level' => 1,
             'hmwp_security_header' => 0,
             'hmwp_hide_unsafe_headers' => 0,
             'hmwp_security_headers' => array(
@@ -381,7 +382,7 @@ class HMWP_Classes_Tools
             'hmwp_hide_styleids' => 0,
             'hmwp_hide_authors' => 0,
             'hmwp_disable_browsing' => 0,
-            'hmwp_hide_commonfiles' => 1,
+            'hmwp_hide_commonfiles' => 0,
             'hmwp_hide_oldpaths' => 0,
             'hmwp_hide_oldpaths_plugins' => 0,
             'hmwp_hide_oldpaths_themes' => 0,
@@ -590,11 +591,11 @@ class HMWP_Classes_Tools
         }
 
         //If not admin
-        if (!is_admin() && !is_network_admin() ) {
+        if ((!is_admin() && !is_network_admin()) || HMWP_Classes_Tools::isAjax() ) {
 
             //if process the change paths
-            if (HMWP_Classes_Tools::getOption('hmwp_hide_loggedusers') 
-                || (function_exists('is_user_logged_in') && !is_user_logged_in() ) 
+            if (HMWP_Classes_Tools::getOption('hmwp_hide_loggedusers')
+                || (function_exists('is_user_logged_in') && !is_user_logged_in() )
             ) {
                 return true;
             }

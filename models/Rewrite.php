@@ -102,14 +102,11 @@ class HMWP_Models_Rewrite
 
         //If ajax call
         if (HMWP_Classes_Tools::isAjax()  ) {
+
             //if change the ajax paths
             if(HMWP_Classes_Tools::getOption('hmwp_hideajax_paths')) {
-                //is change ajax for logged users or not logged users
-                if (HMWP_Classes_Tools::getOption('hmwp_hide_loggedusers') || (function_exists('is_user_logged_in') && !is_user_logged_in())) {
-                    //replace the buffer in Ajax
-                    $buffer = $this->find_replace($buffer);
-                }
-
+	            //replace the buffer in Ajax
+	            $buffer = $this->find_replace($buffer);
             }
 
         } else {
@@ -784,16 +781,18 @@ class HMWP_Models_Rewrite
                 HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->writeInHtaccess('', 'HMWP_RULES');
             }
 
-            $rewritecode = '';
-            if (!empty($this->_rewrites) ) {
-                foreach ( $this->_rewrites as $rewrite ) {
-                    if (PHP_VERSION_ID >= 70400 || (strpos($rewrite['to'], 'index.php') === false && (strpos($rewrite['to'], HMWP_Classes_Tools::$default['hmwp_wp-content_url']) !== false || strpos($rewrite['to'], HMWP_Classes_Tools::$default['hmwp_wp-includes_url']) !== false)) ) {
-                        if (strpos($rewrite['to'], HMWP_Classes_Tools::$default['hmwp_login_url']) === false && strpos($rewrite['to'], HMWP_Classes_Tools::$default['hmwp_admin_url']) === false ) {
-                            $rewritecode .= 'Source: <strong>^/' . str_replace(array('.css', '.js'), array('\.css', '\.js'), $rewrite['from']) . '</strong> Destination: <strong>' . $home_root . $rewrite['to'] . "</strong> Redirect type: Break;<br />";
-                        }
-                    }
-                }
-            }
+	        $rewritecode = '';
+	        if (!empty($this->_rewrites) ) {
+		        foreach ( $this->_rewrites as $rewrite ) {
+			        if(PHP_VERSION_ID >= 70400 ){
+				        $rewritecode .= 'Source: <strong>^/' . str_replace(array('.css', '.js'), array('\.css', '\.js'), $rewrite['from']) . '</strong> Destination: <strong>' . $home_root . $rewrite['to'] . "</strong> Redirect type: Break;<br />";
+			        }elseif (strpos($rewrite['to'], 'index.php') === false && (strpos($rewrite['to'], HMWP_Classes_Tools::$default['hmwp_wp-content_url']) !== false || strpos($rewrite['to'], HMWP_Classes_Tools::$default['hmwp_wp-includes_url']) !== false)) {
+				        if (strpos($rewrite['to'], HMWP_Classes_Tools::$default['hmwp_login_url']) === false && strpos($rewrite['to'], HMWP_Classes_Tools::$default['hmwp_admin_url']) === false ) {
+					        $rewritecode .= 'Source: <strong>^/' . str_replace(array('.css', '.js'), array('\.css', '\.js'), $rewrite['from']) . '</strong> Destination: <strong>' . $home_root . $rewrite['to'] . "</strong> Redirect type: Break;<br />";
+				        }
+			        }
+		        }
+	        }
 
             if ($rewritecode <> '' ) {
                 HMWP_Classes_Error::setError(sprintf(esc_html__('WpEngine detected. Add the redirects in the WpEngine Redirect rules panel %s.', 'hide-my-wp'), '<strong><a href="https://wpengine.com/support/redirect/" target="_blank" style="color: red">' . esc_html__("Learn How To Add the Code", 'hide-my-wp') . '</a></strong> <br /><br /><pre>' . $rewritecode . '</pre>' . $form),'notice',false);
@@ -2098,7 +2097,7 @@ class HMWP_Models_Rewrite
     public function find_replace( $content)
     {
 
-        if (apply_filters('hmwp_process_find_replace', true) ) {
+	    if (HMWP_Classes_Tools::doChangePaths() && apply_filters('hmwp_process_find_replace', true) ) {
 
             if (is_string($content) && $content <> '') {
 
@@ -2152,60 +2151,11 @@ class HMWP_Models_Rewrite
 
             }
 
-            //emulate other CMS on request
-            $content = $this->emulateCMS($content);
-
 
             //Set the replacement action to prevent multiple calls
             $this->_replaced = true;
         }
         //Return the buffer
-        return $content;
-    }
-
-
-    /**
-     * Add CMS Emulators for theme detectors
-     *
-     * @param  $content
-     * @return string|string[]|null
-     */
-    public function emulateCMS( $content )
-    {
-        //emulate other CMS
-        if($emulate = HMWP_Classes_Tools::getOption('hmwp_emulate_cms')) {
-
-            if ($emulate == 'drupal7') { //Drupal
-                $header['generator'] = '<meta name="Generator" content="Drupal 7 (https://www.drupal.org)" />';
-                $header['MobileOptimized'] = '<meta name="MobileOptimized" content="width" />';
-                $header['HandheldFriendly'] = '<meta name="HandheldFriendly" content="true" />';
-                $header_str = str_replace('$', '\$', join("\n", $header));
-                $content = @preg_replace('/(<head(\s[^>]*|)>)/si', sprintf("$1\n%s", $header_str) . PHP_EOL, $content, 1);
-            }elseif ($emulate == 'drupal') {
-                $header['generator'] = '<meta name="Generator" content="Drupal 8 (https://www.drupal.org)" />';
-                $header['MobileOptimized'] = '<meta name="MobileOptimized" content="width" />';
-                $header['HandheldFriendly'] = '<meta name="HandheldFriendly" content="true" />';
-                $header_str = str_replace('$', '\$', join("\n", $header));
-                $content = @preg_replace('/(<head(\s[^>]*|)>)/si', sprintf("$1\n%s", $header_str) . PHP_EOL, $content, 1);
-            }elseif ($emulate == 'drupal9') {
-                $header['generator'] = '<meta name="Generator" content="Drupal 9 (https://www.drupal.org)" />';
-                $header['MobileOptimized'] = '<meta name="MobileOptimized" content="width" />';
-                $header['HandheldFriendly'] = '<meta name="HandheldFriendly" content="true" />';
-                $header_str = str_replace('$', '\$', join("\n", $header));
-                $content = @preg_replace('/(<head(\s[^>]*|)>)/si', sprintf("$1\n%s", $header_str) . PHP_EOL, $content, 1);
-            }elseif ($emulate == 'joomla1') {
-                $header['generator'] = '<meta name="Generator" content="Joomla! 1.5 - Open Source Content Management" />';
-                $header['MobileOptimized'] = '<!-- JoomlaWorks Joomla 1.5 module -->';
-                $header_str = str_replace('$', '\$', join("\n", $header));
-                $content = @preg_replace('/(<head(\s[^>]*|)>)/si', sprintf("$1\n%s", $header_str) . PHP_EOL, $content, 1);
-            }elseif ($emulate == 'joomla3') {
-                $header['generator'] = '<meta name="Generator" content="Joomla! - Open Source Content Management" />';
-                $header['MobileOptimized'] = '<!-- JoomlaWorks Joomla 3.0 module -->';
-                $header_str = str_replace('$', '\$', join("\n", $header));
-                $content = @preg_replace('/(<head(\s[^>]*|)>)/si', sprintf("$1\n%s", $header_str) . PHP_EOL, $content, 1);
-            }
-        }
-
         return $content;
     }
 

@@ -579,17 +579,18 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
 
             //Propare the URL
             $hmwpPath = dirname(HMWP_BASENAME);
-            $pluginsPath = HMWP_Classes_Tools::getOption('hmwp_plugin_url') ;
+            $pluginsPath = HMWP_Classes_Tools::getOption('hmwp_plugin_url');
             $plugins = HMWP_Classes_Tools::getOption('hmwp_plugins');
-            if(isset($plugins['from']) && !empty($plugins['from'])) {
-                if(isset($plugins['to'][array_search($hmwpPath .'/', $plugins['from'])])){
-                    $hmwpPath = trim($plugins['to'][array_search($hmwpPath .'/', $plugins['from'])] , '/');
-                }
-            }
-
+			if(HMWP_Classes_Tools::getOption('hmwp_hide_plugins')) {
+				if ( isset( $plugins['from'] ) && ! empty( $plugins['from'] ) ) {
+					if ( isset( $plugins['to'][ array_search( $hmwpPath . '/', $plugins['from'] ) ] ) ) {
+						$hmwpPath = trim( $plugins['to'][ array_search( $hmwpPath . '/', $plugins['from'] ) ], '/' );
+					}
+				}
+			}
             //set hmwp_brokenfiles to false to not load the broken paths with WordPress rules
             $url = site_url() . '/' . $pluginsPath . '/' . $hmwpPath . '/view/assets/img/logo.png?hmwp_brokenfiles=0&test=' . mt_rand(11111,99999);
-            $response = HMWP_Classes_Tools::hmwp_localcall($url,  array('cookies' => false));
+	        $response = HMWP_Classes_Tools::hmwp_localcall($url,  array('cookies' => false));
 
             if (!is_wp_error($response) ) {
 

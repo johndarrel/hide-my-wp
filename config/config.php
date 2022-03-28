@@ -37,3 +37,4 @@ define('HMWP_OPTION_SAFE', 'hmwp_options_safe');
 define('HMWP_SECURITY_CHECK', 'hmwp_securitycheck');
 define('HMWP_SECURITY_CHECK_IGNORE', 'hmwp_securitycheck_ignore');
 define('HMWP_SECURITY_CHECK_TIME', 'hmwp_securitycheck_time');
+define('HMWP_CRON', 'hmwp_cron_process');

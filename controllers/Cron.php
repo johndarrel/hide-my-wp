@@ -18,8 +18,8 @@ class HMWP_Controllers_Cron
         add_filter('cron_schedules', array($this, 'setInterval'));
 
         //Activate the cron job if not exists.
-        if (!wp_next_scheduled('hmwp_cron_process')) {
-            wp_schedule_event(time(), 'hmwp_every_minute', 'hmwp_cron_process');
+        if (!wp_next_scheduled(HMWP_CRON)) {
+            wp_schedule_event(time(), 'hmwp_every_minute', HMWP_CRON);
         }
     }
 

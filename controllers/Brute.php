@@ -229,10 +229,23 @@ class HMWP_Controllers_Brute extends HMWP_Classes_FrontController
     function hmwp_check_preauth($user = '')
     {
 
-        //Check if Woocommerce login support is loaded
-        if(HMWP_Classes_Tools::getValue('woocommerce-login-nonce')) {
-	        return $user;
-        }
+	    //Check if Woocommerce login support is loaded
+	    if(HMWP_Classes_Tools::isPluginActive('woocommerce/woocommerce.php')
+	       && !HMWP_Classes_Tools::getOption('hmwp_bruteforce_woocommerce')
+	       && HMWP_Classes_Tools::getValue('woocommerce-login-nonce')) {
+
+		    return $user;
+	    }
+
+	    //If Login/Signup Popup is active and logged in through it
+	    if(HMWP_Classes_Tools::isPluginActive('easy-login-woocommerce/xoo-el-main.php')
+	       && !HMWP_Classes_Tools::getOption('brute_use_math')
+	       && HMWP_Classes_Tools::isAjax()
+	       && HMWP_Classes_Tools::getValue('xoo-el-username')
+	       && HMWP_Classes_Tools::getValue('xoo-el-password') ) {
+
+		    return $user;
+	    }
 
         if (is_wp_error($user)) {
             if (method_exists($user, 'get_error_codes')) {
