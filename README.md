@@ -1,13 +1,4 @@
-﻿=== Hide My WP Ghost - Security Plugin ===
-Contributors: johndarrel
-Tags: security,firewall,hide,antivirus,wp-login,wp-admin,hide wordpress,hide wp,security plugin
-Requires at least: 4.3
-Tested up to: 6.0
-Requires PHP: 5.6
-Stable tag: 5.0.14
-Donate link:
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Hide My WP Ghost - Security Plugin
 
 Hide WP paths, wp-admin, wp-login, wp-content, plugins, themes, authors, XML-RPC, API, etc. Add 7G Firewall Security, Brute Force protection & more.
 
@@ -25,23 +16,24 @@ Note! **No file or directory is physically changed**. All the changes are made b
 
 After the common paths are changed, **all the common paths are hidden from hackers** to protect all the plugins and themes.
 
-[youtube https://www.youtube.com/watch?v=gwRKHQTNkh0]
-YouTube - Why You Must Have <a href="https://hidemywpghost.com/">Hide My WP</a>
+
+YouTube - https://www.youtube.com/watch?v=gwRKHQTNkh0 
+* Why You Must Have <a href="https://hidemywpghost.com/">Hide My WP</a>
 
 > Check the Demo Website source code:
-> <a href="https://demo.wpplugins.tips/">https://demo.wpplugins.tips/</a>
-> (the elementor is changed in files and classes using the PRO version)
+> * <a href="https://demo.wpplugins.tips/">https://demo.wpplugins.tips/</a>
+> * (the elementor is changed in files and classes using the PRO version)
 
 
 > Check the Redirected URLs in Demo Website (all are redirected to Front Page):
-> <a href="https://demo.wpplugins.tips/wp-admin/">https://demo.wpplugins.tips/wp-admin</a>
-> <a href="https://demo.wpplugins.tips/wp-login/">https://demo.wpplugins.tips/wp-login</a>
+> * <a href="https://demo.wpplugins.tips/wp-admin/">https://demo.wpplugins.tips/wp-admin</a>
+> * <a href="https://demo.wpplugins.tips/wp-login/">https://demo.wpplugins.tips/wp-login</a>
 
 
 > Check the Hidden Common Paths in Demo Website (all show 404 Page Not Found):
-> <a href="https://demo.wpplugins.tips/wp-content/">https://demo.wpplugins.tips/wp-content</a>
-> <a href="https://demo.wpplugins.tips/wp-content/plugins/">https://demo.wpplugins.tips/wp-content/plugins</a>
-> <a href="https://demo.wpplugins.tips/wp-content/themes/">https://demo.wpplugins.tips/wp-content/themes</a>
+> * <a href="https://demo.wpplugins.tips/wp-content/">https://demo.wpplugins.tips/wp-content</a>
+> * <a href="https://demo.wpplugins.tips/wp-content/plugins/">https://demo.wpplugins.tips/wp-content/plugins</a>
+> * <a href="https://demo.wpplugins.tips/wp-content/themes/">https://demo.wpplugins.tips/wp-content/themes</a>
 
 
 The plugin works with other security plugins like Wordfence, iThemes Security, Sucuri and adds a layer of security to your WordPress website against hacker bots.
