@@ -338,6 +338,9 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
                         $cookies = HMWP_Classes_ObjController::newInstance('HMWP_Models_Cookies');
 
                         if (HMWP_Classes_Tools::isNginx() || $cookies->setCookiesCurrentPath() ) {
+	                        //whait for the server
+	                        sleep(3);
+
                             //set logout to false
                             HMWP_Classes_Tools::saveOptions('logout', false);
                             //activate frontend test
@@ -345,7 +348,7 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
                             remove_all_filters('wp_redirect');
                             remove_all_filters('admin_url');
-                            wp_safe_redirect(HMWP_Classes_Tools::getSettingsUrl(HMWP_Classes_Tools::getValue('page')));
+                            wp_redirect(HMWP_Classes_Tools::getSettingsUrl(HMWP_Classes_Tools::getValue('page')));
                             exit();
                         }
                     }
@@ -643,7 +646,7 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
                 remove_all_filters('wp_redirect');
                 remove_all_filters('admin_url');
-                wp_safe_redirect(HMWP_Classes_Tools::getSettingsUrl(HMWP_Classes_Tools::getValue('page')));
+                wp_redirect(HMWP_Classes_Tools::getSettingsUrl(HMWP_Classes_Tools::getValue('page')));
                 exit();
             }
 

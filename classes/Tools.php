@@ -13,9 +13,9 @@ class HMWP_Classes_Tools
 {
 
     /**
-     * 
      *
-     * @var array Saved options in database 
+     *
+     * @var array Saved options in database
      */
     public static $init = array(), $default = array(), $lite = array();
     public static $options = array();
@@ -23,9 +23,9 @@ class HMWP_Classes_Tools
     public static $active_plugins;
 
     /**
-     * 
      *
-     * @var integer Count the errors in site 
+     *
+     * @var integer Count the errors in site
      */
     static $errors_count = 0;
 
@@ -259,6 +259,7 @@ class HMWP_Classes_Tools
             //redirects
             'hmwp_url_redirect' => '.',
             'hmwp_do_redirects' => 0,
+            'hmwp_logged_users_redirect' => 0,
             'hmwp_url_redirects' => array('default' => array('login' => '', 'logout' => '')),
             'hmwp_signup_template' => 0,
 
@@ -347,8 +348,8 @@ class HMWP_Classes_Tools
             'hmwp_admin-ajax_url' => 'admin-ajax.php',
             'hmwp_hideajax_admin' => 0,
             'hmwp_hideajax_paths' => 0,
-            'hmwp_plugin_url' => 'modules',
-            'hmwp_themes_url' => 'views',
+            'hmwp_plugin_url' => 'core/modules',
+            'hmwp_themes_url' => 'core/views',
             'hmwp_upload_url' => 'storage',
             'hmwp_wp-content_url' => 'core',
             'hmwp_wp-includes_url' => 'lib',
@@ -625,8 +626,8 @@ class HMWP_Classes_Tools
         //If not admin
         if (!is_admin() && !is_network_admin() ) {
             //if process the change paths
-            if (HMWP_Classes_Tools::getOption('hmwp_hide_loggedusers') 
-                || (function_exists('is_user_logged_in') && !is_user_logged_in() ) 
+            if (HMWP_Classes_Tools::getOption('hmwp_hide_loggedusers')
+                || (function_exists('is_user_logged_in') && !is_user_logged_in() )
             ) {
                 return true;
             }
@@ -1085,6 +1086,10 @@ class HMWP_Classes_Tools
      */
     public static function isAWS()
     {
+	    if(isset($_SERVER["DOCUMENT_ROOT"]) && strpos($_SERVER["DOCUMENT_ROOT"], "/bitnami/")){
+		    return true;
+	    }
+
         $headers = headers_list();
 
         foreach ($headers as $header){
@@ -1385,16 +1390,12 @@ class HMWP_Classes_Tools
         if ($url <> '' ) {
             $url = str_replace(wp_make_link_relative(get_bloginfo('url')), '', $url);
 
-            if (self::isMultisiteWithPath() && defined('PATH_CURRENT_SITE') ) {
+            if (self::isMultisiteWithPath() && defined('PATH_CURRENT_SITE') && PATH_CURRENT_SITE <> '/' ) {
                 $url = str_replace(rtrim(PATH_CURRENT_SITE, '/'), '', $url);
-                $url = trim($url, '/');
-                $url = $url . '/';
-            } else {
-                $url = trim($url, '/');
             }
         }
 
-        return rtrim($url, '/') . '/';
+        return trailingslashit($url);
     }
 
     /**
@@ -1574,7 +1575,7 @@ class HMWP_Classes_Tools
             if (!HMWP_Classes_Tools::getOption('error') && !HMWP_Classes_Tools::getOption('logout') ) {
 
                 //Build the redirect table
-                HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->clearRedirect()->buildRedirect()->setRewriteRules()->flushRewrites();
+                HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->clearRedirect()->setRewriteRules()->flushRewrites();
 
                 //INSERT SEURITY RULES
                 if (!HMWP_Classes_Tools::isIIS() ) {

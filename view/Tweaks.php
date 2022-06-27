@@ -149,6 +149,18 @@
 
                             </div>
                         </div>
+
+                        <div class="col-sm-12 row mb-1 ml-1 p-2">
+                            <div class="checker col-sm-12 row my-2 py-1">
+                                <div class="col-sm-12 p-0 switch switch-sm">
+                                    <input type="hidden" name="hmwp_logged_users_redirect" value="0"/>
+                                    <input type="checkbox" id="hmwp_logged_users_redirect" name="hmwp_logged_users_redirect" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_logged_users_redirect') ? 'checked="checked"' : '') ?> value="1"/>
+                                    <label for="hmwp_logged_users_redirect"><?php echo esc_html__('Redirect Logged Users To Dashboard', 'hide-my-wp'); ?></label>
+                                    <div class="offset-1 text-black-50"><?php echo esc_html__("Automatically redirect the logged in users to the admin dashboard", 'hide-my-wp'); ?>.</div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 

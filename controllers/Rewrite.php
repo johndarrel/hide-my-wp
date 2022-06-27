@@ -101,7 +101,7 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController
 
         //actions
         add_action('login_init', array($this->model, 'login_init'), PHP_INT_MAX);
-        add_action('login_head', array($this->model, 'login_head'), PHP_INT_MAX);
+	    add_action('login_head', array($this->model, 'login_head'), PHP_INT_MAX);
         add_action('login_title', array($this->model, 'login_title'), PHP_INT_MAX, 1);
         add_action('wp_logout', array($this->model, 'wp_logout'), PHP_INT_MAX);
         add_action('check_admin_referer', array($this->model, 'check_admin_referer'), PHP_INT_MAX, 2);

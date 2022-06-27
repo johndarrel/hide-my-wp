@@ -5,8 +5,8 @@
 
   Plugin Name: Hide My WP Ghost Lite
   Plugin URI: https://wordpress.org/plugins/hide-my-wp/
-  Description: The best solution for WordPress Security. Hide wp-admin, wp-login, wp-content, plugins, themes etc. Add Firewall, Brute Force protection & more. <br /> <a href="https://hidemywpghost.com/wordpress" target="_blank"><strong>Unlock all features</strong></a>
-  Version: 5.0.13
+  Description: Hide WP paths, wp-admin, wp-login, wp-content, plugins, themes, authors, XML-RPC, API, etc. Add 7G Firewall Security, Brute Force protection & more.
+  Version: 5.0.14
   Author: WPPlugins - WordPress Security Plugins
   Author URI: https://hidemywp.co
   License: GPLv2 or later
@@ -22,10 +22,10 @@
 if ( defined( 'ABSPATH' ) && !defined( 'HMW_VERSION' ) ) {
 
     //Set current plugin version
-    define( 'HMWP_VERSION', '5.0.13' );
+    define( 'HMWP_VERSION', '5.0.14' );
 
     //Set the last stable version of the plugin
-    define( 'HMWP_STABLE_VERSION', '5.0.12' );
+    define( 'HMWP_STABLE_VERSION', '5.0.13' );
 
     //Set the plugin basename
     define( 'HMWP_BASENAME',  plugin_basename(__FILE__) );
@@ -75,8 +75,8 @@ if ( defined( 'ABSPATH' ) && !defined( 'HMW_VERSION' ) ) {
                 //Check the user roles
                 HMWP_Classes_ObjController::getClass('HMWP_Models_RoleManager');
 
-                //Make sure to write the rewrites with other plugins
-                add_action('rewrite_rules_array', array(HMWP_Classes_ObjController::getClass('HMWP_Classes_Tools'), 'checkRewriteUpdate'));
+	            //Make sure to write the rewrites with other plugins
+	            add_action('rewrite_rules_array', array(HMWP_Classes_ObjController::getClass('HMWP_Classes_Tools'), 'checkRewriteUpdate'), 11, 1);
 
                 //hook activation and deactivation
                 register_activation_hook(__FILE__, array(HMWP_Classes_ObjController::getClass('HMWP_Classes_Tools'), 'hmwp_activate'));

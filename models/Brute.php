@@ -521,7 +521,7 @@ class HMWP_Models_Brute
     public function brute_math_authenticate($user, $response)
     {
 
-        if (HMWP_Classes_Tools::getValue('brute_ck', false)) {
+        if (HMWP_Classes_Tools::getValue('brute_ck')) {
 
             $salt = HMWP_Classes_Tools::getOption('hmwp_disable') . get_site_option('admin_email');
             $ans = (int)HMWP_Classes_Tools::getValue('brute_num', 0);
@@ -535,6 +535,11 @@ class HMWP_Models_Brute
                 );
             }
 
+        }else{
+	        $user = new WP_Error(
+		        'authentication_failed',
+		        sprintf(esc_html__('%sYou failed to correctly answer the math problem.%s Please try again', 'hide-my-wp'), '<strong>', '</strong>')
+	        );
         }
 
         return $user;

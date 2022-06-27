@@ -231,8 +231,7 @@ class HMWP_Controllers_Brute extends HMWP_Classes_FrontController
 
 	    //Check if Woocommerce login support is loaded
 	    if(HMWP_Classes_Tools::isPluginActive('woocommerce/woocommerce.php')
-	       && !HMWP_Classes_Tools::getOption('hmwp_bruteforce_woocommerce')
-	       && HMWP_Classes_Tools::getValue('woocommerce-login-nonce')) {
+	       &&  HMWP_Classes_Tools::getValue('woocommerce-login-nonce')) {
 
 		    return $user;
 	    }

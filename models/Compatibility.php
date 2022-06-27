@@ -39,7 +39,7 @@ class HMWP_Models_Compatibility
     {
 
         //If Admin
-        if (is_admin() ) {
+        if (is_admin() || is_network_admin()) {
 
             add_filter('rocket_cache_reject_uri', array($this, 'rocket_reject_url'), PHP_INT_MAX);
 
@@ -58,9 +58,17 @@ class HMWP_Models_Compatibility
                 );
             }
 
-			//if it's wordfence scan
-	        if(HMWP_Classes_Tools::getValue('action') == 'wordfence_scan' && HMWP_Classes_Tools::isPluginActive('wordfence/wordfence.php')) {
-		        set_transient('hmwp_disable_hide_urls', 1, 3600);
+	        //Refresh rewrites when a new website or new term is created on Litespeed server
+	        if(HMWP_Classes_Tools::isLitespeed()) {
+
+		        add_action('wp_initialize_site', function($site_id){
+			        HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
+		        }, 11, 1);
+
+		        add_action('create_term', function($tem_id){
+			        HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
+		        }, 11, 1);
+
 	        }
 
         } else {
@@ -80,11 +88,6 @@ class HMWP_Models_Compatibility
                 //Conpatibility with Confirm Email from AppThemes
                 if (HMWP_Classes_Tools::isPluginActive('confirm-email/confirm-email.php') ) {
                     add_action('init', array($this, 'checkAppThemesConfirmEmail'));
-                }
-
-                //Compatibility with Assets plugin - tested 01102021
-                if (HMWP_Classes_Tools::isPluginActive('wp-asset-clean-up/wpacu.php') || HMWP_Classes_Tools::isPluginActive('wp-asset-clean-up-pro/wpacu.php') ) {
-                    add_filter('wpacu_html_source', array($this, 'findReplaceCache'), PHP_INT_MAX);
                 }
 
                 //Compatibility with Autoptimize plugin - tested 01102021
@@ -164,11 +167,17 @@ class HMWP_Models_Compatibility
                     add_filter('jch_optimize_save_content', array($this, 'findReplaceCache'), PHP_INT_MAX);
                 }
 
-                //Compatibility with LiteSpeed Cache to change the cache directory too
-                if (HMWP_Classes_Tools::isPluginActive('litespeed-cache/litespeed-cache.php') ) {
-                    add_filter('hmwp_priority_buffer', '__return_true');
-                    add_filter('litespeed_comment', '__return_false');
-                }
+				//Compatibility with LiteSpeed Cache to change the cache directory too
+	            if (HMWP_Classes_Tools::isPluginActive('litespeed-cache/litespeed-cache.php') ) {
+		            add_action( 'litespeed_initing' , function (){
+			            if (! defined( 'LITESPEED_DISABLE_ALL' ) || ! defined( 'LITESPEED_GUEST_OPTM' )){
+				            add_filter('hmwp_process_buffer', '__return_false');
+			            }
+		            });
+		            add_filter( 'litespeed_buffer_finalize', array($this, 'findReplaceCache'), PHP_INT_MAX );
+		            add_filter('hmwp_priority_buffer', '__return_true');
+		            add_filter('litespeed_comment', '__return_false');
+	            }
 
                 //Compatibility with Wp Fastest Cache
                 if (HMWP_Classes_Tools::isPluginActive('wp-fastest-cache/wpFastestCache.php') ) {
@@ -181,7 +190,25 @@ class HMWP_Models_Compatibility
                 }
 
                 if(HMWP_Classes_Tools::isPluginActive('minimal-coming-soon-maintenance-mode/minimal-coming-soon-maintenance-mode.php') ) {
-                    $headers = headers_list();
+
+					if (HMWP_Classes_Tools::$default['hmwp_login_url'] <> HMWP_Classes_Tools::getOption('hmwp_login_url') ) {
+		                add_filter('csmm_get_options', function ($signals_csmm_options){
+			                $signals_csmm_options['custom_login_url'] = HMWP_Classes_Tools::getOption('hmwp_login_url');
+
+			                return $signals_csmm_options;
+		                });
+
+		                if(isset($_SERVER["REQUEST_URI"])) {
+			                $url = untrailingslashit(strtok($_SERVER["REQUEST_URI"], '?'));
+
+			                if (strpos($url , home_url('wp-login.php', 'relative')) !== false){
+				                add_filter('csmm_force_display', "__return_false");
+			                }
+
+		                }
+	                }
+
+					$headers = headers_list();
 
                     if(!empty($headers)) {
                         $iscontenttype = false;
@@ -392,11 +419,7 @@ class HMWP_Models_Compatibility
 		                if (HMWP_Classes_Tools::getValue('action') == 'backup_guard_awake' && HMWP_Classes_Tools::isPluginActive('backup-guard-gold/backup-guard-pro.php')) {
 			                add_filter('hmwp_process_hide_urls', '__return_false');
 		                }
-		                //?action=wp_async_request on Wordfence cron scans
-		                if ((HMWP_Classes_Tools::getValue('action') == 'wordfence_doScan' || HMWP_Classes_Tools::getValue('action') == 'wordfence_testAjax') && HMWP_Classes_Tools::isPluginActive('wordfence/wordfence.php')) {
-			                set_transient('hmwp_disable_hide_urls', 1, 60);
-			                add_filter('hmwp_process_hide_urls', '__return_false');
-		                }
+
 		                //?action=hmbkp_cron_test on backupguard scans
 		                if (HMWP_Classes_Tools::getValue('action') == 'hmbkp_cron_test' && HMWP_Classes_Tools::isPluginActive('backupwordpress/backupwordpress.php')) {
 			                add_filter('hmwp_process_hide_urls', '__return_false');
@@ -410,6 +433,47 @@ class HMWP_Models_Compatibility
                 }
             }, 10
         );
+
+	    //add Wordfence compativility
+	    if(HMWP_Classes_Tools::isPluginActive('wordfence/wordfence.php')) {
+
+		    add_action('init', function () {
+			    if(is_admin()) {
+
+				    //if it's wordfence scan
+				    if(HMWP_Classes_Tools::getValue('action') == 'wordfence_scan') {
+					    set_transient('hmwp_disable_hide_urls', 1, (3600 * 6));
+				    }
+
+				    //Add the Wordfence menu when the wp-admin path is changed
+				    if (is_multisite()) {
+					    if (class_exists('wfUtils') && !wfUtils::isAdminPageMU()) {
+						    add_action('network_admin_menu', 'wordfence::admin_menus', 10);
+						    add_action('network_admin_menu', 'wordfence::admin_menus_20', 20);
+						    add_action('network_admin_menu', 'wordfence::admin_menus_30', 30);
+						    add_action('network_admin_menu', 'wordfence::admin_menus_40', 40);
+						    add_action('network_admin_menu', 'wordfence::admin_menus_50', 50);
+						    add_action('network_admin_menu', 'wordfence::admin_menus_60', 60);
+						    add_action('network_admin_menu', 'wordfence::admin_menus_70', 70);
+						    add_action('network_admin_menu', 'wordfence::admin_menus_80', 80);
+						    add_action('network_admin_menu', 'wordfence::admin_menus_90', 90);
+					    } //else don't show menu
+				    }
+			    }
+		    });
+
+		    if(HMWP_Classes_Tools::isAjax()) {
+			    //?action=wordfence_doScan on Wordfence cron scans
+			    if ((HMWP_Classes_Tools::getValue('action') == 'wordfence_doScan' || HMWP_Classes_Tools::getValue('action') == 'wordfence_testAjax') ) {
+				    add_filter('hmwp_process_hide_urls', '__return_false');
+			    }
+		    }
+
+		    //Add fix for the virus scan
+		    add_action('wordfence_start_scheduled_scan', function () {
+			    set_transient('hmwp_disable_hide_urls', 1, (3600 * 6));
+		    });
+	    }
 
         //Compatibility with WPML plugin
         if (HMWP_Classes_Tools::isPluginActive('sitepress-multilingual-cms/sitepress.php') ) {
@@ -641,6 +705,48 @@ class HMWP_Models_Compatibility
         $wp_filesystem = HMWP_Classes_ObjController::initFilesystem();
         $content_dir = $wp_filesystem->wp_content_dir();
 
+
+	    //Change the paths in the elementor cached css
+	    if (HMWP_Classes_Tools::isPluginActive('elementor/elementor.php') ) {
+		    if (HMWP_Classes_Tools::isMultisites() ) {
+
+			    global $wpdb;
+			    $this->paths = array();
+
+			    if ($blogs = $wpdb->get_results("SELECT blog_id FROM " . $wpdb->blogs . " where blog_id > 1")) {
+				    foreach ($blogs as $blog) {
+
+					    //Set the cache directory for this plugin
+					    $path = $content_dir . HMWP_Classes_Tools::$default['hmwp_upload_url'] . '/sites/' . $blog->blog_id . '/elementor/css/';
+
+					    if ($wp_filesystem->is_dir($path)) {
+
+						    //Set the cache directory for this plugin
+						    HMWP_Classes_ObjController::getClass('HMWP_Models_Cache')->setCachePath($path);
+
+						    //change the paths in css
+						    HMWP_Classes_ObjController::getClass('HMWP_Models_Cache')->changePathsInCss();
+
+						    //mark as cache changed
+						    $changed = true;
+					    }
+				    }
+			    }
+		    }else{
+			    //Set the cache directory for this plugin
+			    $path = $content_dir . HMWP_Classes_Tools::$default['hmwp_upload_url'] . '/elementor/css/';
+			    if($wp_filesystem->is_dir($path)) {
+				    HMWP_Classes_ObjController::getClass('HMWP_Models_Cache')->setCachePath($path);
+
+				    //change the paths in css
+				    HMWP_Classes_ObjController::getClass('HMWP_Models_Cache')->changePathsInCss();
+
+				    //mark as cache changed
+				    $changed = true;
+			    }
+		    }
+
+	    }
 
         //Change the paths in the cached css
         if (HMWP_Classes_Tools::isPluginActive('fusion-builder/fusion-builder.php') ) {
@@ -952,23 +1058,6 @@ class HMWP_Models_Compatibility
             }
 
         }
-
-	    //Change the paths in the cached css
-	    if (HMWP_Classes_Tools::isPluginActive('elementor/elementor.php') ) {
-		    //Set the cache directory for this plugin
-		    $path = $content_dir . HMWP_Classes_Tools::$default['hmwp_upload_url'] . '/elementor/css/';
-		    if($wp_filesystem->is_dir($path)) {
-			    HMWP_Classes_ObjController::getClass('HMWP_Models_Cache')->setCachePath($path);
-
-			    //change the paths in css
-			    HMWP_Classes_ObjController::getClass('HMWP_Models_Cache')->changePathsInCss();
-			    //change the paths in js
-			    HMWP_Classes_ObjController::getClass('HMWP_Models_Cache')->changePathsInJs();
-
-			    //mark as cache changed
-			    $changed = true;
-		    }
-	    }
 
         //IF none of these plugins are installed. Search whole directory.
         if (!$changed || HMWP_Classes_Tools::getOption('hmwp_change_in_cache_directory') <> '') {
