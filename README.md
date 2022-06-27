@@ -1,4 +1,4 @@
-Hide My WP Ghost - Security Plugin
+<h1>Hide My WP - Security Plugin</h1>
 
 Hide WP paths, wp-admin, wp-login, wp-content, plugins, themes, authors, XML-RPC, API, etc. Add 7G Firewall Security, Brute Force protection & more.
 
