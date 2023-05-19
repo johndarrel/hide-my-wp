@@ -139,6 +139,25 @@ class HMWP_Models_Cookies
         }
     }
 
+	/**
+	 * Add the test cookie in the login form
+	 *
+	 * @return void
+	 */
+	public function setWhitelistCookie()
+	{
+
+		if(headers_sent()) {
+			return;
+		}
+
+		$secure = is_ssl() && 'https' === parse_url(get_option('home'), PHP_URL_SCHEME);
+		setcookie(HMWP_LOGGED_IN_COOKIE . 'whitelist', 'whitelist', 0, COOKIEPATH, $this->getCookieDomain(), $secure);
+		if (SITECOOKIEPATH != COOKIEPATH ) {
+			setcookie(HMWP_LOGGED_IN_COOKIE . 'whitelist', 'whitelist', 0, SITECOOKIEPATH, COOKIE_DOMAIN, $secure);
+		}
+	}
+
     /**
      * Set the plugin cookies for the custom admin path
      * @param string $auth_cookie

@@ -326,7 +326,7 @@ class HMWP_Models_Rules
 
                 if (is_writeable($config_file) ) {
                     if (method_exists($wp_filesystem, 'copy') ) {
-                        $wp_filesystem->copy($config_file, $config_file . '_' . substr(md5(date('d')), 0, 5));
+                        $wp_filesystem->copy($config_file, $config_file . '_bk');
                     }
 
                     return true;
@@ -367,15 +367,21 @@ class HMWP_Models_Rules
     public function getInjectionRewrite()
     {
         $rules = '';
-        if (HMWP_Classes_Tools::isApache() || HMWP_Classes_Tools::isLitespeed() ) {
-            $home_root = parse_url(home_url());
-            if (isset($home_root['path']) ) {
-                $home_root = trailingslashit($home_root['path']);
-            } else {
-                $home_root = '/';
-            }
 
-            if (HMWP_Classes_Tools::getOption('hmwp_sqlinjection')  && (int)HMWP_Classes_Tools::getOption('hmwp_sqlinjection_level') > 0) {
+	    $home_root = '/';
+	    if(HMWP_Classes_Tools::isMultisites() && defined('PATH_CURRENT_SITE')){
+		    $path = PATH_CURRENT_SITE;
+	    }else {
+		    $path = parse_url(site_url(), PHP_URL_PATH);
+	    }
+
+	    if ($path) {
+		    $home_root = trailingslashit($path);
+	    }
+
+        if (HMWP_Classes_Tools::isApache() || HMWP_Classes_Tools::isLitespeed() ) {
+
+	        if (HMWP_Classes_Tools::getOption('hmwp_sqlinjection')  && (int)HMWP_Classes_Tools::getOption('hmwp_sqlinjection_level') > 0) {
                 $rules .= "<IfModule mod_rewrite.c>" . PHP_EOL;
                 $rules .= "RewriteEngine On" . PHP_EOL;
                 $rules .= "RewriteBase $home_root" . PHP_EOL;

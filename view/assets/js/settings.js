@@ -381,6 +381,14 @@
             }
         );
 
+        $this.find("button[type=submit]").click(function(){
+            $(this).hmwp_loading(true);
+        });
+
+        $this.find("input[type=submit]").click(function(){
+            $(this).hmwp_loading(true);
+        });
+
         $this.find("input.switch").each(
             function () {
                 if (!$(this).prop('checked')) {

@@ -99,11 +99,11 @@ class HMWP_Models_Files
     }
 
     /**
-     * Checking the mapping file
+     * Show the file if in the list of extensions
      *
      * @throws Exception
      */
-    public function checkMappingFile()
+    public function maybeShowFile()
     {
 
         if ($this->isFile($this->getCurrentURL()) ) {
@@ -117,7 +117,7 @@ class HMWP_Models_Files
      *
      * @throws Exception
      */
-    public function checkBrokenFile()
+    public function maybeShowNotFound()
     {
 
         //If the file doesn't exist
@@ -168,7 +168,7 @@ class HMWP_Models_Files
             // build the URL in the address bar
             $url = is_ssl() ? 'https://' : 'http://';
             $url .= $_SERVER['HTTP_HOST'];
-            $url .= $_SERVER['REQUEST_URI'];
+	        $url .= rawurldecode( $_SERVER['REQUEST_URI'] );
         }
 
         return $url;
@@ -202,18 +202,12 @@ class HMWP_Models_Files
             }
         }
 
-        if (!empty($rewriteModel->_replace['from']) && !empty($rewriteModel->_replace['to']) ) {
-            foreach ( $rewriteModel->_replace['from'] as $index => $row ) {
-                if (($index && isset($rewriteModel->_replace['to'][$index]) && substr($rewriteModel->_replace['to'][$index], -1) == '/') 
-                    || strpos($rewriteModel->_replace['to'][$index], '/' . HMWP_Classes_Tools::getOption('hmwp_themes_style')) 
-                ) {
-
-                    $this->_rewrites['from'][] = '#^/' . $rewriteModel->_replace['to'][$index] . (substr($rewriteModel->_replace['to'][$index], -1) == '/' ? "(.*)" : "") . '#i';
-                    $this->_rewrites['to'][] = '/' . $rewriteModel->_replace['from'][$index] . (substr($rewriteModel->_replace['to'][$index], -1) == '/' ? "$1" : "");
-
-                }
-            }
-        }
+	    if (!empty($rewriteModel->_replace['from']) && !empty($rewriteModel->_replace['to']) ) {
+		    foreach ( $rewriteModel->_replace['from'] as $index => $row ) {
+			    $this->_rewrites['from'][] = '#^/' . $rewriteModel->_replace['to'][$index] . (substr($rewriteModel->_replace['to'][$index], -1) == '/' ? "(.*)" : "") . '#i';
+			    $this->_rewrites['to'][] = '/' . $rewriteModel->_replace['from'][$index] . (substr($rewriteModel->_replace['to'][$index], -1) == '/' ? "$1" : "");
+		    }
+	    }
     }
 
     /**
@@ -235,26 +229,33 @@ class HMWP_Models_Files
         //Get the original URL based on rewrite rules
         $parse_url = parse_url($url);
 
-        //Get the home root path
-        $path = parse_url(home_url(), PHP_URL_PATH);
+	    //Get the home root path
+	    $path = parse_url(home_url(), PHP_URL_PATH);
 
-        //$parse_url['path'] = str_replace( $path, '', $parse_url['path'] );
-        $parse_url['path'] = preg_replace('/^' . preg_quote($path, '/') . '/', '', $parse_url['path']);
+	    //Backslash the paths
+	    if($path <> '') {
+		    $parse_url['path'] = preg_replace('/^' . preg_quote($path, '/') . '/', '', $parse_url['path']);
+	    }
 
-        //Replace paths back to original
-        if (isset($this->_rewrites['from']) && isset($this->_rewrites['to']) 
-            && !empty($this->_rewrites['from']) && !empty($this->_rewrites['to']) 
-        ) {
-            $parse_url['path'] = preg_replace($this->_rewrites['from'], $this->_rewrites['to'], $parse_url['path'], 1);
-        }
-        //get the original URL
-        if(isset($parse_url['port']) && $parse_url['port'] <> 80) {
-            $new_url = $parse_url['scheme'] . '://' . $parse_url['host'] . ':' . $parse_url['port'] . $path . $parse_url['path'];
-        }else{
-            $new_url = $parse_url['scheme'] . '://' . $parse_url['host'] . $path . $parse_url['path'];
-        }
+	    //Replace paths back to original
+	    if (isset($this->_rewrites['from']) && isset($this->_rewrites['to']) && !empty($this->_rewrites['from']) && !empty($this->_rewrites['to'])) {
+		    $parse_url['path'] = preg_replace($this->_rewrites['from'], $this->_rewrites['to'], $parse_url['path'], 1);
+	    }
 
-        return str_replace('/wp-admin/wp-admin/', '/wp-admin/', $new_url); //remove duplicates
+	    //get the original URL
+	    if(isset($parse_url['port']) && $parse_url['port'] <> 80) {
+		    $new_url = $parse_url['scheme'] . '://' . $parse_url['host'] . ':' . $parse_url['port'] . $path . $parse_url['path'];
+	    }else{
+		    $new_url = $parse_url['scheme'] . '://' . $parse_url['host'] . $path . $parse_url['path'];
+	    }
+
+	    if( isset($_SERVER['QUERY_STRING']) && !empty( $_SERVER['QUERY_STRING'] ) ){
+		    $query = $_SERVER['QUERY_STRING'];
+		    $query = str_replace(array('?', '%3F'),'&', $query);
+		    $new_url .= ( ! strpos( $new_url, '?' ) ? '?' : '&') . $query ;
+	    }
+
+	    return $new_url; //remove duplicates
 
     }
 
@@ -266,8 +267,15 @@ class HMWP_Models_Files
      */
     public function getOriginalPath( $new_url )
     {
-        $new_path = str_replace(home_url(), '', $new_url);
-        return HMWP_Classes_Tools::getRootPath() . ltrim($new_path, '/');
+	    //remove domain from path
+	    $new_path = str_replace(home_url(), '', $new_url);
+
+	    //remove queries from path
+	    if(strpos($new_path , '?') !== false){
+		    $new_path = substr($new_path, 0, strpos($new_path , '?'));
+	    }
+
+	    return HMWP_Classes_Tools::getRootPath() . ltrim($new_path, '/');
     }
 
     /**
@@ -280,7 +288,7 @@ class HMWP_Models_Files
     public function showFile( $url )
     {
 
-        //Initialize WordPress Filesystem
+	    //Initialize WordPress Filesystem
         $wp_filesystem = HMWP_Classes_ObjController::initFilesystem();
 
         //remove the redirect hook
@@ -298,7 +306,6 @@ class HMWP_Models_Files
         //Get the original URL and path based on rewrite rules
         $new_url = $this->getOriginalUrl($url);
         $new_path = $this->getOriginalPath($new_url);
-
         $ctype = false;
 
         if ($ext = $this->isFile($new_url) ) {
@@ -345,12 +352,16 @@ class HMWP_Models_Files
                 }
 
                 ob_clean(); //clear the buffer
-                $content = $wp_filesystem->get_contents($new_path);
+	            $content = $wp_filesystem->get_contents($new_path);
+	            $etag = md5_file($new_path);
 
-                header("HTTP/1.1 200 OK");
-                header("Cache-Control: max-age=2592000");
-                header("Expires: " . gmdate('r', strtotime("+1 month")));
-                header('Vary: Accept-Encoding');
+	            header("HTTP/1.1 200 OK");
+	            header("Cache-Control: max-age=2592000, must-revalidate");
+	            header("Expires: " . gmdate('r', strtotime("+1 month")));
+	            header('Vary: Accept-Encoding');
+	            header("Pragma: public");
+	            header("Etag: \"{$etag}\"");
+
                 if ($ctype ) {
                     header('Content-Type: ' . $ctype . '; charset: UTF-8');
                 }
@@ -437,81 +448,71 @@ class HMWP_Models_Files
                 exit();
             }
 
-        } elseif (strpos($new_url, 'wp-login.php') || strpos($new_url, HMWP_Classes_Tools::getOption('hmwp_login_url')) ) {
+        } elseif (strpos($new_url, '/' .HMWP_Classes_Tools::getOption('hmwp_login_url')) ||
+                  strpos($new_url, '/' .HMWP_Classes_Tools::$default['hmwp_login_url']) ||
+                  (HMWP_Classes_Tools::getOption('hmwp_lostpassword_url') && strpos($new_url, '/' .HMWP_Classes_Tools::getOption('hmwp_lostpassword_url')))||
+                  (HMWP_Classes_Tools::getOption('hmwp_logout_url') && strpos($new_url, '/' .HMWP_Classes_Tools::getOption('hmwp_logout_url')))||
+                  (HMWP_Classes_Tools::getOption('hmwp_register_url') && strpos($new_url, '/' .HMWP_Classes_Tools::getOption('hmwp_register_url')))) {
 
-            $actions = array(
-                'postpass',
-                'logout',
-                'lostpassword',
-                'retrievepassword',
-                'resetpass',
-                'rp',
-                'register',
-                'login',
-                'confirmaction'
-            );
-            $_REQUEST['action'] = $this->strposa($new_url, $actions);
+	        add_filter('hmwp_option_hmwp_remove_third_hooks', '__return_true');
 
-            ob_start();
-            include ABSPATH . '/wp-login.php';
-            $content = ob_get_clean();
+	        header("HTTP/1.1 200 OK");
 
-            header("HTTP/1.1 200 OK");
+	        $this->handleLogin($new_url);
 
-            //Echo the html file content
-            echo $content;
-            exit();
+        } elseif ( $url <> $new_url ) {
 
-        } elseif (strpos($new_url, '/wp-activate.php') ) {
+	        if (stripos($new_url, '/' . HMWP_Classes_Tools::getDefault('hmwp_admin-ajax_url')) !== false ||
+	            stripos($new_url, '/' . HMWP_Classes_Tools::getDefault('hmwp_wp-json') . '/') !== false) {
 
-            ob_start();
-            include ABSPATH . '/wp-activate.php';
-            $content = ob_get_clean();
+		        $response = false;
 
-            header("HTTP/1.1 200 OK");
+		        if(isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' ) {
+			        $response = $this->postRequest($new_url);
+		        }elseif(isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'GET' ) {
+			        $response = $this->getRequest($new_url);
+		        }
 
-            //Echo the html file content
-            echo $content;
-            exit();
+		        if($response){
+			        header("HTTP/1.1 200 OK");
+			        if (!empty($response['headers']) ) {
+				        foreach ( $response['headers'] as $header ) {
+					        header($header);
+				        }
+			        }
 
-        } elseif (strpos($new_url, '/wp-signup.php') ) {
+			        //Echo the html file content
+			        echo $response['body'];
+			        exit();
+		        }
 
-            ob_start();
-            include ABSPATH . '/wp-signup.php';
-            $content = ob_get_clean();
+		        exit();
 
-            header("HTTP/1.1 200 OK");
+	        } elseif (strpos($new_url, '/' . HMWP_Classes_Tools::getDefault('hmwp_activate_url')) !== false ||
+	                  strpos($new_url, '/' . HMWP_Classes_Tools::getDefault('hmwp_wp-signup_url')) !== false ) {
 
-            //Echo the html file content
-            echo $content;
-            exit();
+		        ob_start();
+		        include $new_path;
+		        $content = ob_get_clean();
 
-        } elseif (strpos($new_url, '/' . HMWP_Classes_Tools::$default['hmwp_wp-json']) !== false && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' ) {
-            $response = $this->postRequest($url);
+		        header("HTTP/1.1 200 OK");
 
-            header("HTTP/1.1 200 OK");
-            if (!empty($response['headers']) ) {
-                foreach ( $response['headers'] as $header ) {
-                    header($header);
-                }
-            }
+		        //Echo the html file content
+		        echo $content;
+		        exit();
 
-            //Echo the html file content
-            echo $response['body'];
-            exit();
+	        }elseif (!HMWP_Classes_Tools::getValue('nordt') ) {
 
-        } elseif ($url <> $new_url ) {
-            if (!HMWP_Classes_Tools::getValue('noredirect') ) {
+		        $uri = parse_url($url, PHP_URL_QUERY);
 
-	            $uri = parse_url($url, PHP_URL_QUERY);
+		        if($uri && strpos($new_url,'?') === false){
+			        $new_url .= '?' . $uri;
+		        }
 
-	            if($uri && strpos($new_url, '?') === false){
-		            $new_url .= '?' . $uri;
-	            }
+		        wp_safe_redirect(add_query_arg(array('nordt' => true), $new_url), 301);
+		        exit();
+	        }
 
-                wp_safe_redirect(add_query_arg(array('noredirect' => true), $new_url), 301);
-                exit();
-            }
         }
     }
 
@@ -605,5 +606,87 @@ class HMWP_Models_Files
 
         return false;
     }
+
+
+	/**
+	 * Handle the Login if the rules were not added in the config file
+	 *
+	 * @param $url
+	 * @return void
+	 */
+	public function handleLogin($url){
+		$url = rawurldecode( $url );
+
+		if ( ! ( HMWP_Classes_Tools::getvalue('action') === 'postpass' && HMWP_Classes_Tools::getIsset('post_password') ) ) {
+
+			//If it's the login page
+			if(strpos($url, '/' . HMWP_Classes_Tools::getOption('hmwp_login_url')) ||
+			   strpos($url, '/' . HMWP_Classes_Tools::$default['hmwp_login_url']) ||
+			   (HMWP_Classes_Tools::getOption('hmwp_lostpassword_url') && strpos($url, '/' .HMWP_Classes_Tools::getOption('hmwp_lostpassword_url'))) ||
+			   (HMWP_Classes_Tools::getOption('hmwp_register_url') && strpos($url, '/' .HMWP_Classes_Tools::getOption('hmwp_register_url')))) {
+
+				$actions = array(
+					'postpass',
+					'logout',
+					'lostpassword',
+					'retrievepassword',
+					'resetpass',
+					'rp',
+					'register',
+					'login',
+					'confirmaction'
+				);
+				$_REQUEST['action'] = $this->strposa($url, $actions);
+
+				$urled_redirect_to = '';
+				if ( isset( $_REQUEST['redirect_to'] ) ) {
+					$urled_redirect_to = $_REQUEST['redirect_to'];
+				}
+
+				if ( is_user_logged_in() ) {
+					$user = wp_get_current_user();
+					if ( ! isset( $_REQUEST['action'] ) ) {
+						$logged_in_redirect = apply_filters( 'hmwp_url_login_redirect', admin_url(), $urled_redirect_to, $user );
+						wp_safe_redirect( $logged_in_redirect );
+						die();
+					}
+				}
+
+				global $error, $interim_login, $action, $user_login;
+				@require_once ABSPATH . 'wp-login.php';
+				die();
+
+			} elseif (HMWP_Classes_Tools::getOption('hmwp_logout_url') <> '' && strpos($url, '/' . HMWP_Classes_Tools::getOption('hmwp_logout_url'))){
+
+				check_admin_referer( 'log-out' );
+
+				$user = wp_get_current_user();
+
+				wp_logout();
+
+				if ( ! empty( $_REQUEST['redirect_to'] ) ) {
+					$redirect_to           = $_REQUEST['redirect_to'];
+					$requested_redirect_to = $redirect_to;
+				} else {
+					$redirect_to = add_query_arg(
+						array(
+							'loggedout' => 'true',
+							'wp_lang'   => get_user_locale( $user ),
+						),
+						wp_login_url()
+					);
+
+					$requested_redirect_to = '';
+				}
+
+				$redirect_to = apply_filters( 'logout_redirect', $redirect_to, $requested_redirect_to, $user );
+
+				wp_safe_redirect( $redirect_to );
+				exit;
+			}
+
+		}
+
+	}
 
 }

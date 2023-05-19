@@ -38,10 +38,13 @@
                                         <div class="col-sm-12 p-0 switch switch-sm">
                                             <input type="hidden" name="hmwp_mapping_classes" value="0"/>
                                             <input type="checkbox" id="hmwp_mapping_classes" name="hmwp_mapping_classes" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_mapping_classes') ? 'checked="checked"' : '') ?> value="1"/>
-                                            <label for="hmwp_mapping_classes"><?php echo esc_html__('Text Mapping only Classes, IDs, JS variables', 'hide-my-wp'); ?></label>
-                                            <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#text_mapping_style') ?>" target="_blank" class="d-inline-block ml-2"><i class="dashicons dashicons-editor-help"></i></a>
+                                            <label for="hmwp_mapping_classes"><?php echo esc_html__('Text Mapping only Classes, IDs, JS variables', 'hide-my-wp'); ?>
+                                                <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#text_mapping_style') ?>" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a>
+                                                <span class="text-black-50 small">(<?php echo esc_html__("recommended", 'hide-my-wp'); ?>)</span>
+                                            </label>
                                             <div class="offset-1 text-black-50"><?php echo esc_html__("Change the text only in classes, styles & scrips. (Recommended ON)", 'hide-my-wp'); ?></div>
                                             <div class="offset-1 text-black-50"><?php echo esc_html__("If this option is switched off, the text is changed brutally in source-code.", 'hide-my-wp'); ?></div>
+                                            <div class="offset-1 text-danger my-2"><?php echo esc_html__("Avoid using text mapping for commonly used paths such as wp-content, wp-admin, wp-includes because it can cause errors. Instead, use the 'Change Paths' feature in the Hide My Wp plugin to safely hide these paths.", 'hide-my-wp'); ?></div>
                                         </div>
                                     </div>
                                 </div>
@@ -253,8 +256,10 @@
                                         <div class="col-sm-12 p-0 switch switch-sm">
                                             <input type="hidden" name="hmwp_file_cache" value="0"/>
                                             <input type="checkbox" id="hmwp_file_cache" name="hmwp_file_cache" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_file_cache') ? 'checked="checked"' : '') ?> value="1"/>
-                                            <label for="hmwp_file_cache"><?php echo esc_html__('Optimize CSS and JS files', 'hide-my-wp'); ?></label>
-                                            <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#optimize_css') ?>" target="_blank" class="d-inline-block ml-2"><i class="dashicons dashicons-editor-help"></i></a>
+                                            <label for="hmwp_file_cache"><?php echo esc_html__('Optimize CSS and JS files', 'hide-my-wp'); ?>
+                                                <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#optimize_css') ?>" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a>
+                                                <span class="text-black-50 small">(<?php echo esc_html__("not recommended", 'hide-my-wp'); ?>)</span> </label>
+                                            </label>
                                             <div class="offset-1 text-black-50"><?php echo esc_html__('Cache CSS, JS and Images to increase the frontend loading speed.', 'hide-my-wp'); ?></div>
                                             <div class="offset-1 text-black-50"><?php echo sprintf(esc_html__('Check the website loading speed with %sPingdom Tool%s', 'hide-my-wp'), '<a href="https://tools.pingdom.com/" target="_blank">', '</a>'); ?></div>
                                         </div>
@@ -271,9 +276,10 @@
                                        <div class="col-sm-12 p-0 switch switch-sm switch-red">
                                             <input type="hidden" name="hmwp_mapping_file" value="0"/>
                                             <input type="checkbox" id="hmwp_mapping_file" name="hmwp_mapping_file" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_mapping_file') ? 'checked="checked"' : '') ?> value="1"/>
-                                            <label for="hmwp_mapping_file"><?php echo esc_html__('Text Mapping in CSS and JS files including caches', 'hide-my-wp'); ?></label>
-                                            <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#text_mapping_files') ?>" target="_blank" class="d-inline-block ml-2"><i class="dashicons dashicons-editor-help"></i></a>
-
+                                            <label for="hmwp_mapping_file"><?php echo esc_html__('Text Mapping in CSS and JS files including caches', 'hide-my-wp'); ?>
+                                               <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#text_mapping_files') ?>" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a>
+                                               <span class="text-black-50 small">(<?php echo esc_html__("not recommended", 'hide-my-wp'); ?>)</span> </label>
+                                            </label>
                                             <div class="offset-1 text-black-50"><?php echo esc_html__("Change the text in all CSS and JS files including cached files generated by cache plugins.", 'hide-my-wp'); ?></div>
                                             <div class="offset-1 mt-1 p-2 alert-danger"><?php echo esc_html__("If you switch this option on, it will significantly slow down the website as CSS and JS files are loaded dynamically and not through rewrites to be able to change the text within all of them", 'hide-my-wp'); ?></div>
                                         </div>

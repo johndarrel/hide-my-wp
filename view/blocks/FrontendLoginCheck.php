@@ -16,12 +16,12 @@
                     </form>
                 </div>
                 <div class="text-center" style="display: inline-block; margin-right: 5px;">
-                    <button type="button" class="btn rounded-0 btn-default btn-lg text-white px-4 login_test hmwp_modal" data-remote="<?php echo esc_url(home_url() . '/' . HMWP_Classes_Tools::getOption('hmwp_login_url')) ?>" data-target="#frontend_test_modal" ><?php echo esc_html__('Login Test', 'hide-my-wp'); ?></button>
+                    <button type="button" class="btn rounded-0 btn-default btn-lg text-white px-4 login_test hmwp_modal" data-remote="<?php echo esc_url(site_url() . '/' . HMWP_Classes_Tools::getOption('hmwp_login_url')) ?>" data-target="#frontend_test_modal" ><?php echo esc_html__('Login Test', 'hide-my-wp'); ?></button>
                 </div>
             </div>
             <div id="hmwp_frontendcheck_content" class="my-3"></div>
             <div id="hmwp_solutions" class="my-3 mb-4 border-bottom text-center" style="display: none">
-                <?php if(HMWP_Classes_Tools::isApache()) { ?>
+                <?php if(HMWP_Classes_Tools::isApache() && !HMWP_Classes_Tools::isWpengine()) { ?>
                     <div class="mb-2" style="font-size: 1.2rem"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/how-to-set-allowoverride-all/') ?>" target="_blank">Make sure to activate <strong>AllowOverride All</strong> for your website directory</a></div>
                 <?php }?>
                 <?php if(HMWP_Classes_Tools::isNginx()) { ?>
@@ -37,7 +37,7 @@
                 <?php if(HMWP_Classes_Tools::isIIS()) { ?>
                     <div class="mb-2" style="font-size: 1.2rem"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/setup-hide-my-wp-on-windows-iis-server/') ?>" target="_blank">Setup The Plugin On Windows IIS Server</a></div>
                 <?php }?>
-                <?php if(HMWP_Classes_Tools::isInmotion() && HMWP_Classes_Tools::isNginx()) { ?>
+                <?php if(HMWP_Classes_Tools::isInmotion()) { ?>
                     <div class="mb-2" style="font-size: 1.2rem"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/hide-my-wp-pro-compatible-with-inmotion-wordpress-hosting/') ?>" target="_blank">Setup The Plugin On Inmotion Server</a></div>
                 <?php }?>
             </div>
@@ -50,9 +50,15 @@
                 <li><?php echo sprintf(esc_html__("If you can't configure %s, switch to Deactivated Mode and %scontact us%s.", 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/contact/" target="_blank" >', '</a>'); ?></li>
             </ol>
 
-            <div class="wp-admin_warning col-sm-12 my-4 text-danger p-0 text-center">
-                <div class="mb-3"><?php echo sprintf(esc_html__("Your login URL will be: %s In case you can't login, use the safe URL: %s", 'hide-my-wp'), '<br /><a href="' . esc_url(home_url() . '/' . HMWP_Classes_Tools::getOption('hmwp_login_url')) . '" target="_blank">' . esc_url(home_url() . '/' . HMWP_Classes_Tools::getOption('hmwp_login_url')) . '</a><br /><br />', "<br /><a href='".site_url() . "/wp-login.php?" . HMWP_Classes_Tools::getOption('hmwp_disable_name') . "=" . HMWP_Classes_Tools::getOption('hmwp_disable')."' target='_blank'>" . site_url() . "/wp-login.php?" . HMWP_Classes_Tools::getOption('hmwp_disable_name') . "=" . HMWP_Classes_Tools::getOption('hmwp_disable') . "</a>"); ?></div>
-            </div>
+            <?php if (defined('HMWP_DEFAULT_LOGIN') && HMWP_DEFAULT_LOGIN ) { ?>
+                <div class="wp-admin_warning col-sm-12 my-4 text-danger p-0 text-center">
+                    <div class="mb-3"><?php echo sprintf(esc_html__("Your login URL is: %s", 'hide-my-wp'), '<br /><a href="' . esc_url(home_url(HMWP_DEFAULT_LOGIN)) . '" target="_blank">' . esc_url(home_url(HMWP_DEFAULT_LOGIN)) . '</a>'); ?></div>
+                </div>
+            <?php }else{ ?>
+                <div class="wp-admin_warning col-sm-12 my-4 text-danger p-0 text-center">
+                    <div class="mb-3"><?php echo sprintf(esc_html__("Your login URL will be: %s In case you can't login, use the safe URL: %s", 'hide-my-wp'), '<br /><a href="' . esc_url(site_url() . '/' . HMWP_Classes_Tools::getOption('hmwp_login_url')) . '" target="_blank">' . esc_url(site_url() . '/' . HMWP_Classes_Tools::getOption('hmwp_login_url')) . '</a><br /><br />', "<br /><a href='".site_url() . "/wp-login.php?" . HMWP_Classes_Tools::getOption('hmwp_disable_name') . "=" . HMWP_Classes_Tools::getOption('hmwp_disable')."' target='_blank'>" . site_url() . "/wp-login.php?" . HMWP_Classes_Tools::getOption('hmwp_disable_name') . "=" . HMWP_Classes_Tools::getOption('hmwp_disable') . "</a>"); ?></div>
+                </div>
+            <?php }?>
 
             <div class="p-0 text-center">
                 <div class="hmwp_confirm">

@@ -14,7 +14,7 @@ defined('HMW_PRIORITY') || define('HMW_PRIORITY', false);
 //Force not to write the rules in config file.
 defined('HMW_RULES_IN_CONFIG') || define('HMW_RULES_IN_CONFIG', true);
 //add HMW Rules in WordPress rewrite definition in htaccess.
-defined('HMW_RULES_IN_WP_RULES') || define('HMW_RULES_IN_WP_RULES', true);
+defined('HMW_RULES_IN_WP_RULES') || define('HMW_RULES_IN_WP_RULES', false);
 //Force all CSS and JS to load dynamically.
 defined('HMW_DYNAMIC_FILES') || define('HMW_DYNAMIC_FILES', false);
 //Force the plugin to rename the paths even in admin mode.

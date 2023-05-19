@@ -37,6 +37,24 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
         //Add the Settings class only for the plugin settings page
         add_filter('admin_body_class', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Menu'), 'addSettingsClass'));
 
+	    //If the option to prevent broken layout is on
+	    if(HMWP_Classes_Tools::getOption( 'prevent_slow_loading' )){
+
+		    //check the frontend on settings successfully saved
+		    add_action('hmwp_confirmed_settings', function () {
+			    //check the frontend and prevent from showing brake websites
+			    $url = _HMWP_URL_ . '/view/assets/img/logo.png?hmwp_preview=1&test=' . mt_rand(11111,99999);
+			    $url = HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->find_replace_url($url);
+			    $response = HMWP_Classes_Tools::hmwp_localcall($url,  array('redirection' => 0, 'cookies' => false));
+
+			    //If the plugin logo is not loading correctly, switch off the path changes
+                if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) == 404) {
+				    HMWP_Classes_Tools::saveOptions('file_mappings', array(home_url()));
+			    }
+		    });
+
+	    }
+
     }
 
     /**
@@ -207,7 +225,7 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
                 ?>
                 <div class="hmwp_notice error notice" style="margin-left: 0;">
                     <div style="display: inline-block;">
-                        <form action="<?php echo HMWP_Classes_Tools::getSettingsUrl() ?>" method="POST">
+                        <form action="<?php echo HMWP_Classes_Tools::getSettingsUrl('hmwp_permalinks') ?>" method="POST">
                             <?php wp_nonce_field('hmwp_newpluginschange', 'hmwp_nonce') ?>
                             <input type="hidden" name="action" value="hmwp_newpluginschange"/>
                             <p>
@@ -282,82 +300,27 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
         switch ( HMWP_Classes_Tools::getValue('action') ) {
         case 'hmwp_settings':
+
             //Save the settings
             if (!empty($_POST) ) {
                 /**  @var $this->model HMWP_Models_Settings  */
                 $this->model->savePermalinks($_POST);
             }
 
-            //If no change is made on settings, just return
-            if(!$this->model->checkOptionsChange()) {
-                return;
-            }
+	        //whitelist_ip
+            $this->saveWhiteListIps();
 
-            //Create the Wp-Rocket Burts Mapping for all blogs if not exists
-            HMWP_Classes_ObjController::getClass('HMWP_Models_Compatibility')->rocket_burst_mapping();
+	        //load the after saving settings process
+	        if($this->applyPermalinksChanged()){
+		        HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
 
-
-            //If no errors and no reconnect required
-            if (!HMWP_Classes_Tools::getOption('error') ) {
-
-                // Delete the restore transient
-                delete_transient('hmwp_restore');
-                //Force the recheck security notification
-                delete_option(HMWP_SECURITY_CHECK_TIME);
-                //Clear the cache if there are no errors
-                HMWP_Classes_Tools::emptyCache();
-                //Flush the WordPress rewrites
-                HMWP_Classes_Tools::flushWPRewrites();
-
-                //Flush the changes
-                HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
-
-                //If there are no errors
-                if (!HMWP_Classes_Error::isError() ) {
-
-                    if (!HMWP_Classes_Tools::getOption('logout') || HMWP_Classes_Tools::getOption('hmwp_mode') == 'default' ) {
-                        //Save the working options into backup
-                        HMWP_Classes_Tools::saveOptionsBackup();
-                    }
-
-                    //Send email notification about the path changed
-                    HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->sendEmail();
-
-                    HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
-
-                    //Show the Nginx message to set up the config file
-                    if (HMWP_Classes_Tools::isNginx() && !HMWP_Classes_Tools::getOption('test_frontend') && HMWP_Classes_Tools::getOption('hmwp_mode') <> 'default' ) {
-                        $config_file = HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->getConfFile();
-                        HMWP_Classes_Error::setError(sprintf(esc_html__("NGINX detected. In case you didn't add the code in the NGINX config already, please add the following line. %s", 'hide-my-wp'), '<br /><br /><code><strong>include ' . $config_file . ';</strong></code> <br /><br /><h5>' . esc_html__("Don't forget to reload the Nginx service.", 'hide-my-wp') . ' ' . '</h5><strong><br /><a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-setup-hide-my-wp-on-nginx-server/" target="_blank" style="color: red">' . esc_html__("Learn how to setup on Nginx server", 'hide-my-wp') . '</a></strong>'), 'notice', false);
-                    }
-
-                    //Redirect to the new admin URL
-                    if (HMWP_Classes_Tools::getOption('logout') ) {
-
-                        //Set the cookies for the current path
-                        $cookies = HMWP_Classes_ObjController::newInstance('HMWP_Models_Cookies');
-
-                        if (HMWP_Classes_Tools::isNginx() || $cookies->setCookiesCurrentPath() ) {
-	                        //whait for the server
-	                        sleep(3);
-
-                            //set logout to false
-                            HMWP_Classes_Tools::saveOptions('logout', false);
-                            //activate frontend test
-                            HMWP_Classes_Tools::saveOptions('test_frontend', true);
-
-                            remove_all_filters('wp_redirect');
-                            remove_all_filters('admin_url');
-                            wp_redirect(HMWP_Classes_Tools::getSettingsUrl(HMWP_Classes_Tools::getValue('page')));
-                            exit();
-                        }
-                    }
-                }
-            }
-
+		        //add action for later use
+		        do_action( 'hmwp_settings_saved' );
+	        }
 
             break;
         case 'hmwp_tweakssettings':
+
             //Save the settings
             if (!empty($_POST) ) {
                 $this->model->saveValues($_POST);
@@ -369,22 +332,13 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
             HMWP_Classes_Tools::saveOptions('hmwp_disable_copy_paste_message', HMWP_Classes_Tools::getValue('hmwp_disable_copy_paste_message', '', true));
             HMWP_Classes_Tools::saveOptions('hmwp_disable_drag_drop_message', HMWP_Classes_Tools::getValue('hmwp_disable_drag_drop_message', '', true));
 
-            //If no change is made on settings, just return
-            if(!$this->model->checkOptionsChange()) {
-                return;
-            }
+	        //load the after saving settings process
+	        if($this->applyPermalinksChanged()){
+		        HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
 
-            //Flush the changes for XML-RPC option
-            HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
-
-            if (!HMWP_Classes_Tools::getOption('error') ) {
-
-                if (!HMWP_Classes_Tools::getOption('logout') ) {
-                    HMWP_Classes_Tools::saveOptionsBackup();
-                }
-
-                HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
-            }
+		        //add action for later use
+		        do_action('hmwp_tweakssettings_saved');
+	        }
 
             break;
         case 'hmwp_mappsettings':
@@ -408,114 +362,39 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
                 HMWP_Classes_Tools::saveOptions('hmwp_cdn_urls', json_encode($hmwp_cdn_urls));
             }
 
-            //Save Text Mapping
-            if ($hmwp_text_mapping_from = HMWP_Classes_Tools::getValue('hmwp_text_mapping_from', false) ) {
-                if ($hmwp_text_mapping_to = HMWP_Classes_Tools::getValue('hmwp_text_mapping_to', false) ) {
-                    $hmwp_text_mapping = array();
+	        //Save Text Mapping
+	        if ($hmwp_text_mapping_from = HMWP_Classes_Tools::getValue('hmwp_text_mapping_from') ) {
+		        if ($hmwp_text_mapping_to = HMWP_Classes_Tools::getValue('hmwp_text_mapping_to') ) {
+			        $this->model->saveTextMapping($hmwp_text_mapping_from, $hmwp_text_mapping_to);
+		        }
+	        }
 
-                    foreach ( $hmwp_text_mapping_from as $index => $from ) {
-                        if ($hmwp_text_mapping_from[$index] <> '' && $hmwp_text_mapping_to[$index] <> '' ) {
-                            $hmwp_text_mapping_from[$index] = preg_replace('/[^A-Za-z0-9-_.{}\/]/', '', $hmwp_text_mapping_from[$index]);
-                            $hmwp_text_mapping_to[$index] = preg_replace('/[^A-Za-z0-9-_.{}\/]/', '', $hmwp_text_mapping_to[$index]);
+	        //Save URL mapping
+	        if ($hmwp_url_mapping_from = HMWP_Classes_Tools::getValue('hmwp_url_mapping_from') ) {
+		        if ($hmwp_url_mapping_to = HMWP_Classes_Tools::getValue('hmwp_url_mapping_to') ) {
+			        $this->model->saveURLMapping($hmwp_url_mapping_from, $hmwp_url_mapping_to);
+		        }
+	        }
 
-                            if (!isset($hmwp_text_mapping['from']) || !in_array($hmwp_text_mapping_from[$index], (array)$hmwp_text_mapping['from']) ) {
-                                //Don't save the wp-posts for Woodmart theme
-                                if (HMWP_Classes_Tools::isPluginActive('woocommerce/woocommerce.php') ) {
-                                    if ($hmwp_text_mapping_from[$index] == 'wp-post-image' ) {
-                                        continue;
-                                    }
-                                }
+	        //load the after saving settings process
+	        if($this->applyPermalinksChanged()) {
+		        HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
 
-                                if ($hmwp_text_mapping_from[$index] <> $hmwp_text_mapping_to[$index] ) {
-                                    $hmwp_text_mapping['from'][] = $hmwp_text_mapping_from[$index];
-                                    $hmwp_text_mapping['to'][] = $hmwp_text_mapping_to[$index];
-                                }
-                            } else {
-                                HMWP_Classes_Error::setError(esc_html__('Error: You entered the same text twice in the Text Mapping. We removed the duplicates to prevent any redirect errors.'));
-                            }
-                        }
-                    }
-                    HMWP_Classes_Tools::saveOptions('hmwp_text_mapping', json_encode($hmwp_text_mapping));
+		        //add action for later use
+		        do_action('hmwp_mappsettings_saved');
 
-                }
-            }
+	        }
 
-            //Save URL mapping
-            if ($hmwp_url_mapping_from = HMWP_Classes_Tools::getValue('hmwp_url_mapping_from') ) {
-                if ($hmwp_url_mapping_to = HMWP_Classes_Tools::getValue('hmwp_url_mapping_to') ) {
-                    $hmwp_url_mapping = array();
-                    foreach ( $hmwp_url_mapping_from as $index => $from ) {
-                        if ($hmwp_url_mapping_from[$index] <> '' && $hmwp_url_mapping_to[$index] <> '' ) {
-                            $hmwp_url_mapping_from[$index] = preg_replace('/[^A-Za-z0-9-_;:=%.#\/\?]/', '', $hmwp_url_mapping_from[$index]);
-                            $hmwp_url_mapping_to[$index] = preg_replace('/[^A-Za-z0-9-_;:%=.#\/\?]/', '', $hmwp_url_mapping_to[$index]);
-
-                            //if (substr_count($hmwp_url_mapping_from[$index], home_url()) == 1 && substr_count($hmwp_url_mapping_to[$index], home_url()) == 1) {
-                            if (!isset($hmwp_url_mapping['from']) || (                                !in_array($hmwp_url_mapping_from[$index], (array)$hmwp_url_mapping['from']) 
-                                && !in_array($hmwp_url_mapping_to[$index], (array)$hmwp_url_mapping['to'])) 
-                            ) {
-                                if ($hmwp_url_mapping_from[$index] <> $hmwp_url_mapping_to[$index] ) {
-                                    $hmwp_url_mapping['from'][] = $hmwp_url_mapping_from[$index];
-                                    $hmwp_url_mapping['to'][] = $hmwp_url_mapping_to[$index];
-                                }
-                            } else {
-                                HMWP_Classes_Error::setError(esc_html__('Error: You entered the same URL twice in the URL Mapping. We removed the duplicates to prevent any redirect errors.'));
-                            }
-                        }
-                    }
-
-
-                    HMWP_Classes_Tools::saveOptions('hmwp_url_mapping', json_encode($hmwp_url_mapping));
-
-                }
-
-                if (!empty($hmwp_url_mapping) ) {
-	                //show rules to be added manually
-                    if (!HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->clearRedirect()->setRewriteRules()->flushRewrites() ) {
-	                    HMWP_Classes_Tools::saveOptions('test_frontend', false);
-                        HMWP_Classes_Tools::saveOptions('error', true);
-                    }
-                }
-            }
-
-            //If no change is made on settings, just return
-            if(!$this->model->checkOptionsChange()) {
-                return;
-            }
-
-            if (HMWP_Classes_Tools::getOption('hmwp_file_cache') ) {
-                //Flush the changes
-                HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
-            }
-
-            //Clear the cache if there are no errors
-            if (!HMWP_Classes_Tools::getOption('error') ) {
-
-                //Create the Wp-Rocket Burts Mapping for all blogs if not exists
-                HMWP_Classes_ObjController::getClass('HMWP_Models_Compatibility')->rocket_burst_mapping();
-
-                //Flush the changes
-                HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
-
-
-                if (!HMWP_Classes_Tools::getOption('logout') ) {
-                    HMWP_Classes_Tools::saveOptionsBackup();
-                }
-
-                HMWP_Classes_Tools::emptyCache();
-                HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
-
-                //Show the Nginx message to set up the config file
-                if (HMWP_Classes_Tools::isNginx() && !HMWP_Classes_Tools::getOption('test_frontend') && HMWP_Classes_Tools::getOption('hmwp_mode') <> 'default' ) {
-                    $config_file = HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->getConfFile();
-                    HMWP_Classes_Error::setError(sprintf(esc_html__("NGINX detected. In case you didn't add the code in the NGINX config already, please add the following line. %s", 'hide-my-wp'), '<br /><br /><code><strong>include ' . $config_file . ';</strong></code> <br /><br /><h5>' . esc_html__("Don't forget to reload the Nginx service.", 'hide-my-wp') . ' ' . '</h5><strong><br /><a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-setup-hide-my-wp-on-nginx-server/" target="_blank" style="color: red">' . esc_html__("Learn how to setup on Nginx server", 'hide-my-wp') . '</a></strong>'), 'notice', false);
-                }
-
-            }
             break;
         case 'hmwp_advsettings':
 
             if (!empty($_POST) ) {
                 $this->model->saveValues($_POST);
+
+                //save the loading moment
+                HMWP_Classes_Tools::saveOptions('hmwp_firstload', in_array('first', HMWP_Classes_Tools::getOption('hmwp_loading_hook')));
+                HMWP_Classes_Tools::saveOptions('hmwp_priorityload', in_array('priority', HMWP_Classes_Tools::getOption('hmwp_loading_hook')));
+                HMWP_Classes_Tools::saveOptions('hmwp_laterload', in_array('late', HMWP_Classes_Tools::getOption('hmwp_loading_hook')));
 
                 //Send the notification email in case of Weekly report
                 if (HMWP_Classes_Tools::getValue('hmwp_send_email') && HMWP_Classes_Tools::getValue('hmwp_email_address') ) {
@@ -530,18 +409,17 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
                     HMWP_Classes_ObjController::getClass('HMWP_Models_Compatibility')->deleteMUPlugin();
                 }
 
-                //Clear the cache if there are no errors
-                if (!HMWP_Classes_Tools::getOption('error') ) {
+	            //load the after saving settings process
+	            if($this->applyPermalinksChanged()) {
+		            HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
 
-                    if (!HMWP_Classes_Tools::getOption('logout') ) {
-                        HMWP_Classes_Tools::saveOptionsBackup();
-                    }
+		            //add action for later use
+		            do_action('hmwp_advsettings_saved');
 
-                    HMWP_Classes_Tools::emptyCache();
-                    HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
-                }
+	            }
 
             }
+
             break;
         case 'hmwp_savecachepath':
 
@@ -568,7 +446,6 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
             }else{
                 HMWP_Classes_Tools::saveOptions('hmwp_change_in_cache_directory', '');
             }
-
 
             //If Ajax call, return saved
             if (HMWP_Classes_Tools::isAjax()) {
@@ -625,30 +502,12 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
             //set frontend, error & logout to false
             HMWP_Classes_Tools::saveOptions('test_frontend', false);
-            HMWP_Classes_Tools::saveOptions('error', false);
+	        HMWP_Classes_Tools::saveOptions('file_mappings', array());
+	        HMWP_Classes_Tools::saveOptions('error', false);
             HMWP_Classes_Tools::saveOptions('logout', false);
 
-            // Delete the restore transient
-            delete_transient('hmwp_restore');
-
-            //Clear the cache and remove the redirects
-            HMWP_Classes_Tools::emptyCache();
-            //Flush the WordPress rewrites
-            HMWP_Classes_Tools::flushWPRewrites();
-
-            HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->clearRedirect();
-            //Flush the changes
-            HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
-
-            //Set the cookies for the current path
-            $cookies = HMWP_Classes_ObjController::newInstance('HMWP_Models_Cookies');
-            if (HMWP_Classes_Tools::isNginx() || $cookies->setCookiesCurrentPath() ) {
-
-                remove_all_filters('wp_redirect');
-                remove_all_filters('admin_url');
-                wp_redirect(HMWP_Classes_Tools::getSettingsUrl(HMWP_Classes_Tools::getValue('page')));
-                exit();
-            }
+	        //load the after saving settings process
+	        $this->applyPermalinksChanged(true);
 
             break;
         case 'hmwp_newpluginschange':
@@ -664,23 +523,17 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
                 HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->hideThemeNames();
             }
 
-            //Clear the cache and remove the redirects
-            HMWP_Classes_Tools::emptyCache();
+	        //load the after saving settings process
+	        if($this->applyPermalinksChanged()) {
+		        HMWP_Classes_Error::setError(esc_html__('The list of plugins and themes was updated with success!'), 'success');
+	        }
 
-            //Flush the WordPress rewrites
-            HMWP_Classes_Tools::flushWPRewrites();
-
-            //Flush the changes
-            HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
-
-            if (!HMWP_Classes_Error::isError() ) {
-                HMWP_Classes_Error::setError(esc_html__('The list of plugins and themes was updated with success!'), 'success');
-            }
             break;
         case 'hmwp_confirm':
             HMWP_Classes_Tools::saveOptions('error', false);
             HMWP_Classes_Tools::saveOptions('logout', false);
             HMWP_Classes_Tools::saveOptions('test_frontend', false);
+	        HMWP_Classes_Tools::saveOptions('file_mappings', array());
 
             //Send email notification about the path changed
             HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->sendEmail();
@@ -695,11 +548,15 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
             HMWP_Classes_Tools::saveOptions('download_settings', true);
 
+	        //add action for later use
+	        do_action('hmwp_confirmed_settings');
+
             break;
         case 'hmwp_manualrewrite':
             HMWP_Classes_Tools::saveOptions('error', false);
             HMWP_Classes_Tools::saveOptions('logout', false);
             HMWP_Classes_Tools::saveOptions('test_frontend', true);
+	        HMWP_Classes_Tools::saveOptions('file_mappings', array());
 
             //save to safe mode in case of db
             if (!HMWP_Classes_Tools::getOption('logout') ) {
@@ -732,8 +589,6 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
             if (function_exists('base64_encode') ) {
                 echo base64_encode(json_encode(HMWP_Classes_Tools::$options));
-            } else {
-                echo json_encode(HMWP_Classes_Tools::$options);
             }
             exit();
         case 'hmwp_rollback':
@@ -795,60 +650,19 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
                         $options = base64_decode($options);
                     }
                     $options = json_decode($options, true);
+
                     if (is_array($options) && isset($options['hmwp_ver']) ) {
+
                         foreach ( $options as $key => $value ) {
                             if ($key <> 'hmwp_token' && $key <> 'api_token' ) {
-                                HMWP_Classes_Tools::$options[$key] = $value;
+                                HMWP_Classes_Tools::saveOptions($key, $value);
                             }
                         }
-                        HMWP_Classes_Tools::saveOptions();
-                        HMWP_Classes_Error::setError(esc_html__('Great! The backup is restored.', 'hide-my-wp') . " <br /> ", 'success');
 
-                        if (!HMWP_Classes_Tools::getOption('error') ) {
-                            HMWP_Classes_Tools::emptyCache();
-                            //Flush the WordPress rewrites
-                            add_action(
-                                'admin_footer', array(
-                                'HMWP_Classes_Tools',
-                                'flushWPRewrites'
-                                ), PHP_INT_MAX 
-                            );
-                        }
-
-                        if (!HMWP_Classes_Tools::getOption('error') && !HMWP_Classes_Tools::getOption('logout') ) {
-                            HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
-                        }
-
-                    } elseif (is_array($options) && isset($options['hmw_ver']) ) {
-                        foreach ( $options as $key => $value ) {
-                            if ($key <> 'hmw_token' ) {
-                                HMWP_Classes_Tools::$options[str_replace('hmwp_', 'hmwp_', $key)] = $value;
-                            }
-                        }
-                        HMWP_Classes_Tools::saveOptions();
-                        HMWP_Classes_Error::setError(esc_html__('Great! The backup is restored.', 'hide-my-wp') . " <br /> ", 'success');
-
-                        if (!HMWP_Classes_Tools::getOption('error') ) {
-                            HMWP_Classes_Tools::emptyCache();
-                            //Flush the WordPress rewrites
-                            add_action(
-                                'admin_footer', array(
-                                'HMWP_Classes_Tools',
-                                'flushWPRewrites'
-                                ), PHP_INT_MAX 
-                            );
-                        }
-
-                        if (!HMWP_Classes_Tools::getOption('error') && !HMWP_Classes_Tools::getOption('logout') ) {
-                            //Clear the cache and remove the redirects
-                            HMWP_Classes_Tools::emptyCache();
-                            //Flush the WordPress rewrites
-                            HMWP_Classes_Tools::flushWPRewrites();
-
-                            HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->clearRedirect();
-                            //Flush the changes
-                            HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
-                        }
+	                    //load the after saving settings process
+	                    if($this->applyPermalinksChanged(true)){
+		                    HMWP_Classes_Error::setError(esc_html__('Great! The backup is restored.', 'hide-my-wp') . " <br /> ", 'success');
+	                    }
 
                     } else {
                         HMWP_Classes_Error::setError(esc_html__('Error! The backup is not valid.', 'hide-my-wp') . " <br /> ");
@@ -892,6 +706,126 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
             exit();
         }
 
+    }
+
+	/**
+     * Save the whitelist IPs into database
+	 * @return void
+	 */
+    private function saveWhiteListIps(){
+
+	    $whitelist = HMWP_Classes_Tools::getValue('whitelist_ip', '', true);
+	    $ips = explode(PHP_EOL, $whitelist);
+
+	    if (!empty($ips)) {
+		    foreach ($ips as &$ip) {
+			    $ip = trim($ip);
+
+			    // Check for IPv4 IP cast as IPv6
+			    if (preg_match('/^::ffff:(\d+\.\d+\.\d+\.\d+)$/', $ip, $matches)) {
+				    $ip = $matches[1];
+			    }
+		    }
+
+		    $ips = array_unique($ips);
+		    HMWP_Classes_Tools::saveOptions('whitelist_ip', json_encode($ips));
+	    }
+    }
+
+    /**
+     * This function applies changes to permalinks.
+     * It deletes the restore transient and clears the cache if there are no errors.
+     * If no changes are made on settings and $force is false, the function returns true.
+     * It forces the recheck security notification, clears the cache, removes the redirects, and flushes the WordPress rewrites.
+     * If there are no errors, it checks if there is any main path change and saves the working options into backup.
+     * It sends an email notification about the path changed, sets the cookies for the current path, activates frontend test, and triggers an action after applying the permalink changes.
+     *
+     * @param bool $force If true, the function will always apply the permalink changes.
+     * @return bool Returns true if the changes are applied successfully; otherwise, returns false.
+     *
+     * @throws Exception
+     */
+    private function applyPermalinksChanged($force = false){
+
+        // Delete the restore transient
+        delete_transient('hmwp_restore');
+
+        //Clear the cache if there are no errors
+        if (HMWP_Classes_Tools::getOption('error') ) {
+            return false;
+        }
+
+        //If no change is made on settings, just return
+        if(!$force && !$this->model->checkOptionsChange()) {
+            return true;
+        }
+
+        //Force the recheck security notification
+        delete_option(HMWP_SECURITY_CHECK_TIME);
+
+        //Clear the cache and remove the redirects
+        HMWP_Classes_Tools::emptyCache();
+
+        //Flush the WordPress rewrites
+        HMWP_Classes_Tools::flushWPRewrites();
+
+        //check if the config file is writable or is WP-engine server
+        if (!HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->isConfigWritable() || HMWP_Classes_Tools::isWpengine()) {
+            //if not writeable, call the rules to show manually changes
+            //show rules to be added manually
+            if (!HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->clearRedirect()->setRewriteRules()->flushRewrites()) {
+                HMWP_Classes_Tools::saveOptions('test_frontend', false);
+                HMWP_Classes_Tools::saveOptions('error', true);
+            }
+        }else{
+            //Flush the changes
+            HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
+        }
+
+        //If there are no errors
+        if (!HMWP_Classes_Error::isError() ) {
+
+            //Check if there is any main path change
+            $this->model->checkMainPathsChange();
+
+            if ( HMWP_Classes_Tools::getOption( 'hmwp_mode' ) == 'default' ) {
+                //Save the working options into backup
+                HMWP_Classes_Tools::saveOptionsBackup();
+            }
+
+            //Redirect to the new admin URL
+            if ( HMWP_Classes_Tools::getOption( 'logout' ) ) {
+
+                //Send email notification about the path changed
+                HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' )->sendEmail();
+
+                //Set the cookies for the current path
+                $cookies = HMWP_Classes_ObjController::newInstance( 'HMWP_Models_Cookies' );
+
+                if ( HMWP_Classes_Tools::isNginx() || $cookies->setCookiesCurrentPath() ) {
+
+                    HMWP_Classes_Tools::saveOptions( 'logout', false );
+                    //activate frontend test
+                    HMWP_Classes_Tools::saveOptions( 'test_frontend', true );
+
+                    remove_all_filters( 'wp_redirect' );
+                    remove_all_filters( 'admin_url' );
+
+                    //trigger action after apply the permalink changes
+                    do_action('hmwp_apply_permalink_changes');
+
+                    wp_redirect(HMWP_Classes_Tools::getSettingsUrl(HMWP_Classes_Tools::getValue('page')));
+                    exit();
+                }
+
+                //trigger action after apply the permalink changes
+                do_action('hmwp_apply_permalink_changes');
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**

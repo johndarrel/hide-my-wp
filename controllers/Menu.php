@@ -29,6 +29,15 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController
         //Add the plugin menu in admin.
         if (HMWP_Classes_Tools::userCan('manage_options') ) {
 
+	        //Check if updates.
+	        if (get_transient('hmwp_update') ) {
+
+		        //Delete the redirect transient.
+		        delete_transient('hmwp_update');
+
+		        HMWP_Classes_ObjController::getClass('HMWP_Classes_Tools')->checkRewriteUpdate(array());
+	        }
+
             //Check if activated.
             if (get_transient('hmwp_activate') ) {
 
@@ -128,16 +137,18 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController
                 /* add the admin menu */
                 $tabs = $this->model->getMenu();
                 foreach ($tabs as $slug => $tab) {
-                    $this->model->addSubmenu(
-                        array(
-                        $tab['parent'],
-                        $tab['title'],
-                        $tab['name'],
-                        $tab['capability'],
-                        $slug,
-                        $tab['function'],
-                        )
-                    );
+					if(isset($tab['parent']) && isset($tab['name']) && isset($tab['title']) && isset($tab['capability'])) {
+						$this->model->addSubmenu(
+							array(
+								$tab['parent'],
+								$tab['title'],
+								$tab['name'],
+								$tab['capability'],
+								$slug,
+								$tab['function'],
+							)
+						);
+					}
                 }
 
 	            //Avoid blank page after upgrade
@@ -325,6 +336,18 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController
 	        );
         }
 
+		//Update the external links in the menu
+	    global $submenu;
+	    if (!empty($submenu['hmwp_settings'])) {
+		    foreach ($submenu['hmwp_settings'] as &$item) {
 
+			    if (isset($tabs[$item[2]]['href']) && $tabs[$item[2]]['href'] !== false) {
+				    if (parse_url($tabs[$item[2]]['href'], PHP_URL_HOST) !== parse_url(home_url(), PHP_URL_HOST)) {
+					    $item[0] .= '<i class="dashicons dashicons-external" style="font-size:12px;vertical-align:-2px;height:10px;"></i>';
+				    }
+				    $item[2] = $tabs[$item[2]]['href'];
+			    }
+		    }
+	    }
     }
 }

@@ -2,10 +2,9 @@
 Contributors: johndarrel
 Tags: security,firewall,hide,antivirus,wp-login,wp-admin,hide wordpress,hide wp,security plugin
 Requires at least: 4.3
-Tested up to: 6.0
+Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 5.0.14
-Donate link:
+Stable tag: 5.0.22
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,7 +14,7 @@ Hide WP paths, wp-admin, wp-login, wp-content, plugins, themes, authors, XML-RPC
 
 **Hide My WP Ghost** is a **WordPress Security plugin**. It gives you the best security solutions with its powerful and easy-to-use features. Without physically changing any directory or file, Hide My WP Ghost can take your website’s security to the next level.
 
-Over **100.000 secured websites**, over **2,200,000 brute force attempts protection** and over **140.000 monthly hacks stopped** and counting.
+Over **200.000 secured websites**, over **8,000,000 brute force attempts blocked** and over **140.000 monthly hacks stopped** and counting.
 
 The plugin **adds filters and security layers** to prevent Scripts and SQL Injections, Brute Force attacks, XML-RPC attacks, XSS, and more.
 
@@ -234,9 +233,6 @@ Thank you all for your trust, support, and positive reviews!
 
 <strong>Ready To Protect Your Website From Hackers With The Most USER-FRIENDLY WordPress Security Plugin?</strong>
 
-== Upgrade Notice ==
-= 5.0.10 =
-This version brings new security features and firewalls against script injection and SQL injection.
 
 == Installation ==
 Manually install the Hide My WP Ghost Lite plugin:
@@ -275,6 +271,80 @@ Enjoy!
 9. Customize the wp-admin path while logged in as an administrator
 
 == Changelog ==
+= 5.0.22 (16 May 2023) =
+* Update - Add compatibility for Cloud Panel servers
+* Update - Add compatibility for CMP Coming Soon & Maintenance Plugin by NiteoThemes plugin
+* Update - Add the option to select the server type if it's not detected by the server
+* Update - Add the option to add the rules between the WordPress rewrite rules on Apache/Litespeed servers
+* Update - Compatibility with Siteground
+* Update - Compatibility with Avada when cache plguins are enabled
+* Fixed - Remove the rewrites from WordPress section when the plugin is deactivated
+* Fixed - User roles names display on Tweaks
+* Fixed - Combined the Plugin Loading Hook into one option
+
+
+= 5.0.20 (03 May 2023) =
+* Update - File processing when the rules are not set correctly
+* Update - Security headers default values
+* Fixed - Compatibilities with the last versions of other plugins
+* Fixed - Reduce resource usage on 404 pages
+
+= 5.0.19 (23 Apr 2023) =
+* Update - Brute Force protection on lost password form
+* Update - Brute Force protection on Woocommerce (login, signup, lost passowrd)
+* Update - Compatibility with Memberpress plugin
+* Fixed - My account link on multisite option
+* Fixed - Settings to verify the array values on settings saving process
+* Fixed - Small Bugs
+
+= 5.0.18 (03 Mar 2023)=
+* Update - Compatibility with WP 6.2
+* Update - Compatibility with more plugins and themes
+* Update - Security check when wp-content is customized
+* Update - File handle for login, signup, logout
+* Update - Compatibility with PHP 8.2
+* Update - Remove the atom+xml meta from header
+* Update - Remove the noredirect param if the redirect is fixed
+* Update - Check the XML and TXT URI by REQUEST_URI to make sure the Sitemap and Robots URLs are identified
+* Update - Check the rewrite rules on WordPress Automatic updates too
+* Update - Add the option to disable HMWP Ghost custom paths for the whitelisted IPs
+* Update - Save all section on backup restore
+* Update - Add the option to remove the sitemap style as a separate option from changing the paths in Sitemap.
+
+= 5.0.17 (19 Dec 2022)=
+* Update - Compatibility with WP 6.1
+* Update - Remove the noredirect param if the redirect is fixed
+* Update - Update the verification of the XML and TXT URI
+* Update - Get the corect login URL when backend URL is different from frontend URL
+* Update - Add the Whitelabel IP option in Security Level and allow the Whitelabel IP addresses to pass login recaptcha and hidden URLs
+* Fixed - Allow self access to hidden paths to avoid cron errors on backup/migration plugins
+* Fixed - White screen on iphone > safari when disable inspect element option is on
+* Fixed - To remove the version from URL even if the 'ver' param doesn't have any value
+* Fixed - Typo in Security Check
+
+= 5.0.16 (21 Oct 2022)=
+* Update - Add the Brute Force protection on Register Form to prevent account spam
+* Update - Add the Whitelabel IP option in Security Level and allow the Whitelabel IP addresses to pass login recaptcha and hidden URLs
+* Update - Added the option to prioritize the loading of HMWP Ghost plugin for more compatibility with other plugins
+* Update - Compatibility with LiteSpeed servers and last version of WordPress 
+* Update - Compatibility with Breakdance plugin
+* Update - Compatibility with Nicepage Builder plugin
+* Update - Compatibility with WP 6.0.2
+* Fixed - Allow self access to hidden paths to avoid cron errors on backup/migration plugins
+* Fixed - Remove the get_site_icon_url hook to avoid any issue on the login page with other themes
+* Fixed - Compatibility with ShortPixel webp extention when Feed Security is enabled
+* Fixed - Fixed the ltrim of null error on PHP 8.1 for site_url() path
+
+= 5.0.15 (06 Sept 2022)=
+* Fixed - URL Mapping for Nginx servers to prevent 404 pages
+* Fixed - PHP error in Security Check when the X-Powered-By header is not string
+* Fixed - Compatibility with Wp-Rocket last version
+* Fixed - Brute force math issue on woocommerce login when third party woocommerce logins
+* Fixed - Not to hide the image on login page when no custom image is set in Appearance > Customize > Site Logo
+* Fixed - Compatibility with ShortPixel webp extention when Feed Security is enabled
+* Update - Compatibility with Nicepage Builder plugin
+* Update - Compatibility with WP 6.0.2
+
 = 5.0.14 (17 June 2022)=
 * Update - Compatibility with Coming Soon & Maintenance Mode PRO
 * Update - Compatibility with WordPress 6.0

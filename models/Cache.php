@@ -79,6 +79,11 @@ class HMWP_Models_Cache
             //build the rules paths to change back the hidden paths
             if (!isset($rewriteModel->_replace['from']) && !isset($rewriteModel->_replace['to'])) {
                 $rewriteModel->buildRedirect();
+
+	            //add the domain to rewrites if not multisite
+	            if (HMWP_Classes_Tools::getOption('hmwp_fix_relative') && !HMWP_Classes_Tools::isMultisites()) {
+		            $rewriteModel->prepareFindReplace();
+	            }
             }
 
             //Verify only the rewrites

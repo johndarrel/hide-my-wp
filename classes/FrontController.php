@@ -66,6 +66,7 @@ class HMWP_Classes_FrontController
         /* Load the Main classes Actions Handler */
         HMWP_Classes_ObjController::getClass('HMWP_Classes_Action');
         HMWP_Classes_ObjController::getClass('HMWP_Classes_DisplayController');
+        HMWP_Classes_ObjController::getClass('HMWP_Models_Compatibility_Abstract');
 
     }
 

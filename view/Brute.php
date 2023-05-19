@@ -56,20 +56,39 @@
                             </div>
                         </div>
 
-                        <?php if (HMWP_Classes_Tools::isPluginActive('woocommerce/woocommerce.php') ) { ?>
-                            <div class="col-sm-12 row mb-1 py-1 mx-2 hmwp_bruteforce hmwp_pro">
-                                <div class="box" >
-                                    <div class="ribbon"><span><?php echo esc_html__( 'PRO', 'hide-my-wp' ) ?></span></div>
+                        <div class="col-sm-12 row mb-1 py-1 mx-2 hmwp_bruteforce">
+                            <div class="checker col-sm-12 row my-2 py-1">
+                                <div class="col-sm-12 p-0 switch switch-sm">
+                                    <input type="checkbox" id="hmwp_bruteforce_lostpassword" name="hmwp_bruteforce_lostpassword" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_bruteforce_lostpassword') ? 'checked="checked"' : '') ?> value="1"/>
+                                    <label for="hmwp_bruteforce_lostpassword"><?php echo esc_html__('Lost Password Form Protection', 'hide-my-wp'); ?></label>
+                                    <div class="offset-1 text-black-50"><?php echo esc_html__('Activate the Brute Force protection on lost password form.', 'hide-my-wp'); ?></div>
                                 </div>
-                                <div class="checker col-sm-12 row my-2 py-1" style="opacity: 0.3" onclick="jQuery('#hmwp_ghost_mode_modal').modal('show')">
+                            </div>
+                        </div>
+
+	                    <?php if ( get_option( 'users_can_register' ) || (HMWP_Classes_Tools::isPluginActive('woocommerce/woocommerce.php') && 'yes' === get_option( 'woocommerce_enable_myaccount_registration' ) ) ) {?>
+                            <div class="col-sm-12 row mb-1 py-1 mx-2 hmwp_bruteforce">
+                                <div class="checker col-sm-12 row my-2 py-1">
                                     <div class="col-sm-12 p-0 switch switch-sm">
-                                        <input type="checkbox" id="hmwp_bruteforce_woocommerce" name="hmwp_bruteforce_woocommerce" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_bruteforce_woocommerce') ? 'checked="checked"' : '') ?> value="1"/>
-                                        <label for="hmwp_bruteforce_woocommerce"><?php echo esc_html__('Add WooCommerce Login Protection', 'hide-my-wp'); ?></label>
-                                        <div class="offset-1 text-black-50"><?php echo esc_html__('Activate the Brute Force protection for Woocommerce login forms.', 'hide-my-wp'); ?></div>
+                                        <input type="checkbox" id="hmwp_bruteforce_register" name="hmwp_bruteforce_register" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_bruteforce_register') ? 'checked="checked"' : '') ?> value="1"/>
+                                        <label for="hmwp_bruteforce_register"><?php echo esc_html__('Sign Up Form Protection', 'hide-my-wp'); ?></label>
+                                        <div class="offset-1 text-black-50"><?php echo esc_html__('Activate the Brute Force protection on sign up form.', 'hide-my-wp'); ?></div>
                                     </div>
                                 </div>
                             </div>
-                        <?php } ?>
+	                    <?php }?>
+
+	                    <?php if (HMWP_Classes_Tools::isPluginActive('woocommerce/woocommerce.php') ) { ?>
+                            <div class="col-sm-12 row mb-1 py-1 mx-2 hmwp_bruteforce">
+                                <div class="checker col-sm-12 row my-2 py-1">
+                                    <div class="col-sm-12 p-0 switch switch-sm">
+                                        <input type="checkbox" id="hmwp_bruteforce_woocommerce" name="hmwp_bruteforce_woocommerce" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_bruteforce_woocommerce') ? 'checked="checked"' : '') ?> value="1"/>
+                                        <label for="hmwp_bruteforce_woocommerce"><?php echo esc_html__('WooCommerce Support', 'hide-my-wp'); ?></label>
+                                        <div class="offset-1 text-black-50"><?php echo esc_html__('Activate the Brute Force protection for Woocommerce login/signup forms.', 'hide-my-wp'); ?></div>
+                                    </div>
+                                </div>
+                            </div>
+	                    <?php } ?>
 
                         <div class="hmwp_bruteforce">
 

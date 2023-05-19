@@ -88,7 +88,7 @@ class HMWP_Classes_Error
         if ($wp_filesystem->exists(_HMWP_THEME_DIR_ . 'Notices.php')) {
             include _HMWP_THEME_DIR_ . 'Notices.php';
         } else {
-            echo wp_kses_post($message); //returns the
+            echo wp_kses_post($message);
         }
     }
 
