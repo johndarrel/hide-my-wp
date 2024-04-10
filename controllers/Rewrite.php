@@ -31,30 +31,6 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController
 		    return;
 	    }
 
-        //If safe parameter is set, clear the banned IPs and let the default paths
-        if (HMWP_Classes_Tools::getIsset(HMWP_Classes_Tools::getOption('hmwp_disable_name')) ) {
-            if (HMWP_Classes_Tools::getValue(HMWP_Classes_Tools::getOption('hmwp_disable_name')) == HMWP_Classes_Tools::getOption('hmwp_disable') ) {
-
-                HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute')->clearBlockedIPs();
-                HMWP_Classes_Tools::saveOptions('banlist_ip', json_encode(array()));
-
-                add_filter('site_url', array($this->model, 'site_url'), PHP_INT_MAX, 2);
-	            add_filter('hmwp_process_init', '__return_false');
-	            return;
-            }
-        }
-
-	    //prevent slow websites due to misconfiguration in the config file
-	    if(count((array)HMWP_Classes_Tools::getOption( 'file_mappings' )) > 0){
-
-		    if(HMWP_Classes_Tools::getOption( 'prevent_slow_loading' )){
-			    add_filter('site_url', array($this->model, 'site_url'), PHP_INT_MAX, 2);
-			    return;
-		    }
-
-		    add_filter('hmwp_process_hide_urls', '__return_false');
-	    }
-
 	    //Init the main hooks
 	    //start HMWP path process
 	    $this->initHooks();
@@ -81,22 +57,46 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController
             return;
         }
 
-        //don't let to rename and hide the current paths if logout is required
-        if (HMWP_Classes_Tools::getOption('error') || HMWP_Classes_Tools::getOption('logout') ) {
-            return;
+        //If safe parameter is set, clear the banned IPs and let the default paths
+        if (HMWP_Classes_Tools::getIsset(HMWP_Classes_Tools::getOption('hmwp_disable_name')) ) {
+            if (HMWP_Classes_Tools::getValue(HMWP_Classes_Tools::getOption('hmwp_disable_name')) == HMWP_Classes_Tools::getOption('hmwp_disable') ) {
+
+                HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute')->clearBlockedIPs();
+                HMWP_Classes_Tools::saveOptions('banlist_ip', json_encode(array()));
+
+                add_filter('site_url', array($this->model, 'site_url'), PHP_INT_MAX, 2);
+                add_filter('hmwp_process_init', '__return_false');
+                return;
+            }
         }
+
+        //prevent slow websites due to misconfiguration in the config file
+        if(count((array)HMWP_Classes_Tools::getOption( 'file_mappings' )) > 0){
+
+            if(HMWP_Classes_Tools::getOption( 'prevent_slow_loading' )){
+                return;
+            }
+
+            add_filter('hmwp_process_hide_urls', '__return_false');
+        }
+
+        //Check the whitelist IPs for accessing the hide paths
+        HMWP_Classes_ObjController::getClass('HMWP_Models_Compatibility')->checkWhitelistIPs();
 
 	    //load the compatibility class when the plugin loads
 	    //Check boot compatibility for some plugins and functionalities
 	    HMWP_Classes_ObjController::getClass('HMWP_Models_Compatibility')->checkCompatibility();
 
+
+        //don't let to rename and hide the current paths if logout is required
+        if (HMWP_Classes_Tools::getOption('error') || HMWP_Classes_Tools::getOption('logout') ) {
+            return;
+        }
+
 	    //check if the custom paths ar set to be processed
 	    if(!apply_filters('hmwp_process_init', true)) {
 		    return;
 	    }
-
-	    //Check the whitelist IPs for accessing the hide paths
-	    HMWP_Classes_ObjController::getClass('HMWP_Models_Compatibility')->checkWhitelistIPs();
 
         //rename the author if set so
         add_filter('author_rewrite_rules', array($this->model, 'author_url'), PHP_INT_MAX, 1);
@@ -157,6 +157,12 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController
         //If not dashboard
         if(!is_admin() && !is_network_admin()) {
 
+            //Load firewall on request for all server types
+            HMWP_Classes_ObjController::getClass('HMWP_Controllers_Firewall')->run();
+            if (HMWP_Classes_Tools::getOption('hmwp_sqlinjection')){
+            }
+
+
             //Check if buffer priority
 	        if(apply_filters('hmwp_priority_buffer', HMWP_Classes_Tools::getOption('hmwp_priorityload'))) {
                 //Starte the buffer
@@ -169,6 +175,9 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController
                 add_action('the_content_feed', array($this->model, 'find_replace'));
                 add_action('rss2_head', array($this->model, 'find_replace'));
                 add_action('commentsrss2_head', array($this->model, 'find_replace'));
+                add_action('the_permalink_rss', array($this->model, 'find_replace_url'));
+                add_action('comments_link_feed', array($this->model, 'find_replace_url'));
+                add_action('get_site_icon_url', array($this->model, 'find_replace_url'));
             }
 
             //Check the buffer on shutdown

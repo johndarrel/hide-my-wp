@@ -145,7 +145,8 @@ class HMWP_Classes_Action extends HMWP_Classes_FrontController
                "actions" => array(
                    "action" => array(
                        "hmwp_connect",
-                       "hmwp_dont_connect"
+                       "hmwp_reconnect",
+                       "hmwp_dont_connect",
                    )
                ),
            ),

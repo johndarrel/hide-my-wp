@@ -19,12 +19,12 @@
                             </div>
                             <div class="col-sm-6 p-0 input-group ">
 	                            <?php
-	                            $email = HMWP_Classes_Tools::getOption( 'hmwp_email_address' );
-	                            if ( $email == '' ) {
-		                            global $current_user;
-		                            $email = $current_user->user_email;
-	                            }
-	                            ?>
+                                $email = HMWP_Classes_Tools::getOption( 'hmwp_email_address' );
+                                if ( $email == '' ) {
+                                    global $current_user;
+                                    $email = $current_user->user_email;
+                                }
+                                ?>
                                 <input type="text" class="form-control" name="hmwp_email" value="<?php echo $email ?>" placeholder="<?php echo $email ?>"/>
                             </div>
                         </div>

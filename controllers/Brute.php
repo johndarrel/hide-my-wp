@@ -19,13 +19,7 @@ class HMWP_Controllers_Brute extends HMWP_Classes_FrontController
 
 	    add_filter('authenticate', array($this, 'hmwp_check_preauth'), 99, 1);
 	    add_action('admin_init', array($this, 'hmwp_update_trusted_headers'), 99);
-
-	    if(HMWP_Classes_Tools::getOption('hmwp_bruteforce_register')) {
-		    add_filter('registration_errors', array($this, 'hmwp_check_registration'), 99, 3);
-	    }
-	    if(HMWP_Classes_Tools::getOption('hmwp_bruteforce_lostpassword')) {
-		    add_filter('lostpassword_errors', array($this, 'hmwp_check_lpassword'), 99, 2);
-	    }
+        add_shortcode('hmwp_bruteforce', array($this, 'hmwp_bruteforce_shortcode') );
 
 	    if (HMWP_Classes_Tools::getOption('brute_use_math')) {
 		    add_action('wp_login_failed', array($this, 'hmwp_failed_attempt'), 99);
@@ -66,6 +60,16 @@ class HMWP_Controllers_Brute extends HMWP_Classes_FrontController
     {
         if (function_exists('is_user_logged_in') && !is_user_logged_in()) {
 
+            //Check BF on register
+            if (HMWP_Classes_Tools::getOption('hmwp_bruteforce_register')) {
+                add_filter('registration_errors', array($this, 'hmwp_check_registration'), 99, 3);
+            }
+
+            //Check BF on Lost Password
+            if (HMWP_Classes_Tools::getOption('hmwp_bruteforce_lostpassword')) {
+                add_filter('lostpassword_errors', array($this, 'hmwp_check_lpassword'), 99, 2);
+            }
+
             //Load the Multilanguage
             HMWP_Classes_Tools::loadMultilanguage();
 
@@ -86,6 +90,32 @@ class HMWP_Controllers_Brute extends HMWP_Classes_FrontController
                 );
             }
         }
+    }
+
+    /**
+     * Get the brute force using shortcode
+     * @param $atts
+     * @param $content
+     *
+     * @return string|void
+     */
+    public function hmwp_bruteforce_shortcode( $atts = array(), $content = '' ){
+        global $hmwp_bruteforce;
+
+        if (function_exists('is_user_logged_in') && is_user_logged_in()) {
+            return;
+        }
+
+        $hmwp_bruteforce = true;
+
+        if (HMWP_Classes_Tools::getOption('brute_use_math')) {
+            return $this->model->brute_math_form();
+        }elseif (HMWP_Classes_Tools::getOption('brute_use_captcha')) {
+            return $this->model->brute_recaptcha_head() . $this->model->brute_recaptcha_form();
+        }elseif (HMWP_Classes_Tools::getOption('brute_use_captcha_v3')) {
+            return $this->model->brute_recaptcha_head_v3() . $this->model->brute_recaptcha_form_v3();
+        }
+
     }
 
     /**
@@ -125,7 +155,7 @@ class HMWP_Controllers_Brute extends HMWP_Classes_FrontController
 
                 // If the IP is in a private or reserved range, keep looking
                 if ($ip == '127.0.0.1' || $ip == '::1') {
-                    HMWP_Classes_Error::setError(esc_html__("Add only real IPs. No local ips allowed.", 'hide-my-wp'));
+                    HMWP_Classes_Error::setNotification(esc_html__("Add only real IPs. No local ips allowed.", 'hide-my-wp'));
                 }
             }
             if (!empty($ips)) {
@@ -139,7 +169,7 @@ class HMWP_Controllers_Brute extends HMWP_Classes_FrontController
                 $attempts = HMWP_Classes_Tools::getValue('brute_max_attempts');
                 if ((int)$attempts <= 0) {
                     $attempts = 3;
-                    HMWP_Classes_Error::setError(esc_html__('You need to set a positive number of attempts.', 'hide-my-wp'));
+                    HMWP_Classes_Error::setNotification(esc_html__('You need to set a positive number of attempts.', 'hide-my-wp'));
 
                 }
                 HMWP_Classes_Tools::saveOptions('brute_max_attempts', (int)$attempts);
@@ -147,7 +177,7 @@ class HMWP_Controllers_Brute extends HMWP_Classes_FrontController
                 $timeout = HMWP_Classes_Tools::getValue('brute_max_timeout');
                 if ((int)$timeout <= 0) {
                     $timeout = 3600;
-                    HMWP_Classes_Error::setError(esc_html__('You need to set a positive waiting time.', 'hide-my-wp'));
+                    HMWP_Classes_Error::setNotification(esc_html__('You need to set a positive waiting time.', 'hide-my-wp'));
 
                 }
                 HMWP_Classes_Tools::saveOptions('hmwp_brute_message', HMWP_Classes_Tools::getValue('hmwp_brute_message', '', true));
@@ -177,7 +207,7 @@ class HMWP_Controllers_Brute extends HMWP_Classes_FrontController
                 }
 
                 HMWP_Classes_Tools::emptyCache();
-                HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
+                HMWP_Classes_Error::setNotification(esc_html__('Saved'), 'success');
             }
 
             break;
@@ -194,10 +224,7 @@ class HMWP_Controllers_Brute extends HMWP_Classes_FrontController
 
         case 'hmwp_blockedips':
             if(HMWP_Classes_Tools::isAjax()) {
-                HMWP_Classes_Tools::setHeader('json');
-                $data = $this->getBlockedIps();
-                echo json_encode(array('data' => $data));
-                exit();
+                wp_send_json_success($this->getBlockedIps());
             }
             break;
         }
@@ -234,8 +261,8 @@ class HMWP_Controllers_Brute extends HMWP_Classes_FrontController
             }
         } else {
             $data .= "<tr>
-                                <td colspan='5'>" . _('No blacklisted ips') . "</td>
-                             </tr>";
+                        <td colspan='5'>" . _('No blacklisted ips') . "</td>
+                     </tr>";
         }
         $data .= '</table>';
 

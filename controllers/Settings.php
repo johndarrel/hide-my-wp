@@ -55,6 +55,11 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
 	    }
 
+        //save the login path on Cloud
+        add_action( 'hmwp_apply_permalink_changes', function () {
+            HMWP_Classes_Tools::sendLoginPathsApi();
+        } );
+
     }
 
     /**
@@ -86,14 +91,13 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
         if (HMWP_Classes_Tools::isNginx() && HMWP_Classes_Tools::getOption('test_frontend') && HMWP_Classes_Tools::getOption('hmwp_mode') <> 'default' ) {
             $config_file = HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->getConfFile();
-            HMWP_Classes_Error::setError(sprintf(esc_html__("NGINX detected. In case you didn't add the code in the NGINX config already, please add the following line. %s", 'hide-my-wp'), '<br /><br /><code><strong>include ' . $config_file . ';</strong></code> <br /><br /><h5>' . esc_html__("Don't forget to reload the Nginx service.", 'hide-my-wp') . ' ' . '</h5><strong><br /><a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-setup-hide-my-wp-on-nginx-server/" target="_blank" style="color: red">' . esc_html__("Learn how to setup on Nginx server", 'hide-my-wp') . '</a></strong>'), 'notice', false);
+            HMWP_Classes_Error::setNotification(sprintf(esc_html__("NGINX detected. In case you didn't add the code in the NGINX config already, please add the following line. %s", 'hide-my-wp'), '<br /><br /><code><strong>include ' . $config_file . ';</strong></code> <br /><br /><strong><a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-setup-hide-my-wp-on-nginx-server/" target="_blank" >' . esc_html__("Learn how to setup on Nginx server", 'hide-my-wp') . ' >></a></strong>'), 'notice', false);
         }
-
 
         //Setting Alerts based on Logout and Error statements
         if (get_transient('hmwp_restore') == 1 ) {
             $restoreLink = '<a href="'.add_query_arg(array('hmwp_nonce' => wp_create_nonce('hmwp_restore_settings'), 'action' => 'hmwp_restore_settings')) .'" class="btn btn-default btn-sm ml-3" />' . esc_html__("Restore Settings", 'hide-my-wp'). '</a>';
-            HMWP_Classes_Error::setError(esc_html__('Do you want to restore the last saved settings?', 'hide-my-wp') . $restoreLink);
+            HMWP_Classes_Error::setNotification(esc_html__('Do you want to restore the last saved settings?', 'hide-my-wp') . $restoreLink);
         }
 
         //Show the config rules to make sure they are okay
@@ -104,10 +108,10 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
             $config_file = HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->getConfFile();
             if ($config_file <> '' && $wp_filesystem->exists($config_file) ) {
                 $rules = $wp_filesystem->get_contents(HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->getConfFile());
-                HMWP_Classes_Error::setError('<pre>' . $rules . '</pre>');
+                HMWP_Classes_Error::setNotification('<pre>' . $rules . '</pre>');
             }
 
-	        HMWP_Classes_Error::setError('<pre>' . print_r($_SERVER,true) . '</pre>');
+	        HMWP_Classes_Error::setNotification('<pre>' . print_r($_SERVER,true) . '</pre>');
         }
 
         //Load the css for Settings
@@ -133,7 +137,7 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
         }
 
         if (HMWP_Classes_Tools::getOption('error') ) {
-            HMWP_Classes_Error::setError(esc_html__('There is a configuration error in the plugin. Please Save the settings again and follow the instruction.', 'hide-my-wp'));
+            HMWP_Classes_Error::setNotification(esc_html__('There is a configuration error in the plugin. Please Save the settings again and follow the instruction.', 'hide-my-wp'));
         }
 
         if (HMWP_Classes_Tools::isWpengine() ) {
@@ -256,7 +260,7 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
                 </div>
                 <?php
             } else {
-                HMWP_Classes_Error::setError($error);
+                HMWP_Classes_Error::setNotification($error);
             }
         }
     }
@@ -312,7 +316,7 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
 	        //load the after saving settings process
 	        if($this->applyPermalinksChanged()){
-		        HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
+		        HMWP_Classes_Error::setNotification(esc_html__('Saved'), 'success');
 
 		        //add action for later use
 		        do_action( 'hmwp_settings_saved' );
@@ -334,7 +338,7 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
 	        //load the after saving settings process
 	        if($this->applyPermalinksChanged()){
-		        HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
+		        HMWP_Classes_Error::setNotification(esc_html__('Saved'), 'success');
 
 		        //add action for later use
 		        do_action('hmwp_tweakssettings_saved');
@@ -378,7 +382,7 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
 	        //load the after saving settings process
 	        if($this->applyPermalinksChanged()) {
-		        HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
+		        HMWP_Classes_Error::setNotification(esc_html__('Saved'), 'success');
 
 		        //add action for later use
 		        do_action('hmwp_mappsettings_saved');
@@ -411,7 +415,7 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
 	            //load the after saving settings process
 	            if($this->applyPermalinksChanged()) {
-		            HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
+		            HMWP_Classes_Error::setNotification(esc_html__('Saved'), 'success');
 
 		            //add action for later use
 		            do_action('hmwp_advsettings_saved');
@@ -425,7 +429,6 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
             //Save the option to change the paths in the cache file
             HMWP_Classes_Tools::saveOptions('hmwp_change_in_cache', HMWP_Classes_Tools::getValue('hmwp_change_in_cache'));
-            $json = array('success' => true, 'message' => esc_html__('Saved', 'hide-my-wp'));
 
             //Save the cache directory
             $directory = HMWP_Classes_Tools::getValue('hmwp_change_in_cache_directory');
@@ -441,20 +444,17 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
                 if (!in_array($directory, array('languages', 'mu-plugins', 'plugins', 'themes', 'upgrade', 'uploads'))) {
                     HMWP_Classes_Tools::saveOptions('hmwp_change_in_cache_directory', $directory);
                 } else {
-                    $json = array('success' => false, 'message' => esc_html__('Path not allowed. Avoid paths like plugins and themes.', 'hide-my-wp'));
+                    wp_send_json_error(esc_html__('Path not allowed. Avoid paths like plugins and themes.', 'hide-my-wp'));
                 }
             }else{
                 HMWP_Classes_Tools::saveOptions('hmwp_change_in_cache_directory', '');
             }
 
-            //If Ajax call, return saved
-            if (HMWP_Classes_Tools::isAjax()) {
-                HMWP_Classes_Tools::setHeader('json');
-                echo json_encode($json);
-                exit();
+            if(HMWP_Classes_Tools::isAjax()){
+                wp_send_json_success(esc_html__('Saved', 'hide-my-wp'));
             }
-
             break;
+
         case 'hmwp_devsettings':
 
             //Set dev settings
@@ -525,7 +525,7 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
 	        //load the after saving settings process
 	        if($this->applyPermalinksChanged()) {
-		        HMWP_Classes_Error::setError(esc_html__('The list of plugins and themes was updated with success!'), 'success');
+		        HMWP_Classes_Error::setNotification(esc_html__('The list of plugins and themes was updated with success!'), 'success');
 	        }
 
             break;
@@ -575,7 +575,7 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
             //Check the cache plugin
             HMWP_Classes_ObjController::getClass('HMWP_Models_Compatibility')->checkCacheFiles();
 
-            HMWP_Classes_Error::setError(esc_html__('Paths changed in the existing cache files', 'hide-my-wp'), 'success');
+            HMWP_Classes_Error::setNotification(esc_html__('Paths changed in the existing cache files', 'hide-my-wp'), 'success');
             break;
         case 'hmwp_backup':
             //Save the Settings into backup
@@ -609,7 +609,7 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
             HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->writeToFile('', 'HMWP_VULNERABILITY');
             HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->writeToFile('', 'HMWP_RULES');
 
-            HMWP_Classes_Error::setError(esc_html__('Great! The initial values are restored.', 'hide-my-wp') . " <br /> ", 'success');
+            HMWP_Classes_Error::setNotification(esc_html__('Great! The initial values are restored.', 'hide-my-wp') . " <br /> ", 'success');
 
             break;
 	    case 'hmwp_rollback_stable':
@@ -661,17 +661,17 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
 
 	                    //load the after saving settings process
 	                    if($this->applyPermalinksChanged(true)){
-		                    HMWP_Classes_Error::setError(esc_html__('Great! The backup is restored.', 'hide-my-wp') . " <br /> ", 'success');
+		                    HMWP_Classes_Error::setNotification(esc_html__('Great! The backup is restored.', 'hide-my-wp') . " <br /> ", 'success');
 	                    }
 
                     } else {
-                        HMWP_Classes_Error::setError(esc_html__('Error! The backup is not valid.', 'hide-my-wp') . " <br /> ");
+                        HMWP_Classes_Error::setNotification(esc_html__('Error! The backup is not valid.', 'hide-my-wp') . " <br /> ");
                     }
                 } catch ( Exception $e ) {
-                    HMWP_Classes_Error::setError(esc_html__('Error! The backup is not valid.', 'hide-my-wp') . " <br /> ");
+                    HMWP_Classes_Error::setNotification(esc_html__('Error! The backup is not valid.', 'hide-my-wp') . " <br /> ");
                 }
             } else {
-                HMWP_Classes_Error::setError(esc_html__('Error! You have to enter a previous saved backup file.', 'hide-my-wp') . " <br /> ");
+                HMWP_Classes_Error::setNotification(esc_html__('Error! No backup to restore.', 'hide-my-wp'));
             }
             break;
 
@@ -818,9 +818,10 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController
                     exit();
                 }
 
-                //trigger action after apply the permalink changes
-                do_action('hmwp_apply_permalink_changes');
             }
+
+            //trigger action after apply the permalink changes
+            do_action('hmwp_apply_permalink_changes');
 
             return true;
         }

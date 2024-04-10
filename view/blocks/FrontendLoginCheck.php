@@ -20,26 +20,28 @@
                 </div>
             </div>
             <div id="hmwp_frontendcheck_content" class="my-3"></div>
-            <div id="hmwp_solutions" class="my-3 mb-4 border-bottom text-center" style="display: none">
-                <?php if(HMWP_Classes_Tools::isApache() && !HMWP_Classes_Tools::isWpengine()) { ?>
-                    <div class="mb-2" style="font-size: 1.2rem"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/how-to-set-allowoverride-all/') ?>" target="_blank">Make sure to activate <strong>AllowOverride All</strong> for your website directory</a></div>
-                <?php }?>
-                <?php if(HMWP_Classes_Tools::isNginx()) { ?>
-                    <div class="mb-2" style="font-size: 1.2rem"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/how-to-setup-hide-my-wp-on-nginx-server/') ?>" target="_blank">Setup The Plugin On Nginx Server</a></div>
-                    <div class="mb-2" style="font-size: 1.2rem"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/how-to-configure-hide-my-wp-on-nginx-web-server-with-virtual-private-server/') ?>" target="_blank">Setup The Plugin On Nginx Server with Virtual Private Server</a></div>
-                <?php }?>
-                <?php if(HMWP_Classes_Tools::isWpengine()) { ?>
-                    <div class="mb-2" style="font-size: 1.2rem"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/hide-my-wp-pro-compatible-with-wp-engine/') ?>" target="_blank">Setup The Plugin On WP Engine</a></div>
-                <?php }?>
-                <?php if(HMWP_Classes_Tools::isGodaddy()) { ?>
-                    <div class="mb-2" style="font-size: 1.2rem"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/how-to-use-hide-my-wp-with-godaddy/') ?>" target="_blank">Setup The Plugin On Godaddy</a></div>
-                <?php }?>
-                <?php if(HMWP_Classes_Tools::isIIS()) { ?>
-                    <div class="mb-2" style="font-size: 1.2rem"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/setup-hide-my-wp-on-windows-iis-server/') ?>" target="_blank">Setup The Plugin On Windows IIS Server</a></div>
-                <?php }?>
-                <?php if(HMWP_Classes_Tools::isInmotion()) { ?>
-                    <div class="mb-2" style="font-size: 1.2rem"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/hide-my-wp-pro-compatible-with-inmotion-wordpress-hosting/') ?>" target="_blank">Setup The Plugin On Inmotion Server</a></div>
-                <?php }?>
+            <div id="hmwp_solutions"  style="display: none">
+                <div class="my-3 pt-3 border-top border-white text-center">
+                    <?php if(HMWP_Classes_Tools::isApache() && !HMWP_Classes_Tools::isWpengine()) { ?>
+                        <div class="mb-2"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/how-to-set-allowoverride-all/') ?>" target="_blank">Make sure to activate <strong>AllowOverride All</strong> for your website directory</a></div>
+                    <?php }?>
+                    <?php if(HMWP_Classes_Tools::isNginx()) { ?>
+                        <div class="mb-2"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/how-to-setup-hide-my-wp-on-nginx-server/') ?>" target="_blank">Setup The Plugin On Nginx Server</a></div>
+                        <div class="mb-2"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/how-to-configure-hide-my-wp-on-nginx-web-server-with-virtual-private-server/') ?>" target="_blank">Setup The Plugin On Nginx Server with Virtual Private Server</a></div>
+                    <?php }?>
+                    <?php if(HMWP_Classes_Tools::isWpengine()) { ?>
+                        <div class="mb-2"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/hide-my-wp-pro-compatible-with-wp-engine/') ?>" target="_blank">Setup The Plugin On WP Engine</a></div>
+                    <?php }?>
+                    <?php if(HMWP_Classes_Tools::isGodaddy()) { ?>
+                        <div class="mb-2"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/how-to-use-hide-my-wp-with-godaddy/') ?>" target="_blank">Setup The Plugin On Godaddy</a></div>
+                    <?php }?>
+                    <?php if(HMWP_Classes_Tools::isIIS()) { ?>
+                        <div class="mb-2"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/setup-hide-my-wp-on-windows-iis-server/') ?>" target="_blank">Setup The Plugin On Windows IIS Server</a></div>
+                    <?php }?>
+                    <?php if(HMWP_Classes_Tools::isInmotion()) { ?>
+                        <div class="mb-2"><a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/hide-my-wp-pro-compatible-with-inmotion-wordpress-hosting/') ?>" target="_blank">Setup The Plugin On Inmotion Server</a></div>
+                    <?php }?>
+                </div>
             </div>
 
             <ol>
@@ -50,9 +52,15 @@
                 <li><?php echo sprintf(esc_html__("If you can't configure %s, switch to Deactivated Mode and %scontact us%s.", 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/contact/" target="_blank" >', '</a>'); ?></li>
             </ol>
 
-            <?php if (defined('HMWP_DEFAULT_LOGIN') && HMWP_DEFAULT_LOGIN ) { ?>
+            <?php if (defined('HMWP_DEFAULT_LOGIN') && HMWP_DEFAULT_LOGIN ) {
+                if(stripos(HMWP_DEFAULT_LOGIN,home_url()) !== false){
+                    $custom_login = HMWP_DEFAULT_LOGIN;
+                }else{
+                    $custom_login = home_url(HMWP_DEFAULT_LOGIN);
+                }
+                ?>
                 <div class="wp-admin_warning col-sm-12 my-4 text-danger p-0 text-center">
-                    <div class="mb-3"><?php echo sprintf(esc_html__("Your login URL is: %s", 'hide-my-wp'), '<br /><a href="' . esc_url(home_url(HMWP_DEFAULT_LOGIN)) . '" target="_blank">' . esc_url(home_url(HMWP_DEFAULT_LOGIN)) . '</a>'); ?></div>
+                    <div class="mb-3"><?php echo sprintf(esc_html__("Your login URL is: %s", 'hide-my-wp'), '<br /><a href="' . esc_url($custom_login) . '" target="_blank">' . esc_url($custom_login) . '</a>'); ?></div>
                 </div>
             <?php }else{ ?>
                 <div class="wp-admin_warning col-sm-12 my-4 text-danger p-0 text-center">

@@ -1,12 +1,12 @@
 <?php
 /*
-  Copyright (c) 2016 - 2022, WPPlugins.
+  Copyright (c) 2016 - 2024, WPPlugins.
   The copyrights to the software code in this file are licensed under the (revised) BSD open source license.
 
   Plugin Name: Hide My WP Ghost Lite
   Plugin URI: https://wordpress.org/plugins/hide-my-wp/
   Description: Hide WP paths, wp-admin, wp-login, wp-content, plugins, themes, authors, XML-RPC, API, etc. Add 7G Firewall Security, Brute Force protection & more.
-  Version: 5.0.22
+  Version: 5.1.01
   Author: WPPlugins - WordPress Security Plugins
   Author URI: https://hidemywp.com
   License: GPLv2 or later
@@ -14,17 +14,17 @@
   Text Domain: hide-my-wp
   Domain Path: /languages
   Network: true
-  Requires at least: 4.3
-  Requires PHP: 5.6
+  Requires at least: 4.6
+  Requires PHP: 7.0
  */
 
 if ( defined( 'ABSPATH' ) && !defined( 'HMW_VERSION' ) ) {
 
     //Set current plugin version
-    define( 'HMWP_VERSION', '5.0.22' );
+    define( 'HMWP_VERSION', '5.1.01' );
 
     //Set the last stable version of the plugin
-    define( 'HMWP_STABLE_VERSION', '5.0.20' );
+    define( 'HMWP_STABLE_VERSION', '5.0.29' );
 
     //Set the plugin basename
     define( 'HMWP_BASENAME',  plugin_basename(__FILE__) );

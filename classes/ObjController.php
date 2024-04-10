@@ -42,7 +42,7 @@ class HMWP_Classes_ObjController
 
             if (! isset(self::$instances[ $className ]) ) {
                 /* check if class is already defined */
-                if (! class_exists($className) || $className == get_class() ) {
+                if (! class_exists($className) ) {
                         //include the class file
                         self::includeClass($class['dir'], $class['name']);
 

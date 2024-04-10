@@ -72,6 +72,7 @@
                                             $('.hmwp_nav_item').not(':first').hide();
 
                                             $('.tab-panel_tutorial').show();
+                                            $('.hmwp_emulate_cms').hide();
                                             $('.hmwp_disable_url').hide();
                                         });
 
@@ -92,7 +93,9 @@
                                             $('.tab-panel_tutorial').hide();
                                             $('.hmwp_nav_item').show();
 
+                                            $('.hmwp_emulate_cms').show();
                                             $('.hmwp_disable_url').hide();
+                                            $('select[name="hmwp_emulate_cms"] option[value="<?php echo esc_attr($lite['hmwp_emulate_cms']) ?>"]').prop('selected', 'selected');
                                         });
 
                                         if ($('input[name=hmwp_mode]').val() == 'default'){
@@ -112,17 +115,43 @@
 
                             <div class="hmwp_disable_url col-sm-12 row border-bottom border-light py-2 m-0">
                                 <?php if(!HMWP_Classes_Tools::getOption('logout')) { ?>
-                                    <div class="col-sm-12 pt-3">
-                                        <strong><?php echo  esc_html__("Login URL", 'hide-my-wp') ?>:</strong>
-                                        <?php echo '<a href="' . site_url() . '/' . HMWP_Classes_Tools::getOption('hmwp_login_url') . '" target="_blank">' . site_url() . '/' . HMWP_Classes_Tools::getOption('hmwp_login_url') . '</a>' ?>
-                                    </div>
+                                    <?php if (defined('HMWP_DEFAULT_LOGIN') && HMWP_DEFAULT_LOGIN ) {
+                                        if(stripos(HMWP_DEFAULT_LOGIN,home_url()) !== false){
+                                            $custom_login = HMWP_DEFAULT_LOGIN;
+                                        }else{
+                                            $custom_login = home_url(HMWP_DEFAULT_LOGIN);
+                                        }
+                                        ?>
+                                        <div class="col-sm-12 pt-3">
+                                            <strong><?php echo  esc_html__("Login URL", 'hide-my-wp') ?>:</strong>
+                                            <?php echo '<a href="' . esc_url($custom_login) . '" target="_blank">' . esc_url($custom_login) . '</a>' ?>
+                                        </div>
+                                    <?php }else{ ?>
+                                        <div class="col-sm-12 pt-3">
+                                            <strong><?php echo  esc_html__("Login URL", 'hide-my-wp') ?>:</strong>
+                                            <?php echo '<a href="' . site_url() . '/' . HMWP_Classes_Tools::getOption('hmwp_login_url') . '" target="_blank">' . site_url() . '/' . HMWP_Classes_Tools::getOption('hmwp_login_url') . '</a>' ?>
+                                        </div>
+                                    <?php }?>
                                 <?php }?>
-
-
                             </div>
                         </div>
+                        <div class="hmwp_emulate_cms col-sm-12 row justify-content-center py-4 shadow-none" <?php echo((HMWP_Classes_Tools::getOption('hmwp_mode') == 'default') ? 'style="display:none"' : '') ?>>
+                            <div class="py-2 px-1 text-right">
+                                <div class="font-weight-bold"><?php echo esc_html__('Simulate CMS', 'hide-my-wp'); ?>:</div>
+                            </div>
+                            <div class="col-sm-4 px-2 input-group">
+                                <select name="hmwp_emulate_cms" class="form-control bg-input mb-1">
+                                    <option value="" <?php selected('', HMWP_Classes_Tools::getOption('hmwp_emulate_cms')) ?>><?php echo esc_html__("No CMS Simulation", 'hide-my-wp') ?></option>
+                                    <option value="drupal" <?php selected('drupal', HMWP_Classes_Tools::getOption('hmwp_emulate_cms')) ?> ><?php echo esc_html__("Drupal 8", 'hide-my-wp') ?></option>
+                                    <option value="drupal9" <?php selected('drupal9', HMWP_Classes_Tools::getOption('hmwp_emulate_cms')) ?> ><?php echo esc_html__("Drupal 9", 'hide-my-wp') ?></option>
+                                    <option value="drupal10" <?php selected('drupal10', HMWP_Classes_Tools::getOption('hmwp_emulate_cms')) ?> ><?php echo esc_html__("Drupal 10", 'hide-my-wp') ?></option>
+                                    <option value="joomla3" <?php selected('joomla3', HMWP_Classes_Tools::getOption('hmwp_emulate_cms')) ?> ><?php echo esc_html__("Joomla 3", 'hide-my-wp') ?></option>
+                                    <option value="joomla4" <?php selected('joomla4', HMWP_Classes_Tools::getOption('hmwp_emulate_cms')) ?> ><?php echo esc_html__("Joomla 4", 'hide-my-wp') ?></option>
+                                    <option value="joomla5" <?php selected('joomla5', HMWP_Classes_Tools::getOption('hmwp_emulate_cms')) ?> ><?php echo esc_html__("Joomla 5", 'hide-my-wp') ?></option>
+                                </select>
+                            </div>
 
-
+                        </div>
                     </div>
 
                     <div class="card col-sm-12 p-0 m-0 mt-3" <?php echo((HMWP_Classes_Tools::getOption('hmwp_mode') == 'default') ? 'style="display:none"' : '') ?>>
@@ -826,7 +855,7 @@
                             </div>
                         </div>
 
-                        <div class="col-sm-12 row mb-1 ml-1 p-2">
+                       <div class="col-sm-12 row mb-1 ml-1 p-2">
                             <div class="checker col-sm-12 row my-2 py-1">
                                 <div class="col-sm-12 p-0 switch switch-sm">
                                     <input type="hidden" name="hmwp_disable_rest_api" value="0"/>
@@ -841,6 +870,18 @@
                             </div>
                         </div>
 
+                        <div class="col-sm-12 row mb-1 ml-1 p-2">
+                            <div class="checker col-sm-12 row my-2 py-1">
+                                <div class="col-sm-12 p-0 switch switch-sm">
+                                    <input type="hidden" name="hmwp_disable_rest_api_param" value="0"/>
+                                    <input type="checkbox" id="hmwp_disable_rest_api_param" name="hmwp_disable_rest_api_param" class="switch"<?php echo(HMWP_Classes_Tools::getOption('hmwp_disable_rest_api_param') ? 'checked="checked"' : '') ?> value="1"/>
+                                    <label for="hmwp_disable_rest_api_param"><?php echo esc_html__('Disable "rest_route" param access', 'hide-my-wp'); ?>
+                                        <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/customize-paths-in-hide-my-wp-ghost/#hide_rest_api') ?>" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a></label>
+                                    </label>
+                                    <div class="offset-1 text-black-50"><?php echo esc_html__("Disable REST API access using the parameter 'rest_route'", 'hide-my-wp'); ?></div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="col-sm-12 row mb-1 ml-1 p-2">
                             <div class="checker col-sm-12 row my-2 py-1">
@@ -916,10 +957,30 @@
                                         "link" => "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options",
                                         "default" => "nosniff"
                                     ),
+                                    "Cross-Origin-Embedder-Policy" => array(
+                                        "title" => "Prevents a document from loading any cross-origin resources that don't explicitly grant the document permission.",
+                                        "link" => "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy",
+                                        "default" => "unsafe-none"
+                                    ),
+                                    "Cross-Origin-Opener-Policy" => array(
+                                        "title" => "Allows you to ensure a top-level document does not share a browsing context group with cross-origin documents.",
+                                        "link" => "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy",
+                                        "default" => "unsafe-none"
+                                    ),
                                     "X-Frame-Options" => array(
                                         "title" => "Can be used to indicate whether or not a browser should be allowed to render a page in a frame, iframe, embed, object.",
                                         "link" => "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options",
                                         "default" => "SAMEORIGIN"
+                                    ),
+                                    "Permissions-Policy" => array(
+                                        "title" => "Provides a mechanism to allow and deny the use of browser features in its own frame, and in content within any iframe elements in the document.",
+                                        "link" => "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy",
+                                        "default" => "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()"
+                                    ),
+                                    "Referrer-Policy" => array(
+                                        "title" => "HTTP header controls how much referrer information (sent with the Referer header) should be included with requests..",
+                                        "link" => "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy",
+                                        "default" => "origin-when-cross-origin"
                                     ),
                                 ); ?>
 
@@ -1019,39 +1080,48 @@
                             </div>
                         </div>
 
-                        <?php if (HMWP_Classes_Tools::isApache() || HMWP_Classes_Tools::isLitespeed() ) { ?>
-
-                            <div class="col-sm-12 row mb-1 ml-1 p-2">
-                                <div class="checker col-sm-12 row my-2 py-1">
-                                    <div class="col-sm-12 p-0 switch switch-sm">
-                                        <input type="hidden" name="hmwp_sqlinjection" value="0"/>
-                                        <input type="checkbox" id="hmwp_sqlinjection" name="hmwp_sqlinjection" class="switch"<?php echo(HMWP_Classes_Tools::getOption('hmwp_sqlinjection') ? 'checked="checked"' : '') ?> value="1"/>
-                                        <label for="hmwp_sqlinjection"><?php echo esc_html__('Firewall Against Script Injection', 'hide-my-wp'); ?>
-                                            <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/customize-paths-in-hide-my-wp-ghost/#firewall_script_injection') ?>" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a>
-                                        </label>
-                                        <div class="offset-1 text-black-50"><?php echo esc_html__('Most WordPress installations are hosted on the popular Apache, Nginx and IIS web servers.', 'hide-my-wp'); ?></div>
-                                        <div class="offset-1 text-black-50"><?php echo esc_html__('A thorough set of rules can prevent many types of SQL Injection and URL hacks from being interpreted.', 'hide-my-wp'); ?></div>
-                                        <div class="offset-1 text-black-50 mt-2"><?php echo esc_html__('The firewall rules are added in the config file to block suspicious calls on your website.', 'hide-my-wp'); ?></div>
-                                    </div>
+                        <div class="col-sm-12 row mb-1 ml-1 p-2">
+                            <div class="checker col-sm-12 row my-2 py-1">
+                                <div class="col-sm-12 p-0 switch switch-sm">
+                                    <input type="hidden" name="hmwp_detectors_block" value="0"/>
+                                    <input type="checkbox" id="hmwp_detectors_block" name="hmwp_detectors_block" class="switch"<?php echo(HMWP_Classes_Tools::getOption('hmwp_detectors_block') ? 'checked="checked"' : '') ?> value="1"/>
+                                    <label for="hmwp_detectors_block"><?php echo esc_html__('Block Theme Detectors Crawlers', 'hide-my-wp'); ?></label>
+                                    <div class="offset-1 text-black-50"><?php echo esc_html__('Block known Users-Agents from popular Theme Detectors.', 'hide-my-wp'); ?></div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="col-sm-12 row border-bottom border-light py-2 mx-3 my-3 hmwp_sqlinjection border-bottom">
-                                <div class="col-sm-4 p-1">
-                                    <div class="font-weight-bold"><?php echo esc_html__('Firewall Strength', 'hide-my-wp'); ?>:</div>
-                                    <div class="text-black-50"><?php echo sprintf(esc_html__('Learn more about %s 7G firewall %s.', 'hide-my-wp'), '<a href="https://perishablepress.com/7g-firewall/" target="_blank">', '</a>'); ?></div>
+                        <div class="col-sm-12 row mb-1 ml-1 p-2">
+                            <div class="checker col-sm-12 row my-2 py-1">
+                                <div class="col-sm-12 p-0 switch switch-sm">
+                                    <input type="hidden" name="hmwp_sqlinjection" value="0"/>
+                                    <input type="checkbox" id="hmwp_sqlinjection" name="hmwp_sqlinjection" class="switch"<?php echo(HMWP_Classes_Tools::getOption('hmwp_sqlinjection') ? 'checked="checked"' : '') ?> value="1"/>
+                                    <label for="hmwp_sqlinjection"><?php echo esc_html__('Firewall Against Script Injection', 'hide-my-wp'); ?>
+                                        <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/customize-paths-in-hide-my-wp-ghost/#firewall_script_injection') ?>" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a>
+                                    </label>
+                                    <div class="offset-1 text-black-50"><?php echo esc_html__('Most WordPress installations are hosted on the popular Apache, Nginx and IIS web servers.', 'hide-my-wp'); ?></div>
+                                    <div class="offset-1 text-black-50"><?php echo esc_html__('A thorough set of rules can prevent many types of SQL Injection and URL hacks from being interpreted.', 'hide-my-wp'); ?></div>
+                                    <div class="offset-1 text-black-50 mt-2"><?php echo esc_html__('The firewall rules are added in the config file to block suspicious calls on your website.', 'hide-my-wp'); ?></div>
                                 </div>
-                                <div class="col-sm-8 p-0 input-group mb-1">
-                                    <select name="hmwp_sqlinjection_level" class="form-control bg-input">
-                                        <option value="1" <?php echo selected(1, HMWP_Classes_Tools::getOption('hmwp_sqlinjection_level')) ?>><?php echo esc_html__('Minimal', 'hide-my-wp'); ?></option>
-                                        <option value="2" <?php echo selected(2, HMWP_Classes_Tools::getOption('hmwp_sqlinjection_level')) ?>><?php echo esc_html__('Medium', 'hide-my-wp'); ?></option>
-                                        <option value="3" <?php echo selected(3, HMWP_Classes_Tools::getOption('hmwp_sqlinjection_level')) ?>><?php echo esc_html__('7G Firewall', 'hide-my-wp'); ?></option>
-                                    </select>
-                                </div>
+                            </div>
+                        </div>
 
+                        <div class="col-sm-12 row border-bottom border-light py-2 mx-3 my-3 hmwp_sqlinjection border-bottom">
+                            <div class="col-sm-4 p-1">
+                                <div class="font-weight-bold"><?php echo esc_html__('Firewall Strength', 'hide-my-wp'); ?>:</div>
+                                <div class="text-black-50"><?php echo sprintf(esc_html__('Learn more about %s 7G firewall %s.', 'hide-my-wp'), '<a href="https://perishablepress.com/7g-firewall/" target="_blank">', '</a>'); ?></div>
+                                <div class="text-black-50"><?php echo sprintf(esc_html__('Learn more about %s 8G firewall %s.', 'hide-my-wp'), '<a href="https://perishablepress.com/8g-firewall/" target="_blank">', '</a>'); ?></div>
+                            </div>
+                            <div class="col-sm-8 p-0 input-group mb-1">
+                                <select name="hmwp_sqlinjection_level" class="form-control bg-input">
+                                    <option value="1" <?php echo selected(1, HMWP_Classes_Tools::getOption('hmwp_sqlinjection_level')) ?>><?php echo esc_html__('Minimal', 'hide-my-wp'); ?></option>
+                                    <option value="2" <?php echo selected(2, HMWP_Classes_Tools::getOption('hmwp_sqlinjection_level')) ?>><?php echo esc_html__('Medium', 'hide-my-wp'); ?></option>
+                                    <option value="3" <?php echo selected(3, HMWP_Classes_Tools::getOption('hmwp_sqlinjection_level')) ?>><?php echo esc_html__('7G Firewall', 'hide-my-wp'); ?></option>
+                                    <option value="4" <?php echo selected(4, HMWP_Classes_Tools::getOption('hmwp_sqlinjection_level')) ?>><?php echo esc_html__('8G Firewall', 'hide-my-wp'); ?></option>
+                                </select>
                             </div>
 
-                        <?php } ?>
+                        </div>
 
                     </div>
                 </div>
@@ -1097,6 +1167,11 @@
             <?php $view->show('blocks/ChangeCacheFiles'); ?>
             <?php $view->show('blocks/SecurityCheck'); ?>
             <?php $view->show('blocks/FrontendCheck'); ?>
+            <?php
+            if (!HMWP_Classes_Tools::getOption('api_token')){
+                $view->show('blocks/Connect');
+            }
+            ?>
         </div>
     </div>
 </div>

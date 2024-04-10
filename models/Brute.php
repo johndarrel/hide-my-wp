@@ -152,7 +152,6 @@ class HMWP_Models_Brute
             $this->brute_kill_login();
         }
 
-
         //If we've reached this point, this means that the IP isn't cached.
         //Now we check to see if we should allow login
         $response = $this->brute_call('check_ip');
@@ -314,16 +313,20 @@ class HMWP_Models_Brute
                 $response['attempts'] = $attempts;
                 $response['status'] = 'blocked';
 
+                $this->set_transient($transient_name, $response, (int)HMWP_Classes_Tools::getOption('brute_max_timeout'));
+
                 //Log the block IP on the server
                 HMWP_Classes_ObjController::getClass('HMWP_Models_Log')->hmwp_log_actions('block_ip', array('ip' => $ip));
 
-                wp_redirect(site_url());
+                wp_redirect(home_url());
+                exit();
             } else {
                 $response['attempts'] = $attempts;
                 $response['status'] = 'ok';
+
+                $this->set_transient($transient_name, $response, (int)HMWP_Classes_Tools::getOption('brute_max_timeout'));
             }
 
-            $this->set_transient($transient_name, $response, (int)HMWP_Classes_Tools::getOption('brute_max_timeout'));
 
         } elseif ($action == 'check_ip') {
             $response['status'] = (isset($response['status']) ? $response['status'] : 'ok');
@@ -331,7 +334,6 @@ class HMWP_Models_Brute
             //Always block a banned IP
             if ($this->check_banned_ip($ip)) {
                 $response['status'] = 'blocked';
-
             }
 
         } elseif ($action == 'clear_ip') {
@@ -419,9 +421,10 @@ class HMWP_Models_Brute
         global $wpdb;
         $ips = array();
         $pattern = '_transient_timeout_hmwp_brute_';
+
         //check 20 keyword at one time
         $sql = $wpdb->prepare("SELECT `option_name` FROM `{$wpdb->options}` WHERE (`option_name` LIKE %s) ORDER BY `option_id` DESC", $pattern . '%');
-        //echo $sql; exit();
+
         if ($rows = $wpdb->get_results($sql)) {
             foreach ($rows as $row) {
                 if (!$transient_value = $this->get_transient(str_replace($pattern, 'hmwp_brute_', $row->option_name))) {
@@ -499,21 +502,16 @@ class HMWP_Models_Brute
      */
     public function brute_math_authenticate($user, $response)
     {
+        $salt = HMWP_Classes_Tools::getOption('hmwp_disable') . get_site_option('admin_email');
+        $ans = (int)HMWP_Classes_Tools::getValue('brute_num', 0);
+        $salted_ans = sha1($salt . $ans);
+        $correct_ans = HMWP_Classes_Tools::getValue('brute_ck');
 
-        if (HMWP_Classes_Tools::getValue('brute_ck')) {
-
-            $salt = HMWP_Classes_Tools::getOption('hmwp_disable') . get_site_option('admin_email');
-            $ans = (int)HMWP_Classes_Tools::getValue('brute_num', 0);
-            $salted_ans = sha1($salt . $ans);
-            $correct_ans = HMWP_Classes_Tools::getValue('brute_ck');
-
-            if ($correct_ans !== false && $salted_ans != $correct_ans) {
-                $user = new WP_Error(
-                    'authentication_failed',
-                    sprintf(esc_html__('%sYou failed to correctly answer the math problem.%s Please try again', 'hide-my-wp'), '<strong>', '</strong>')
-                );
-            }
-
+        if ($correct_ans === false || $salted_ans != $correct_ans) {
+            $user = new WP_Error(
+                'authentication_failed',
+                sprintf(esc_html__('%sYou failed to correctly answer the math problem.%s Please try again', 'hide-my-wp'), '<strong>', '</strong>')
+            );
         }
 
         return $user;
@@ -737,7 +735,6 @@ class HMWP_Models_Brute
      */
     public function brute_kill_login()
     {
-
         do_action('hmwp_kill_login', $this->brute_get_ip());
 
         wp_ob_end_flush_all();

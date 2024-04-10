@@ -118,7 +118,7 @@ class HMWP_Models_Menu
         }
 
         //Return the menu array
-        return $menu;
+        return apply_filters('hmwp_menu', $menu);
     }
 
     /**
@@ -129,6 +129,8 @@ class HMWP_Models_Menu
      */
     public function getSubMenu($current)
     {
+        $submenu = array();
+
         $subtabs = array(
             'hmwp_permalinks' => array(
                 array(
@@ -263,10 +265,10 @@ class HMWP_Models_Menu
 
         //Return all submenus
         if(isset($subtabs[$current])) {
-            return  $subtabs[$current];
+            $submenu =  $subtabs[$current];
         }
 
-        return array();
+        return apply_filters('hmwp_submenu', $submenu);
     }
 
     /**

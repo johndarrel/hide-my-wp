@@ -682,11 +682,9 @@ class HMWP_Controllers_Overview extends HMWP_Classes_FrontController
             if (!empty($_POST)) {
                 HMWP_Classes_ObjController::getClass('HMWP_Models_Settings')->saveValues($_POST);
             }
-            HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
 
-            HMWP_Classes_Tools::setHeader('json');
-            echo json_encode(array('success' => true, 'message' => esc_html__('Saved')));
-            exit();
+            wp_send_json_success(esc_html__('Saved'));
+
         }
     }
 }

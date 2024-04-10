@@ -46,7 +46,7 @@ class HMWP_Classes_Tools
                 @ini_set('memory_limit', apply_filters('admin_memory_limit', WP_MAX_MEMORY_LIMIT));
             } else {
                 define('HMWP_DISABLE', true);
-                HMWP_Classes_Error::setError(sprintf(esc_html__('Your memory limit is %sM. You need at least %sM to prevent loading errors in frontend. See: %sIncreasing memory allocated to PHP%s', 'hide-my-wp'), $maxmemory, 64, '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">', '</a>'));
+                HMWP_Classes_Error::setNotification(sprintf(esc_html__('Your memory limit is %sM. You need at least %sM to prevent loading errors in frontend. See: %sIncreasing memory allocated to PHP%s', 'hide-my-wp'), $maxmemory, 64, '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">', '</a>'));
             }
         }
         ////////////////////////////////////////////////////
@@ -170,6 +170,22 @@ class HMWP_Classes_Tools
             'hmwp_activity_log_roles' => array(),
             'hmwp_email_address' => '',
 
+            //Temporary Login
+            'hmwp_templogin' => 0,
+            'hmwp_templogin_role' => 'administrator',
+            'hmwp_templogin_redirect' => false,
+            'hmwp_templogin_delete_uninstal' => false,
+
+            //2FA Login
+            'hmwp_2falogin' => 0,
+            'hmwp_2falogin_status' => 1,
+            'hmwp_2fa_totp' => 1,
+            'hmwp_2fa_email' => 0,
+            'hmwp_2falogin_max_attempts' => 5,
+            'hmwp_2falogin_max_timeout' => 900,
+            'hmwp_2falogin_message' => '',
+            'hmwp_2falogin_fail_message' => '',
+
             //-- Brute Force
             'hmwp_bruteforce' => 0,
             'hmwp_bruteforce_register' => 0,
@@ -204,6 +220,7 @@ class HMWP_Classes_Tools
             'hmwp_change_in_cache_directory' => '',
             'hmwp_hide_loggedusers' => 1,
             'hmwp_hide_version' => 1,
+            'hmwp_hide_version_random' => 0,
             'hmwp_hide_generator' => 1,
             'hmwp_hide_prefetch' => 1,
             'hmwp_hide_comments' => 1,
@@ -258,8 +275,8 @@ class HMWP_Classes_Tools
             'hmwp_mapping_file' => 0,
             'hmwp_text_mapping' => json_encode(
                 array(
-                    'from' => array('wp-caption'),
-                    'to' => array('caption'),
+                    'from' => array(),
+                    'to' => array(),
                 )
             ),
             'hmwp_cdn_urls' => json_encode(array()),
@@ -314,6 +331,7 @@ class HMWP_Classes_Tools
             'hmwp_wp-json' => 'wp-json',
             'hmwp_hide_rest_api' => 0,
             'hmwp_disable_rest_api' => 0,
+            'hmwp_disable_rest_api_param' => 0,
             'hmwp_disable_xmlrpc' => 0,
             'hmwp_hide_rsd' => 0,
             'hmwp_hide_admin' => 0,
@@ -336,7 +354,6 @@ class HMWP_Classes_Tools
                 "Strict-Transport-Security" => "max-age=15768000;includeSubdomains",
                 "Content-Security-Policy" => "object-src 'none'",
                 "X-XSS-Protection" => "1; mode=block",
-                "X-Content-Type-Options" => "nosniff",
             ),
             //--
             'hmwp_detectors_block' => 0,
@@ -385,15 +402,17 @@ class HMWP_Classes_Tools
             'hmwp_hide_img_classes' => 1,
             'hmwp_hide_rest_api' => 1,
             'hmwp_disable_rest_api' => 0,
-            'hmwp_disable_xmlrpc' => 0,
+            'hmwp_disable_rest_api_param' =>1,
+            'hmwp_disable_xmlrpc' => 1,
             'hmwp_hide_rsd' => 1,
             //
-            'hmwp_sqlinjection' => 0,
+            'hmwp_sqlinjection' => 1,
+            'hmwp_sqlinjection_level' => 1,
             'hmwp_security_header' => 1,
             'hmwp_hide_unsafe_headers' => 1,
+            'hmwp_detectors_block' => 1,
 
             //PRO
-            'hmwp_detectors_block' => 0,
             'hmwp_hide_styleids' => 0,
             'hmwp_hide_authors' => 0,
             'hmwp_disable_browsing' => 0,
@@ -490,6 +509,9 @@ class HMWP_Classes_Tools
                 self::$options['hmwp_hide_in_sitemap'] = self::$options['hmwp_shutdownload'];
                 unset(self::$options['hmwp_shutdownload']);
             }
+
+            //update the login on Cloud when plugin update
+            self::sendLoginPathsApi();
 
             self::$options['hmwp_ver'] = HMWP_VERSION_ID;
             self::saveOptions();
@@ -594,8 +616,22 @@ class HMWP_Classes_Tools
         if (!defined('WP_PLUGIN_DIR') ) {
             load_plugin_textdomain(dirname(HMWP_BASENAME), dirname(HMWP_BASENAME) . '/languages/');
         } else {
-            load_plugin_textdomain(dirname(HMWP_BASENAME), null, dirname(HMWP_BASENAME) . '/languages/');
+            load_plugin_textdomain(dirname(HMWP_BASENAME), false, dirname(HMWP_BASENAME) . '/languages/');
         }
+    }
+
+    /**
+     * Check if it's Rest Api call
+     *
+     * @return bool
+     */
+    public static function isApi()
+    {
+        if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/' . HMWP_Classes_Tools::getOption('hmwp_wp-json') . '/') !== false){
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -624,6 +660,10 @@ class HMWP_Classes_Tools
         //If allways change paths admin & frontend
         if (HMW_ALWAYS_CHANGE_PATHS ) {
             return true;
+        }
+
+        if(HMWP_Classes_Tools::isApi()){
+            return false;
         }
 
         //If not admin
@@ -658,6 +698,10 @@ class HMWP_Classes_Tools
             return false;
         }
 
+        if(HMWP_Classes_Tools::isAjax() || HMWP_Classes_Tools::isApi()){
+            return false;
+        }
+        
         //If not admin
         if (!is_admin() && !is_network_admin() ) {
             //if process the change paths
@@ -970,6 +1014,13 @@ class HMWP_Classes_Tools
                 'sslverify' => _HMWP_CHECK_SSL_,
                 'method' => 'GET',
                 'timeout' => 30,
+                'headers' => array(
+                    'TOKEN' => HMWP_Classes_Tools::getOption('hmwp_token'),
+                    'API-TOKEN' => HMWP_Classes_Tools::getOption('api_token'),
+                    'USER-URL' =>  home_url(),
+                    'LANG' => get_bloginfo('language'),
+                    'VER' => HMWP_VERSION
+                )
             ),
             $options
         );
@@ -979,7 +1030,6 @@ class HMWP_Classes_Tools
             $options['body'] = $params;
             unset($options['method']);
             $response = wp_remote_post($url, $options);
-
         } else {
 
             unset($options['method']);
@@ -1081,11 +1131,7 @@ class HMWP_Classes_Tools
 
 		//If custom defined
         if (HMWP_Classes_Tools::getOption('hmwp_server_type') <> 'auto' ) {
-	       if(in_array(HMWP_Classes_Tools::getOption('hmwp_server_type'), array(
-			   'nginx', 'iis', 'cloudpanel', 'flywheel'
-	       ))){
-			   return false;
-	       }
+            return in_array(HMWP_Classes_Tools::getOption('hmwp_server_type'), array('apache', 'litespeed', 'siteground'));
         }
 
         //If custom defined
@@ -1218,13 +1264,11 @@ class HMWP_Classes_Tools
         global $is_nginx;
 
 	    //If custom defined
-	    if (HMWP_Classes_Tools::getOption('hmwp_server_type') <> 'auto' ) {
-		    if(in_array(HMWP_Classes_Tools::getOption('hmwp_server_type'), array(
-			    'apache','iis'
-		    ))){
-			    return false;
-		    }
-	    }
+        if (HMWP_Classes_Tools::getOption('hmwp_server_type') <> 'auto' ) {
+            if (HMWP_Classes_Tools::getOption('hmwp_server_type') == 'nginx'){
+                return true;
+            }
+        }
 
         //If custom defined
         if (defined('HMWP_SERVER_TYPE') && strtolower(HMWP_SERVER_TYPE) == 'nginx' ) {
@@ -1380,12 +1424,17 @@ class HMWP_Classes_Tools
 	public static function isCloudPanel()
 	{
 
-		//If custom defined
-		if (HMWP_Classes_Tools::getOption('hmwp_server_type') <> 'auto' ) {
-			return (HMWP_Classes_Tools::getOption('hmwp_server_type') == 'cloudpanel');
-		}
+        global $is_nginx;
 
-		return false;
+        //If custom defined
+        if (HMWP_Classes_Tools::getOption('hmwp_server_type') <> 'auto' ) {
+            if (HMWP_Classes_Tools::getOption('hmwp_server_type') == 'cloudpanel'){
+                $is_nginx = true;
+                return true;
+            }
+        }
+
+        return false;
 	}
 
     /**
@@ -1551,11 +1600,22 @@ class HMWP_Classes_Tools
      */
     public static function getRelativePath( $url )
     {
-        $url = wp_make_link_relative($url);
 
         if ($url <> '' ) {
-            $url = str_replace(wp_make_link_relative(get_bloginfo('url')), '', $url);
+            //get the relative url path
+            $url = wp_make_link_relative($url);
 
+            //get the relative domain
+            $domain = site_url();
+            if(self::isMultisiteWithPath()){
+                $domain = network_site_url();
+            }
+            $domain = wp_make_link_relative($domain);
+
+            //exclude the root domain
+            $url = str_replace($domain, '', $url);
+
+            //remove the domain path if exists
             if (self::isMultisiteWithPath() && defined('PATH_CURRENT_SITE') && PATH_CURRENT_SITE <> '/' ) {
                 $url = str_replace(rtrim(PATH_CURRENT_SITE, '/'), '', $url);
             }
@@ -1835,6 +1895,28 @@ class HMWP_Classes_Tools
         }
     }
 
+    /**
+     * Send the login URL to Cloud for this URL
+     * @return void
+     */
+    public static function sendLoginPathsApi(){
+
+        if(HMWP_Classes_Tools::getOption('api_token')){
+
+            $domain = (self::isMultisites() && defined('BLOG_ID_CURRENT_SITE')) ? get_home_url(BLOG_ID_CURRENT_SITE) : home_url();
+            $options = array( 'timeout' => 10, 'headers' => array( 'USER-URL' => $domain ) );
+
+            $login = array(
+                'path' => HMWP_Classes_Tools::getOption('hmwp_login_url'),
+                'parameter' => HMWP_Classes_Tools::getOption('hmwp_disable_name'),
+                'value' => HMWP_Classes_Tools::getOption('hmwp_disable'),
+            );
+
+            self::hmwp_remote_post(_HMWP_API_SITE_ . '/api/settings',
+                array('login' => wp_json_encode($login), 'url' => $domain), $options);
+        }
+    }
+
 	/**
 	 * Call Account API Server
 	 *
@@ -1872,27 +1954,25 @@ class HMWP_Classes_Tools
 		    return $check;
 	    }
 
-	    if ( $response && json_decode( $response ) ) {
-			//print_r($response);exit();
-		    $check = json_decode( $response, true );
+        if ($response && $response = json_decode($response, true)) {
 
-		    HMWP_Classes_Tools::saveOptions( 'hmwp_token', ( isset( $check['token'] ) ? $check['token'] : 0 ) );
-		    HMWP_Classes_Tools::saveOptions( 'api_token', ( isset( $check['api_token'] ) ? $check['api_token'] : false ) );
-		    HMWP_Classes_Tools::saveOptions( 'error', isset( $check['error'] ) );
+		    HMWP_Classes_Tools::saveOptions( 'hmwp_token', ( isset( $response['token'] ) ? $response['token'] : 0 ) );
+		    HMWP_Classes_Tools::saveOptions( 'api_token', ( isset( $response['api_token'] ) ? $response['api_token'] : false ) );
+		    HMWP_Classes_Tools::saveOptions( 'error', isset( $response['error'] ) );
 
-		    if ( ! isset( $check['error'] ) ) {
+		    if ( ! isset( $response['error'] ) ) {
 			    if ( $redirect_to <> '' ) {
 				    wp_redirect( $redirect_to );
 				    exit();
 			    }
-		    } elseif ( isset( $check['message'] ) ) {
-			    HMWP_Classes_Error::setError( $check['message'] );
+		    } elseif ( isset( $response['message'] ) ) {
+                HMWP_Classes_Error::setNotification($response['message'], 'notice', false);
 		    }
 	    } else {
-		    HMWP_Classes_Error::setError( sprintf( __( 'CONNECTION ERROR! Make sure your website can access: %s', 'hide-my-wp' ), '<a href="' . _HMWP_ACCOUNT_SITE_ . '" target="_blank">' . _HMWP_ACCOUNT_SITE_ . '</a>' ) . " <br /> " );
+		    HMWP_Classes_Error::setNotification( sprintf( __( 'CONNECTION ERROR! Make sure your website can access: %s', 'hide-my-wp' ), '<a href="' . _HMWP_ACCOUNT_SITE_ . '" target="_blank">' . _HMWP_ACCOUNT_SITE_ . '</a>' ) , 'notice', false );
 	    }
 
-	    return $check;
+	    return $response;
 
     }
 
@@ -2055,6 +2135,30 @@ class HMWP_Classes_Tools
         return false;
     }
 
+    /**
+     * Search part of string in array
+     *
+     * @param string $needle
+     * @param array $haystack
+     *
+     * @return bool
+     */
+    public static function searchInString( $string, $haystack )
+    {
+        foreach ( $haystack as $value ) {
+            if($string && $value && $string <> '' && $value <> '') {
+                if (function_exists('mb_stripos')) {
+                    if (mb_stripos($string, $value) !== false) {
+                        return true;
+                    }
+                } elseif (stripos($string, $value) !== false) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Customize the redirect for the logout process
@@ -2144,79 +2248,163 @@ class HMWP_Classes_Tools
         return HMWP_Classes_ObjController::initFilesystem();
     }
 
-	/**
-	 * Check if there are whitelisted IPs for accessing the hidden paths
-	 * @return bool
-	 */
-	public static function isWhitelistedIP($ip){
-		$wl_items = array();
+    public static function isWhitelistedIP($ip){
+        $wl_items = array();
 
-		//jetpack whitelist
-		$wl_jetpack = array(
-			'122.248.245.244/32',
-			'54.217.201.243/32',
-			'54.232.116.4/32',
-			'185.64.140.0/22',
-			'76.74.255.0/22',
-			'192.0.64.0/18',
-			'192.0.65.0/22',
-			'192.0.80.0/22',
-			'192.0.96.0/22',
-			'192.0.112.0/20',
-			'192.0.123.0/22',
-			'195.234.108.0/22',
-		);
+        if(!filter_var($ip, FILTER_VALIDATE_IP)){
+            return true;
+        }
 
-		if (filter_var(home_url(), FILTER_VALIDATE_URL) !== FALSE && strpos(home_url(), '.') !== false) {
-			$wl_jetpack[] = '127.0.0.1';
-		}
+        //jetpack whitelist
+        $wl_jetpack = array(
+            '122.248.245.244/32',
+            '54.217.201.243/32',
+            '54.232.116.4/32',
+            '185.64.140.0/22',
+            '76.74.255.0/22',
+            '192.0.64.0/18',
+            '192.0.65.0/22',
+            '192.0.80.0/22',
+            '192.0.96.0/22',
+            '192.0.112.0/20',
+            '192.0.123.0/22',
+            '195.234.108.0/22',
+        );
 
-		if (HMWP_Classes_Tools::getOption('whitelist_ip')) {
-			$wl_items = json_decode(HMWP_Classes_Tools::getOption('whitelist_ip'), true);
-		}
+        if (filter_var(home_url(), FILTER_VALIDATE_URL) !== FALSE && strpos(home_url(), '.') !== false) {
+            $wl_jetpack[] = '127.0.0.1';
+        }
 
-		//merge all the whitelisted ips and also add the hook for users
-		$wl_items = apply_filters('hmwp_whitelisted_ips', array_merge($wl_jetpack, $wl_items));
+        if (HMWP_Classes_Tools::getOption('whitelist_ip')) {
+            $wl_items = (array)json_decode(HMWP_Classes_Tools::getOption('whitelist_ip'), true);
+        }
 
-		try {
-			foreach ($wl_items as $item) {
-				$item = trim($item);
+        //merge all the whitelisted ips and also add the hook for users
+        $wl_items = apply_filters('hmwp_whitelisted_ips', array_merge($wl_jetpack, $wl_items));
 
-				if ($ip == $item) {
-					return true;
-				}
+        try {
+            foreach ($wl_items as $item) {
+                $item = trim($item);
 
-				if (strpos($item, '*') === false && strpos($item, '/') === false) { //no match, no wildcard
-					continue;
-				}
+                if (filter_var($item, FILTER_VALIDATE_IP) && $ip == $item) {
+                    return true;
+                }
 
-				if(strpos($ip,'.') !== false) {
+                if (strpos($item, '*') === false && strpos($item, '/') === false) { //no match, no wildcard
+                    continue;
+                }
 
-					if(strpos($item,'/') !== false) {
-						list( $range, $bits ) = explode( '/', $item, 2 );
-						$subnet = ip2long( $range );
-						$iplong = ip2long( $ip );
-						$mask = -1 << (32 - $bits);
-						$subnet &= $mask;
+                if(strpos($ip,'.') !== false) {
 
-						if ( ($iplong & $mask) == $subnet ){
-							return true;
-						}
+                    if(strpos($item,'/') !== false) {
+                        list( $range, $bits ) = explode( '/', $item, 2 );
 
-					}
+                        if (0 == (int)$bits) {
+                            continue;
+                        }
 
-					$iplong = ip2long($ip);
-					$ip_low = ip2long(str_replace('*', '0', $item));
-					$ip_high = ip2long(str_replace('*', '255', $item));
+                        if ((int)$bits < 0 || (int)$bits > 32) {
+                            continue;
+                        }
 
-					if ($iplong >= $ip_low && $iplong <= $ip_high) {//IP is within wildcard range
-						return true;
-					}
-				}
+                        $subnet = ip2long( $range );
+                        $iplong = ip2long( $ip );
+                        $mask = -1 << (32 - $bits);
+                        $subnet &= $mask;
 
-			}
-		} catch(ArithmeticError $e) {
-		}
-		return false;
-	}
+                        if ( ($iplong & $mask) == $subnet ){
+                            return true;
+                        }
+                    }
+
+                    $iplong = ip2long($ip);
+                    $ip_low = ip2long(str_replace('*', '0', $item));
+                    $ip_high = ip2long(str_replace('*', '255', $item));
+
+                    if ($iplong >= $ip_low && $iplong <= $ip_high) {//IP is within wildcard range
+                        return true;
+                    }
+                }
+
+            }
+        } catch(Exception $e) {
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if there are banned IPs for accessing the hidden paths
+     * @return bool
+     */
+    public static function isBlacklistedIP($ip){
+        $bl_items = array();
+
+        $bl_blacklisted = array(
+            '35.214.130.0/22', // detector
+            '54.86.50.0/22', // detector
+            '172.105.48.0/22', // detector
+            '15.235.50.223', // detector
+            '192.185.4.40', // detector
+            '172.105.48.130', // detector
+            '167.99.233.123', // detector
+        );
+
+        if (HMWP_Classes_Tools::getOption('banlist_ip')) {
+            $bl_items = (array)json_decode(HMWP_Classes_Tools::getOption('banlist_ip'), true);
+        }
+
+        //merge all the whitelisted ips and also add the hook for users
+        $bl_items = apply_filters('hmwp_banlist_ips', array_merge($bl_blacklisted, $bl_items));
+
+        try {
+            foreach ($bl_items as $item) {
+                $item = trim($item);
+
+                if (filter_var($item, FILTER_VALIDATE_IP) && $ip == $item) {
+                    return true;
+                }
+
+                if (strpos($item, '*') === false && strpos($item, '/') === false) { //no match, no wildcard
+                    continue;
+                }
+
+                if(strpos($ip,'.') !== false) {
+
+                    if(strpos($item,'/') !== false) {
+                        list( $range, $bits ) = explode( '/', $item, 2 );
+
+                        if (0 == (int)$bits) {
+                            continue;
+                        }
+
+                        if ((int)$bits < 0 || (int)$bits > 32) {
+                            continue;
+                        }
+
+                        $subnet = ip2long( $range );
+                        $iplong = ip2long( $ip );
+                        $mask = -1 << (32 - $bits);
+                        $subnet &= $mask;
+
+                        if ( ($iplong & $mask) == $subnet ){
+                            return true;
+                        }
+                    }
+
+                    $iplong = ip2long($ip);
+                    $ip_low = ip2long(str_replace('*', '0', $item));
+                    $ip_high = ip2long(str_replace('*', '255', $item));
+
+                    if ($iplong >= $ip_low && $iplong <= $ip_high) {//IP is within wildcard range
+                        return true;
+                    }
+                }
+
+            }
+        } catch(Exception $e) {
+        }
+
+        return false;
+    }
 }

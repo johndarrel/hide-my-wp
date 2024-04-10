@@ -43,7 +43,7 @@ class HMWP_Controllers_Log extends HMWP_Classes_FrontController
                 }
 
                 HMWP_Classes_Tools::emptyCache();
-                HMWP_Classes_Error::setError(esc_html__('Saved'), 'success');
+                HMWP_Classes_Error::setNotification(esc_html__('Saved'), 'success');
             }
         }
     }

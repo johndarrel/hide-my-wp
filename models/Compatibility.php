@@ -65,7 +65,12 @@ class HMWP_Models_Compatibility
 			'wp-user-manager/wp-user-manager.php' => 'HMWP_Models_Compatibility_Wpum',
 			'wp-defender/wp-defender.php' => 'HMWP_Models_Compatibility_WpDefender',
 			'cmp-coming-soon-maintenance/niteo-cmp.php' => 'HMWP_Models_Compatibility_Cmp',
-		);
+            'display-admin-page-on-frontend-premium/index.php' => 'HMWP_Models_Compatibility_WPFrontendAdmin',
+            'flying-press/flying-press.php' => 'HMWP_Models_Compatibility_FlyingPress',
+            'two-factor/two-factor.php' => 'HMWP_Models_Compatibility_TwoFactor',
+            'hcaptcha-for-forms-and-more/hcaptcha.php' => 'HMWP_Models_Compatibility_hCaptcha',
+            'mainwp-child/mainwp-child.php' => 'HMWP_Models_Compatibility_MainWP',
+        );
 
 	    try {
 
@@ -164,6 +169,38 @@ class HMWP_Models_Compatibility
 		}
 	}
 
+    /**
+     * Check if the IP is in blacklist
+     * Include also the theme detectors
+     * @return void
+     * @throws Exception
+     */
+    public function checkBlacklistIPs(){
+
+        if (!HMWP_Classes_Tools::getValue('hmwp_preview') && isset($_SERVER['REMOTE_ADDR']) && strpos($_SERVER['REMOTE_ADDR'], '.') !== false ) {
+
+
+            $ip = $_SERVER['REMOTE_ADDR'];
+
+            if(!HMWP_Classes_Tools::isWhitelistedIP($ip) && HMWP_Classes_Tools::isBlacklistedIP($ip)){
+                HMWP_Classes_ObjController::getClass('HMWP_Models_Brute')->brute_kill_login();
+            }
+
+            if(isset($_SERVER['HTTP_USER_AGENT'])){
+                $agent = $_SERVER['HTTP_USER_AGENT'];
+                if(strpos($agent, 'wpthemedetector') !== false ||
+                    strpos($agent, 'builtwith') !== false ||
+                    strpos($agent, 'wapalyzer') !== false ||
+                    strpos($agent, 'mShots') !== false ||
+                    strpos($agent, 'WhatCMS') !== false ||
+                    strpos($agent, 'isitwp') !== false){
+
+                    HMWP_Classes_ObjController::getClass('HMWP_Models_Brute')->brute_kill_login();
+                }
+            }
+
+        }
+    }
 
     /**
      * Check if the cache plugins are loaded and have cached files
@@ -607,7 +644,7 @@ class HMWP_Models_Compatibility
         //First thing you need to do
         $page = HMWP_Classes_Tools::getValue('page');
         if (HMWP_Classes_Tools::getOption('hmwp_mode') == 'default' && $page <> 'hmwp_permalinks') {
-            HMWP_Classes_Error::setError(sprintf(esc_html__('First, you need to activate the %sLite Mode%s in %s', 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_permalinks').'"><strong>', '</strong></a>', '<strong>'.HMWP_Classes_Tools::getOption('hmwp_plugin_name').'</strong>'));
+            HMWP_Classes_Error::setNotification(sprintf(esc_html__('First, you need to activate the %sLite Mode%s in %s', 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_permalinks').'"><strong>', '</strong></a>', '<strong>'.HMWP_Classes_Tools::getOption('hmwp_plugin_name').'</strong>'));
         }
 
         //is CDN plugin installed
@@ -621,14 +658,14 @@ class HMWP_Models_Compatibility
                                 && !in_array(HMWP_Classes_Tools::getOption('hmwp_wp-content_url'), $dirs) 
                                 && !in_array(HMWP_Classes_Tools::getOption('hmwp_wp-includes_url'), $dirs)
                             ) {
-                                HMWP_Classes_Error::setError(sprintf(esc_html__('CDN Enabled detected. Please include %s and %s paths in CDN Enabler Settings', 'hide-my-wp'), '<strong>' . HMWP_Classes_Tools::getOption('hmwp_wp-content_url') . '</strong>', '<strong>' . HMWP_Classes_Tools::getOption('hmwp_wp-includes_url') . '</strong>'));
+                                HMWP_Classes_Error::setNotification(sprintf(esc_html__('CDN Enabled detected. Please include %s and %s paths in CDN Enabler Settings', 'hide-my-wp'), '<strong>' . HMWP_Classes_Tools::getOption('hmwp_wp-content_url') . '</strong>', '<strong>' . HMWP_Classes_Tools::getOption('hmwp_wp-includes_url') . '</strong>'));
                             }
                         }
                     }
                 }
 
                 if (isset($_SERVER['REQUEST_URI']) && admin_url('options-general.php?page=cdn_enabler', 'relative') == $_SERVER['REQUEST_URI'] ) {
-                    HMWP_Classes_Error::setError(sprintf(esc_html__("CDN Enabler detected! Learn how to configure it with %s %sClick here%s", 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/hide-my-wp-and-cdn-enabler/" target="_blank">', '</a>'));
+                    HMWP_Classes_Error::setNotification(sprintf(esc_html__("CDN Enabler detected! Learn how to configure it with %s %sClick here%s", 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/hide-my-wp-and-cdn-enabler/" target="_blank">', '</a>'));
                 }
             }
 
@@ -640,7 +677,7 @@ class HMWP_Models_Compatibility
                         && !in_array(HMWP_Classes_Tools::getOption('hmwp_wp-content_url'), $dirs) 
                         && !in_array(HMWP_Classes_Tools::getOption('hmwp_wp-includes_url'), $dirs)
                     ) {
-                        HMWP_Classes_Error::setError(sprintf(esc_html__('WP Super Cache CDN detected. Please include %s and %s paths in WP Super Cache > CDN > Include directories', 'hide-my-wp'), '<strong>' . HMWP_Classes_Tools::getOption('hmwp_wp-content_url') . '</strong>', '<strong>' . HMWP_Classes_Tools::getOption('hmwp_wp-includes_url') . '</strong>'));
+                        HMWP_Classes_Error::setNotification(sprintf(esc_html__('WP Super Cache CDN detected. Please include %s and %s paths in WP Super Cache > CDN > Include directories', 'hide-my-wp'), '<strong>' . HMWP_Classes_Tools::getOption('hmwp_wp-content_url') . '</strong>', '<strong>' . HMWP_Classes_Tools::getOption('hmwp_wp-includes_url') . '</strong>'));
                     }
                 }
             }
@@ -649,35 +686,35 @@ class HMWP_Models_Compatibility
 	        //indeed-membership-pro%2Findeed-membership-pro
             if (HMWP_Classes_Tools::isPluginActive('indeed-affiliate-pro/indeed-affiliate-pro.php') ) {
                 if (HMWP_Classes_Tools::getOption('hmwp_admin-ajax_url') <>  HMWP_Classes_Tools::$default['hmwp_admin-ajax_url'] ) {
-                    HMWP_Classes_Error::setError(sprintf(esc_html__("Ultimate Affiliate Pro detected. The plugin doesn't support custom %s paths as it doesn't use WordPress functions to call the Ajax URL", 'hide-my-wp'), '<strong>admin-ajax.php</strong>'));
+                    HMWP_Classes_Error::setNotification(sprintf(esc_html__("Ultimate Affiliate Pro detected. The plugin doesn't support custom %s paths as it doesn't use WordPress functions to call the Ajax URL", 'hide-my-wp'), '<strong>admin-ajax.php</strong>'));
                 }
             }
 
 	        if (HMWP_Classes_Tools::isPluginActive('indeed-membership-pro/indeed-membership-pro.php')) {
 		        if (HMWP_Classes_Tools::getOption('hmwp_admin-ajax_url') <>  HMWP_Classes_Tools::$default['hmwp_admin-ajax_url'] ) {
-			        HMWP_Classes_Error::setError(sprintf(esc_html__("Indeed Ultimate Membership Pro detected. The plugin doesn't support custom %s paths as it doesn't use WordPress functions to call the Ajax URL", 'hide-my-wp'), '<strong>admin-ajax.php</strong>'));
+			        HMWP_Classes_Error::setNotification(sprintf(esc_html__("Indeed Ultimate Membership Pro detected. The plugin doesn't support custom %s paths as it doesn't use WordPress functions to call the Ajax URL", 'hide-my-wp'), '<strong>admin-ajax.php</strong>'));
 		        }
 	        }
 
 	        //Mor Rewrite is not installed
             if (HMWP_Classes_Tools::isApache() && !HMWP_Classes_Tools::isModeRewrite() ) {
-                HMWP_Classes_Error::setError(sprintf(esc_html__('%s does not work without mode_rewrite. Please activate the rewrite module in Apache. %sMore details%s', 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name'), '<a href="https://tecadmin.net/enable-apache-mod-rewrite-module-in-ubuntu-linuxmint/" target="_blank">', '</a>'));
+                HMWP_Classes_Error::setNotification(sprintf(esc_html__('%s does not work without mode_rewrite. Please activate the rewrite module in Apache. %sMore details%s', 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name'), '<a href="https://tecadmin.net/enable-apache-mod-rewrite-module-in-ubuntu-linuxmint/" target="_blank">', '</a>'));
             }
 
             //IIS server and no Rewrite Permalinks installed
             if (HMWP_Classes_Tools::isIIS() && HMWP_Classes_Tools::isPHPPermalink() ) {
-                HMWP_Classes_Error::setError(sprintf(esc_html__('You need to activate the URL Rewrite for IIS to be able to change the permalink structure to friendly URL (without index.php). %sMore details%s', 'hide-my-wp'), '<a href="https://www.iis.net/downloads/microsoft/url-rewrite" target="_blank">', '</a>'));
+                HMWP_Classes_Error::setNotification(sprintf(esc_html__('You need to activate the URL Rewrite for IIS to be able to change the permalink structure to friendly URL (without index.php). %sMore details%s', 'hide-my-wp'), '<a href="https://www.iis.net/downloads/microsoft/url-rewrite" target="_blank">', '</a>'));
             } elseif (HMWP_Classes_Tools::isPHPPermalink() ) {
-                HMWP_Classes_Error::setError(esc_html__('You need to set the permalink structure to friendly URL (without index.php).', 'hide-my-wp'));
+                HMWP_Classes_Error::setNotification(esc_html__('You need to set the permalink structure to friendly URL (without index.php).', 'hide-my-wp'));
             }
 
             //Inmotion server detected
             if (HMWP_Classes_Tools::isInmotion() ) {
-                HMWP_Classes_Error::setError(sprintf(esc_html__('Inmotion detected. %sPlease read how to make the plugin compatible with Inmotion Nginx Cache%s', 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/hide-my-wp-pro-compatible-with-inmotion-wordpress-hosting/" target="_blank">', '</a>'));
+                HMWP_Classes_Error::setNotification(sprintf(esc_html__('Inmotion detected. %sPlease read how to make the plugin compatible with Inmotion Nginx Cache%s', 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/hide-my-wp-pro-compatible-with-inmotion-wordpress-hosting/" target="_blank">', '</a>'));
             }
 
             if (HMWP_Classes_Tools::isAWS() ) {
-                HMWP_Classes_Error::setError(sprintf(esc_html__('Bitnami detected. %sPlease read how to make the plugin compatible with AWS hosting%s', 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-set-hide-my-wp-for-bitnami-servers/" target="_blank">', '</a>'));
+                HMWP_Classes_Error::setNotification(sprintf(esc_html__('Bitnami detected. %sPlease read how to make the plugin compatible with AWS hosting%s', 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-set-hide-my-wp-for-bitnami-servers/" target="_blank">', '</a>'));
             }
 
             //The login path is changed by other plugins and may affect the functionality
@@ -706,7 +743,7 @@ class HMWP_Models_Compatibility
 
 				        if($fusion_url){
 					        if (defined('FUSION_LIBRARY_URL') && stripos(FUSION_LIBRARY_URL, $fusion_url) === false ) {
-						        HMWP_Classes_Error::setError(sprintf(esc_html__('To hide the Avada library, please add the Avada FUSION_LIBRARY_URL in wp-config.php file after $table_prefix line: %s', 'hide-my-wp'), '<br /><strong>define(\'FUSION_LIBRARY_URL\',\'' . site_url(HMWP_Classes_Tools::getOption('hmwp_themes_url')) . '/'.$avada_path.'/includes/lib\');</strong>'));
+						        HMWP_Classes_Error::setNotification(sprintf(esc_html__('To hide the Avada library, please add the Avada FUSION_LIBRARY_URL in wp-config.php file after $table_prefix line: %s', 'hide-my-wp'), '<br /><strong>define(\'FUSION_LIBRARY_URL\',\'' . site_url(HMWP_Classes_Tools::getOption('hmwp_themes_url')) . '/'.$avada_path.'/includes/lib\');</strong>'));
 					        }
 				        }
 
@@ -717,7 +754,7 @@ class HMWP_Models_Compatibility
 
 	        //The admin URL is already changed by other plugins and may affect the functionality
             if (!HMW_RULES_IN_CONFIG ) {
-                HMWP_Classes_Error::setError(sprintf(esc_html__('%s rules are not saved in the config file and this may affect the website loading speed.', 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name')));
+                HMWP_Classes_Error::setNotification(sprintf(esc_html__('%s rules are not saved in the config file and this may affect the website loading speed.', 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name')));
                 defined('HMWP_DEFAULT_ADMIN') || define('HMWP_DEFAULT_ADMIN', HMWP_Classes_Tools::$default['hmwp_admin_url']);
             } elseif (HMWP_Classes_Tools::$default['hmwp_admin_url'] == HMWP_Classes_Tools::getOption('hmwp_admin_url') ) {
                 if (strpos(admin_url(), HMWP_Classes_Tools::$default['hmwp_admin_url']) === false ) {
@@ -727,35 +764,39 @@ class HMWP_Models_Compatibility
 
             //Show the option to change in cache files
             if (HMWP_Classes_Tools::getOption('hmwp_mode') <> 'default' && !HMWP_Classes_Tools::getOption('test_frontend')  &&  HMWP_Classes_Tools::isCachePlugin() && !HMWP_Classes_Tools::getOption('hmwp_change_in_cache')) {
-                HMWP_Classes_Error::setError(sprintf(esc_html__("To change the paths in the cached files, switch on %s Change Paths in Cached Files%s", 'hide-my-wp'), '<strong><a href="'. HMWP_Classes_Tools::getOption('hmwp_plugin_website') .'/kb/activate-security-tweaks/#change_paths_cached_files" target="_blank">', '</a></strong>'));
+                HMWP_Classes_Error::setNotification(sprintf(esc_html__("To change the paths in the cached files, switch on %s Change Paths in Cached Files%s", 'hide-my-wp'), '<strong><a href="'. HMWP_Classes_Tools::getOption('hmwp_plugin_website') .'/kb/activate-security-tweaks/#change_paths_cached_files" target="_blank">', '</a></strong>'));
             }
 
             if (HMWP_Classes_Tools::isGodaddy() ) {
-                HMWP_Classes_Error::setError(sprintf(esc_html__("Godaddy detected! To avoid CSS errors, make sure you switch off the CDN from %s", 'hide-my-wp'), '<strong>' . '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-use-hide-my-wp-with-godaddy/" target="_blank"> Godaddy > Managed WordPress > Overview</a>' . '</strong>'));
+                HMWP_Classes_Error::setNotification(sprintf(esc_html__("Godaddy detected! To avoid CSS errors, make sure you switch off the CDN from %s", 'hide-my-wp'), '<strong>' . '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-use-hide-my-wp-with-godaddy/" target="_blank"> Godaddy > Managed WordPress > Overview</a>' . '</strong>'));
             }
 
             if (HMWP_Classes_Tools::isPluginActive('bulletproof-security/bulletproof-security.php') ) {
-                HMWP_Classes_Error::setError(sprintf(esc_html__("BulletProof plugin! Make sure you save the settings in %s after activating Root Folder BulletProof Mode in BulletProof plugin.", 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name')));
+                HMWP_Classes_Error::setNotification(sprintf(esc_html__("BulletProof plugin! Make sure you save the settings in %s after activating Root Folder BulletProof Mode in BulletProof plugin.", 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name')));
             }
 
             if (HMWP_Classes_Tools::isPluginActive('worker/init.php') && !HMWP_Classes_Tools::getOption('hmwp_firstload')  ) {
-	            HMWP_Classes_Error::setError(sprintf(esc_html__("Activate 'Must Use Plugin Loading' from 'Plugin Loading Hook' to be able to connect to your dashboard directly from managewp.com. %s click here %s", 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_advanced#tab=compatibility', true).'" >', '</a>'));
+	            HMWP_Classes_Error::setNotification(sprintf(esc_html__("Activate 'Must Use Plugin Loading' from 'Plugin Loading Hook' to be able to connect to your dashboard directly from managewp.com. %s click here %s", 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_advanced#tab=compatibility', true).'" >', '</a>'));
             }
 
             //Check if the rules are working as expected
             $mappings = HMWP_Classes_Tools::getOption('file_mappings');
             if (!empty($mappings) ) {
                 $restoreLink = '<br /><a href="'.add_query_arg(array('hmwp_nonce' => wp_create_nonce('hmwp_ignore_errors'), 'action' => 'hmwp_ignore_errors')) .'" class="btn btn-default btn-sm mt-3" />' . esc_html__("Close Error", 'hide-my-wp'). '</a>';
-                HMWP_Classes_Error::setError(sprintf(esc_html__('Attention! Some URLs passed through the config file rules and were loaded through WordPress rewrite which may slow down your website. %s Please follow this tutorial to fix the issue: %s', 'hide-my-wp'), '<br /><br />' . join('<br />', $mappings) . '<br /><br />', '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/kb/when-the-website-loads-slower-with-hide-my-wp-ghost/" target="_blank" class="text-warning">'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/kb/when-the-website-loads-slower-with-hide-my-wp-ghost/</a> ' . $restoreLink), 'text-white bg-danger');
+                HMWP_Classes_Error::setNotification(sprintf(esc_html__('Attention! Some URLs passed through the config file rules and were loaded through WordPress rewrite which may slow down your website. %s Please follow this tutorial to fix the issue: %s', 'hide-my-wp'), '<br /><br />' . join('<br />', $mappings) . '<br /><br />', '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/kb/when-the-website-loads-slower-with-hide-my-wp-ghost/" target="_blank" class="text-warning">'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/kb/when-the-website-loads-slower-with-hide-my-wp-ghost/</a> ' . $restoreLink), 'text-white bg-danger');
             }
 
 	        if (HMWP_Classes_Tools::isPluginActive('ultimate-member/ultimate-member.php') && HMWP_Classes_Tools::getOption('hmwp_bruteforce') && HMWP_Classes_Tools::getOption('brute_use_captcha_v3')  ) {
-		        HMWP_Classes_Error::setError(sprintf(esc_html__("Google reCaptcha V3 is not working with the current login form of %s .", 'hide-my-wp'), 'Ultimate Member plugin'));
+		        HMWP_Classes_Error::setNotification(sprintf(esc_html__("Google reCaptcha V3 is not working with the current login form of %s .", 'hide-my-wp'), 'Ultimate Member plugin'));
 	        }
 
 	        if (HMWP_Classes_Tools::isPluginActive('wp-user-manager/wp-user-manager.php') && HMWP_Classes_Tools::getOption('hmwp_bruteforce') && HMWP_Classes_Tools::getOption('brute_use_captcha_v3')  ) {
-		        HMWP_Classes_Error::setError(sprintf(esc_html__("Google reCaptcha V3 is not working with the current login form of %s .", 'hide-my-wp'), 'Ultimate Member plugin'));
+		        HMWP_Classes_Error::setNotification(sprintf(esc_html__("Google reCaptcha V3 is not working with the current login form of %s .", 'hide-my-wp'), 'Ultimate Member plugin'));
 	        }
+
+            if(HMWP_Classes_Tools::getOption('hmwp_mode') <> 'default' && HMWP_Classes_Tools::getOption('prevent_slow_loading') && HMWP_Classes_Tools::getOption('test_frontend')){
+                HMWP_Classes_Error::setNotification(sprintf(esc_html__('Prevent Broken Website option is active. Test the website using a different browser before turning this option off. %s Go to option %s', 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_advanced', true).'" >', '</a>'));
+            }
 
         }
 

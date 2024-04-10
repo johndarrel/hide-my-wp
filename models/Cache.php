@@ -140,7 +140,6 @@ class HMWP_Models_Cache
 	                    //find replace the content
 	                    $newcontent = $this->findReplace($content);
 	                    if($newcontent <> $content){
-		                    //echo $newcontent;exit();
 		                    //write into file
 		                    $this->writeFile($file, $newcontent);
 	                    }

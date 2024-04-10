@@ -1,4 +1,17 @@
 <?php if(!isset($view)) return; ?>
+<?php
+/**
+ *
+ *
+ * @var $wp_roles WP_Roles
+ */
+global $wp_roles;
+
+$allroles = array();
+if (function_exists('wp_roles') ) {
+    $allroles = wp_roles()->get_names();
+}
+?>
 <noscript> <style>#hmwp_wrap .tab-panel:not(.tab-panel-first){display: block}</style> </noscript>
 <div id="hmwp_wrap" class="d-flex flex-row p-0 my-3">
 <?php echo $view->getAdminTabs(HMWP_Classes_Tools::getValue('page', 'hmwp_tweaks')); ?>
@@ -50,21 +63,7 @@
                             </div>
                         </div>
                         <div class="col-sm-12 py-3 m-0 hmwp_do_redirects" >
-                            <?php
-                            /**
-                             *
-                             *
-                             * @var $wp_roles WP_Roles
-                             */
-                            global $wp_roles;
-
-                            $allroles = array();
-                            if (function_exists('wp_roles') ) {
-                                $allroles = wp_roles()->get_names();
-                            }
-
-                            $urlRedirects = HMWP_Classes_Tools::getOption('hmwp_url_redirects');
-                            ?>
+                            <?php $urlRedirects = HMWP_Classes_Tools::getOption('hmwp_url_redirects');  ?>
                             <ul class="nav nav-tabs" role="tablist">
                                 <li class="nav-item m-0">
                                     <a class="nav-link active" data-toggle="tab" href="#default" role="tab" aria-controls="default" aria-selected="true"><?php echo esc_html__("Default", 'hide-my-wp') ?></a>
@@ -106,12 +105,12 @@
                                     </div>
 
                                     <div class="p-3">
-                                        <div class="p-2 text-danger"><?php echo sprintf(esc_html__("Make sure you that the redirect URLs exist on your website. %sThe User Role redirect URL has higher priority than the Default redirect URL.", 'hide-my-wp'), '<br />'); ?></div>
+                                        <div class="p-2 text-danger"><?php echo sprintf(esc_html__("Make sure the redirect URLs exist on your website. %sThe User Role redirect URL has higher priority than the Default redirect URL.", 'hide-my-wp'), '<br />'); ?></div>
                                     </div>
                                 </div>
 
                                 <?php if (!empty($allroles) ) {
-                                    foreach ( $allroles as $role ) { ?>
+                                    foreach ( $allroles as $role => $name ) { ?>
                                         <div class="tab-pane" id="nav-<?php echo esc_attr($role) ?>" role="tabpanel" aria-labelledby="nav-profile-tab">
                                             <h5 class="card-title pt-3 pb-1 mx-3 text-black-50 border-bottom border-light"><?php echo esc_html(ucwords(str_replace('_', ' ', $role))) . ' ' . esc_html__("redirects", 'hide-my-wp'); ?>:</h5>
                                             <div class="col-sm-12 row border-bottom border-light py-3 m-0">
@@ -137,7 +136,7 @@
                                             </div>
 
                                             <div class="p-3">
-                                                <div class="p-2 text-danger"><?php echo sprintf(esc_html__("Make sure you that the redirect URLs exist on your website. %sThe User Role redirect URL has higher priority than the Default redirect URL.", 'hide-my-wp'), '<br />'); ?></div>
+                                                <div class="p-2 text-danger"><?php echo sprintf(esc_html__("Make that the redirect URLs exist on your website. %sThe User Role redirect URL has higher priority than the Default redirect URL.", 'hide-my-wp'), '<br />'); ?></div>
                                             </div>
                                         </div>
                                     <?php }
@@ -315,17 +314,6 @@
                                 <div class="col-sm-8 p-0 input-group">
                                     <select multiple name="hmwp_hide_admin_toolbar_roles[]" class="selectpicker form-control mb-1">
                                         <?php
-                                        /**
-                                         * 
-                                         *
-                                         * @var $wp_roles WP_Roles 
-                                         */
-                                        global $wp_roles;
-
-                                        $allroles = array();
-                                        if (function_exists('wp_roles') ) {
-                                            $allroles = wp_roles()->get_names();
-                                        }
 
                                         $selected_roles = (array)HMWP_Classes_Tools::getOption('hmwp_hide_admin_toolbar_roles');
 
@@ -347,6 +335,16 @@
                                         <a href="<?php echo HMWP_Classes_Tools::getOption('hmwp_plugin_website') ?>/kb/activate-security-tweaks/#hide_wordpress_version" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a>
                                     </label>
                                     <div class="offset-1 text-black-50"><?php echo esc_html__("Hide all versions from the end of any Image, CSS and JavaScript files", 'hide-my-wp'); ?></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 row mb-1 ml-1 p-2 hmwp_hide_version">
+                            <div class="checker col-sm-12 row my-2 py-1">
+                                <div class="col-sm-12 p-0 switch switch-sm">
+                                    <input type="hidden" name="hmwp_hide_version_random" value="0"/>
+                                    <input type="checkbox" id="hmwp_hide_version_random" name="hmwp_hide_version_random" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_hide_version_random') ? 'checked="checked"' : '') ?>value="<?php echo mt_rand(11111,99999) ?>"/>
+                                    <label for="hmwp_hide_version_random"><?php echo esc_html__('Random Static Number', 'hide-my-wp'); ?></label>
+                                    <div class="offset-1 text-black-50"><?php echo esc_html__("Add a random static number to prevent frontend caching while the user is logged in.", 'hide-my-wp'); ?></div>
                                 </div>
                             </div>
                         </div>
@@ -441,7 +439,12 @@
                 </div>
 
                 <div id="disable" class="card col-sm-12 p-0 m-0 tab-panel">
-                    <h3 class="card-title hmwp_header p-2 m-0"><?php echo esc_html__('Disable Options', 'hide-my-wp'); ?></h3>
+                    <h3 class="card-title hmwp_header p-2 m-0">
+                        <?php echo esc_html__('Disable Options', 'hide-my-wp'); ?>
+                        <div class="col-sm-12 border-0 p-0 mx-0 text-black-50 text-left small">
+                            <?php echo esc_html__('This feature requires jQuery library on frontend.', 'hide-my-wp') ?>
+                        </div>
+                    </h3>
                     <?php if (HMWP_Classes_Tools::getOption('hmwp_mode') == 'default' ) { ?>
                         <div class="card-body">
                             <div class="col-sm-12 border-0 py-3 mx-0 my-3 text-black-50 text-center">
@@ -490,17 +493,6 @@
                                     <div class="col-sm-8 p-0 input-group">
                                         <select multiple name="hmwp_disable_click_roles[]" class="selectpicker form-control mb-1">
 				                            <?php
-				                            /**
-				                             *
-				                             *
-				                             * @var $wp_roles WP_Roles
-				                             */
-				                            global $wp_roles;
-
-				                            $allroles = array();
-				                            if (function_exists('wp_roles') ) {
-					                            $allroles = wp_roles()->get_names();
-				                            }
 
 				                            $selected_roles = (array)HMWP_Classes_Tools::getOption('hmwp_disable_click_roles');
 
@@ -567,17 +559,6 @@
                                     <div class="col-sm-8 p-0 input-group">
                                         <select multiple name="hmwp_disable_inspect_roles[]" class="selectpicker form-control mb-1">
 				                            <?php
-				                            /**
-				                             *
-				                             *
-				                             * @var $wp_roles WP_Roles
-				                             */
-				                            global $wp_roles;
-
-				                            $allroles = array();
-				                            if (function_exists('wp_roles') ) {
-					                            $allroles = wp_roles()->get_names();
-				                            }
 
 				                            $selected_roles = (array)HMWP_Classes_Tools::getOption('hmwp_disable_inspect_roles');
 
@@ -633,17 +614,6 @@
                                     <div class="col-sm-8 p-0 input-group">
                                         <select multiple name="hmwp_disable_source_roles[]" class="selectpicker form-control mb-1">
 				                            <?php
-				                            /**
-				                             *
-				                             *
-				                             * @var $wp_roles WP_Roles
-				                             */
-				                            global $wp_roles;
-
-				                            $allroles = array();
-				                            if (function_exists('wp_roles') ) {
-					                            $allroles = wp_roles()->get_names();
-				                            }
 
 				                            $selected_roles = (array)HMWP_Classes_Tools::getOption('hmwp_disable_source_roles');
 
@@ -699,17 +669,6 @@
                                     <div class="col-sm-8 p-0 input-group">
                                         <select multiple name="hmwp_disable_copy_paste_roles[]" class="selectpicker form-control mb-1">
 				                            <?php
-				                            /**
-				                             *
-				                             *
-				                             * @var $wp_roles WP_Roles
-				                             */
-				                            global $wp_roles;
-
-				                            $allroles = array();
-				                            if (function_exists('wp_roles') ) {
-					                            $allroles = wp_roles()->get_names();
-				                            }
 
 				                            $selected_roles = (array)HMWP_Classes_Tools::getOption('hmwp_disable_copy_paste_roles');
 
@@ -765,17 +724,6 @@
                                     <div class="col-sm-8 p-0 input-group">
                                         <select multiple name="hmwp_disable_drag_drop_roles[]" class="selectpicker form-control mb-1">
 				                            <?php
-				                            /**
-				                             *
-				                             *
-				                             * @var $wp_roles WP_Roles
-				                             */
-				                            global $wp_roles;
-
-				                            $allroles = array();
-				                            if (function_exists('wp_roles') ) {
-					                            $allroles = wp_roles()->get_names();
-				                            }
 
 				                            $selected_roles = (array)HMWP_Classes_Tools::getOption('hmwp_disable_drag_drop_roles');
 

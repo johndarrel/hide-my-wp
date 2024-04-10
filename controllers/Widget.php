@@ -106,9 +106,8 @@ class HMWP_Controllers_Widget extends HMWP_Classes_FrontController
             $this->risktasks = HMWP_Classes_ObjController::getClass('HMWP_Controllers_SecurityCheck')->getRiskTasks();
             $this->riskreport = HMWP_Classes_ObjController::getClass('HMWP_Controllers_SecurityCheck')->getRiskReport();
 
-            HMWP_Classes_Tools::setHeader('json');
-            echo json_encode(array('data' => $this->getView('Dashboard')));
-            exit();
+            wp_send_json_success($this->getView('Dashboard'));
+
         }
     }
 }

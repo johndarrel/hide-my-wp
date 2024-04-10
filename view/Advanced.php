@@ -48,10 +48,10 @@
                         <div class="card-body">
 
                             <div class="col-sm-12 row border-bottom border-light py-3 mx-0 my-3">
-                                <div class="col-sm-4 p-1">
-                                    <div class="font-weight-bold"><?php echo esc_html__('Nginx Server Type', 'hide-my-wp'); ?>:</div>
+                                <div class="col-sm-3 p-1">
+                                    <div class="font-weight-bold"><?php echo esc_html__('Server Type', 'hide-my-wp'); ?>:</div>
                                 </div>
-                                <div class="col-sm-8 p-0 input-group mb-1">
+                                <div class="col-sm-9 p-0 input-group mb-1">
                                     <select name="hmwp_server_type" class="form-control bg-input">
                                         <option value="auto" <?php selected('auto', HMWP_Classes_Tools::getOption('hmwp_server_type')) ?>><?php echo esc_html__("Autodetect", 'hide-my-wp') ?></option>
                                         <option value="apache" <?php selected('apache', HMWP_Classes_Tools::getOption('hmwp_server_type')) ?>><?php echo esc_html__("Apache", 'hide-my-wp') ?></option>
@@ -83,7 +83,7 @@
                                     <select multiple name="hmwp_loading_hook[]" class="form-control bg-input selectpicker">
                                         <option value="first" <?php echo ((in_array('first', HMWP_Classes_Tools::getOption('hmwp_loading_hook')) || HMWP_Classes_Tools::getOption('hmwp_firstload')) ? 'selected="select"' : '' ) ?>><?php echo esc_html__("Must Use Plugin Loading", 'hide-my-wp') ?></option>
                                         <option value="priority" <?php echo ((in_array('priority', HMWP_Classes_Tools::getOption('hmwp_loading_hook')) || HMWP_Classes_Tools::getOption('hmwp_priorityload')) ? 'selected="select"' : '' ) ?>><?php echo esc_html__("Priority Loading", 'hide-my-wp') ?></option>
-                                        <option value="normal" <?php echo ((in_array('normal', HMWP_Classes_Tools::getOption('hmwp_loading_hook'))  || !HMWP_Classes_Tools::getOption('hmwp_laterload')) ? 'selected="select"' : '') ?>><?php echo esc_html__("Normal Loading", 'hide-my-wp') ?> (<?php echo esc_html__("recommended", 'hide-my-wp'); ?>)</option>
+                                        <option value="normal" <?php echo ((in_array('normal', HMWP_Classes_Tools::getOption('hmwp_loading_hook'))  || (!HMWP_Classes_Tools::getOption('hmwp_laterload') && !HMWP_Classes_Tools::getOption('hmwp_priorityload'))) ? 'selected="select"' : '') ?>><?php echo esc_html__("Normal Loading", 'hide-my-wp') ?> (<?php echo esc_html__("recommended", 'hide-my-wp'); ?>)</option>
                                         <option value="late" <?php echo ((in_array('late', HMWP_Classes_Tools::getOption('hmwp_loading_hook')) || HMWP_Classes_Tools::getOption('hmwp_laterload')) ? 'selected="select"' : '') ?>><?php echo esc_html__("Late Loading", 'hide-my-wp') ?></option>
                                     </select>
                                     <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/advanced-wp-security/#hook_loading') ?>" target="_blank" class="d-inline-block m-2" style="right: 7px;top: 20%;"><i class="dashicons dashicons-editor-help d-inline"></i></a>

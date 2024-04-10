@@ -90,7 +90,7 @@ class HMWP_Models_Settings
 		if ($params['hmwp_admin_url'] == $params['hmwp_login_url'] && $params['hmwp_admin_url'] <> '') {
 			HMWP_Classes_Tools::saveOptions('error', true);
 			HMWP_Classes_Tools::saveOptions('test_frontend', false);
-			HMWP_Classes_Error::setError(esc_html__("You can't set both ADMIN and LOGIN with the same name. Please use different names", 'hide-my-wp'));
+			HMWP_Classes_Error::setNotification(esc_html__("You can't set both ADMIN and LOGIN with the same name. Please use different names", 'hide-my-wp'));
 			return;
 		}
 
@@ -289,7 +289,7 @@ class HMWP_Models_Settings
 			if(strlen($rules) > 1) {
 				if (!HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->writeToFile($rules, 'HMWP_VULNERABILITY') ) {
 					$config_file = HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->getConfFile();
-					HMWP_Classes_Error::setError(sprintf(esc_html__('Config file is not writable. Create the file if not exists or copy to %s file with the following lines: %s', 'hide-my-wp'), '<strong>' . $config_file . '</strong>', '<br /><br /><pre><strong># BEGIN HMWP_VULNERABILITY<br />' . htmlentities(str_replace('    ', ' ', $rules)) . '# END HMWP_VULNERABILITY</strong></pre>'));
+					HMWP_Classes_Error::setNotification(sprintf(esc_html__('Config file is not writable. Create the file if not exists or copy to %s file with the following lines: %s', 'hide-my-wp'), '<strong>' . $config_file . '</strong>', '<br /><br /><pre><strong># BEGIN HMWP_VULNERABILITY<br />' . htmlentities(str_replace('    ', ' ', $rules)) . '# END HMWP_VULNERABILITY</strong></pre>'));
 				}
 			}
 		}
@@ -345,7 +345,7 @@ class HMWP_Models_Settings
 						}
 
 					} else {
-						HMWP_Classes_Error::setError(esc_html__('Error: You entered the same text twice in the Text Mapping. We removed the duplicates to prevent any redirect errors.'));
+						HMWP_Classes_Error::setNotification(esc_html__('Error: You entered the same text twice in the Text Mapping. We removed the duplicates to prevent any redirect errors.'));
 					}
 				}
 			}
@@ -417,7 +417,7 @@ class HMWP_Models_Settings
 							$hmwp_url_mapping['to'][] = $hmwp_url_mapping_to[$index];
 						}
 					} else {
-						HMWP_Classes_Error::setError(esc_html__('Error: You entered the same URL twice in the URL Mapping. We removed the duplicates to prevent any redirect errors.'));
+						HMWP_Classes_Error::setNotification(esc_html__('Error: You entered the same URL twice in the URL Mapping. We removed the duplicates to prevent any redirect errors.'));
 					}
 				}
 
@@ -468,7 +468,7 @@ class HMWP_Models_Settings
 				     ( $key <> 'hmwp_upload_url' && $name == 'uploads' ) ||
 				     in_array( $name, $this->invalid_names ) ) {
 
-					HMWP_Classes_Error::setError( sprintf( esc_html__( "Invalid name detected: %s. You need to use another name to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
+					HMWP_Classes_Error::setNotification( sprintf( esc_html__( "Invalid name detected: %s. You need to use another name to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
 
 					return false;
 				}
@@ -495,25 +495,25 @@ class HMWP_Models_Settings
 		if(in_array($key, $this->validate_keys)) {
 
 			if ( strlen( $name ) > 1 && strlen( $name ) < 3 ) {
-				HMWP_Classes_Error::setError( sprintf( esc_html__( "Short name detected: %s. You need to use unique paths with more than 4 chars to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
+				HMWP_Classes_Error::setNotification( sprintf( esc_html__( "Short name detected: %s. You need to use unique paths with more than 4 chars to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
 
 				return false;
 			}
 
 			if ( strpos( $name, '//' ) !== false ) {
-				HMWP_Classes_Error::setError( sprintf( esc_html__( "Invalid name detected: %s. Add only the final path name to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
+				HMWP_Classes_Error::setNotification( sprintf( esc_html__( "Invalid name detected: %s. Add only the final path name to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
 
 				return false;
 			}
 
 			if ( strpos( $name, '/' ) !== false && strpos( $name, '/' ) == 0 ) {
-				HMWP_Classes_Error::setError( sprintf( esc_html__( "Invalid name detected: %s. The name can't start with / to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
+				HMWP_Classes_Error::setNotification( sprintf( esc_html__( "Invalid name detected: %s. The name can't start with / to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
 
 				return false;
 			}
 
 			if ( strpos( $name, '/' ) !== false && substr( $name, - 1 ) == '/' ) {
-				HMWP_Classes_Error::setError( sprintf( esc_html__( "Invalid name detected: %s. The name can't end with / to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
+				HMWP_Classes_Error::setNotification( sprintf( esc_html__( "Invalid name detected: %s. The name can't end with / to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
 
 				return false;
 			}
@@ -522,7 +522,7 @@ class HMWP_Models_Settings
 			if ( ! empty( $array ) ) {
 				foreach ( $array as $row ) {
 					if ( substr( $row, - 1 ) === '.' ) {
-						HMWP_Classes_Error::setError( sprintf( esc_html__( "Invalid name detected: %s. The paths can't end with . to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
+						HMWP_Classes_Error::setNotification( sprintf( esc_html__( "Invalid name detected: %s. The paths can't end with . to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
 
 						return false;
 					}
@@ -554,7 +554,7 @@ class HMWP_Models_Settings
 		);
 
 		if (in_array($name, $invalit_paths)) {
-			HMWP_Classes_Error::setError(sprintf(esc_html__("Weak name detected: %s. You need to use another name to increase your website security.", 'hide-my-wp'), '<strong>' . $name . '</strong>'));
+			HMWP_Classes_Error::setNotification(sprintf(esc_html__("Weak name detected: %s. You need to use another name to increase your website security.", 'hide-my-wp'), '<strong>' . $name . '</strong>'));
 		}
 	}
 }

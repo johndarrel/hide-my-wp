@@ -56,6 +56,7 @@ Hide My WP Ghost is packed with awesome security features:
 >
 > *   Hide WordPress wp-admin, and show 404 error or a custom page
 > *   Hide WordPress wp-login.php, and show 404 error or a custom page
+> *   Emulate CMS Drupal & Joomla
 > *   Change the wp-admin and wp-login URLs
 > *   Change lost password URL
 > *   Change register URL
@@ -94,6 +95,7 @@ Hide My WP Ghost is packed with awesome security features:
 > *   Security Header X-Frame-Options
 > *   Firewall agains Script Injections and SQL Injection
 > *   7G Firewall Security Filter
+> *   8G Firewall Security Filter
 >
 > <strong>Hide Options:</strong>
 >
@@ -182,6 +184,7 @@ Hide My WP Ghost is packed with awesome security features:
 > *   Support for Namecheap Hosting
 > *   Support for RunCloud Hosting
 > *   Support for WPEngine Hosting
+> *   Support for CloudPanel Hosting
 >
 > *   Recommended by Wp Rocket
 > *   Recommended by WPML
