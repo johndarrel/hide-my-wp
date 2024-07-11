@@ -105,9 +105,11 @@ class HMWP_Models_Compatibility_MemberPress extends HMWP_Models_Compatibility_Ab
     public function getLoginPath(){
 
         $options = $this->getOptions();
+
         if(isset($options['login_page_id']) && (int)$options['login_page_id'] > 0){
             $post = get_post((int)$options['login_page_id']);
-            if(!is_wp_error($post)){
+
+            if(!is_wp_error($post) && $post->post_status == 'publish'){
                 return $post->post_name;
             }
         }

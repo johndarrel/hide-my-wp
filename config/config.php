@@ -23,7 +23,10 @@ defined('HMW_ALWAYS_CHANGE_PATHS') || define('HMW_ALWAYS_CHANGE_PATHS', false);
 defined('HMW_HIDE_OLD_IMAGES') || define('HMW_HIDE_OLD_IMAGES', false);
 //Set a custom cookie while user logged in for path disable feature.
 defined('HMWP_LOGGED_IN_COOKIE') || define('HMWP_LOGGED_IN_COOKIE', 'hmwp_logged_in_');
-
+//customize permissions
+defined('HMW_FILE_PERMISSION') || define('HMW_FILE_PERMISSION', 0644);
+defined('HMW_DIR_PERMISSION') || define('HMW_DIR_PERMISSION', 0755);
+defined('HMW_CONFIG_PERMISSION') || define('HMW_CONFIG_PERMISSION', 0444);
 /**
  * No path file? error ...
  */

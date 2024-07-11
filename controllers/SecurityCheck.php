@@ -144,6 +144,7 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
             'checkVersionDisplayed',
             'checkSSL',
             'checkDBDebug',
+            'checkFirewall'
         );
     }
 
@@ -199,7 +200,7 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'value' => false,
                 'valid' => false,
                 'warning' => false,
-                'message' => __("Using an old version of PHP makes your site slow and prone to hacker attacks due to known vulnerabilities that exist in versions of PHP that are no longer maintained. <br /><br />You need <strong>PHP 7.0</strong> or higher for your website.", 'hide-my-wp'),
+                'message' => __("Using an old version of PHP makes your site slow and prone to hacker attacks due to known vulnerabilities that exist in versions of PHP that are no longer maintained. <br /><br />You need <strong>PHP 7.4</strong> or higher for your website.", 'hide-my-wp'),
                 'solution' => esc_html__("Email your hosting company and tell them you'd like to switch to a newer version of PHP or move your site to a better hosting company.", 'hide-my-wp'),
             ),
             'checkMysql' => array(
@@ -225,7 +226,7 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'warning' => false,
                 'message' => __("Every good developer should turn on debugging before getting started on a new plugin or theme. In fact, the WordPress Codex 'highly recommends' that developers use WP_DEBUG. <br /><br />Unfortunately, many developers forget the debug mode, even when the website is live. Showing debug logs in the frontend will let hackers know a lot about your WordPress website.", 'hide-my-wp'),
                 'solution' => __("Disable WP_DEBUG for live websites in wp-config.php <code>define('WP_DEBUG', false);</code>", 'hide-my-wp'),
-                'javascript' => "pro",
+                'javascript' => "jQuery(this).hmwp_fixConfig('WP_DEBUG',false);",
             ),
             'checkDBDebug' => array(
                 'name' => esc_html__('DB Debug Mode', 'hide-my-wp'),
@@ -243,7 +244,7 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'warning' => false,
                 'message' => __("Every good developer should turn on debugging before getting started on a new plugin or theme. In fact, the WordPress Codex 'highly recommends' that developers use SCRIPT_DEBUG. Unfortunately, many developers forget the debug mode even when the website is live. Showing debug logs in the frontend will let hackers know a lot about your WordPress website.", 'hide-my-wp'),
                 'solution' => __("Disable SCRIPT_DEBUG for live websites in wp-config.php <code>define('SCRIPT_DEBUG', false);</code>", 'hide-my-wp'),
-                'javascript' => "pro",
+                'javascript' => "jQuery(this).hmwp_fixConfig('SCRIPT_DEBUG',false);",
             ),
             'checkDisplayErrors' => array(
                 'name' => esc_html__('display_errors PHP directive', 'hide-my-wp'),
@@ -268,6 +269,7 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'warning' => false,
                 'message' => __("In the old days, the default WordPress admin username was 'admin' or 'administrator'. Since usernames make up half of the login credentials, this made it easier for hackers to launch brute-force attacks. <br /><br />Thankfully, WordPress has since changed this and now requires you to select a custom username at the time of installing WordPress.", 'hide-my-wp'),
                 'solution' => esc_html__("Change the user 'admin' or 'administrator' with another name to improve security.", 'hide-my-wp'),
+                'javascript' => "pro",
             ),
             'checkUserRegistration' => array(
                 'name' => esc_html__("Spammers can easily signup", 'hide-my-wp'),
@@ -301,23 +303,6 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'message' => __("WordPress and its plugins and themes are like any other software installed on your computer, and like any other application on your devices. Periodically developers release updates which provide new features or fix known bugs. <br /><br />New features may be something that you do not necessarily want. In fact, you may be perfectly satisfied with the functionality you currently have. Nevertheless, you may still be concerned about bugs.<br /><br />Software bugs can come in many shapes and sizes. A bug could be very serious, such as preventing users from using a plugin, or it could be a minor bug that only affects a certain part of a theme, for example. In some cases, bugs can even cause serious security holes.<br /><br />Keeping themes up to date is one of the most important and easiest ways to keep your site secure.", 'hide-my-wp'),
                 'solution' => esc_html__("Go to the Dashboard > Appearance section and update all the themes to the last version.", 'hide-my-wp'),
             ),
-            'checkDBPrefix' => array(
-                'name' => esc_html__("Database Prefix", 'hide-my-wp'),
-                'value' => false,
-                'valid' => false,
-                'warning' => false,
-                'message' => __("The WordPress database is like a brain for your entire WordPress site, because every single bit of information about your site is stored there, thus making it a hacker’s favorite target. <br /><br />Spammers and hackers run automated code for SQL injections.<br />Unfortunately, many people forget to change the database prefix when they install WordPress. <br />This makes it easier for hackers to plan a mass attack by targeting the default prefix <strong>wp_</strong>.", 'hide-my-wp'),
-                'solution' => sprintf(esc_html__("%s protects your website from most SQL injections but, if possible, use a custom prefix for database tables to avoid SQL injections. %sRead more%s", 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-change-database-prefix-in-wordpress/" target="_blank">', '</a>'),
-            ),
-            'checkVersionDisplayed' => array(
-                'name' => esc_html__("Versions in Source Code", 'hide-my-wp'),
-                'value' => false,
-                'valid' => false,
-                'warning' => false,
-                'message' => __("WordPress, plugins and themes add their version info to the source code, so anyone can see it. <br /><br />Hackers can easily find a website with vulnerable version plugins or themes, and target these with Zero-Day Exploits.", 'hide-my-wp'),
-                'solution' => sprintf(esc_html__("Switch on %s %s > Tweaks > %s %s", 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_tweaks#tab=hide').'" >', HMWP_Classes_Tools::getOption('hmwp_plugin_menu'),  esc_html__('Hide Versions from Images, CSS and JS', 'hide-my-wp'), '</a>'),
-                'javascript' => "pro",
-            ),
             'checkSaltKeys' => array(
                 'name' => esc_html__("Salts and Security Keys valid", 'hide-my-wp'),
                 'value' => false,
@@ -325,6 +310,7 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'warning' => false,
                 'message' => __("Security keys are used to ensure better encryption of information stored in the user's cookies and hashed passwords. <br /><br />These make your site more difficult to hack, access and crack by adding random elements to the password. You don't have to remember these keys. In fact, once you set them you'll never see them again. Therefore, there's no excuse for not setting them properly.", 'hide-my-wp'),
                 'solution' => __("Security keys are defined in wp-config.php as constants on lines. They should be as unique and as long as possible. <code>AUTH_KEY,SECURE_AUTH_KEY,LOGGED_IN_KEY,NONCE_KEY,AUTH_SALT,SECURE_AUTH_SALT,LOGGED_IN_SALT,NONCE_SALT</code>", 'hide-my-wp'),
+                'javascript' => "pro",
             ),
             'checkSaltKeysAge' => array(
                 'name' => esc_html__("Security Keys Updated", 'hide-my-wp'),
@@ -333,6 +319,25 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'warning' => false,
                 'message' => esc_html__("The security keys in wp-config.php should be renewed as often as possible.", 'hide-my-wp'),
                 'solution' => sprintf(__("You can generate %snew Keys from here%s <code>AUTH_KEY,SECURE_AUTH_KEY,LOGGED_IN_KEY,NONCE_KEY,AUTH_SALT,SECURE_AUTH_SALT,LOGGED_IN_SALT,NONCE_SALT</code>", 'hide-my-wp'), '<a href="https://api.wordpress.org/secret-key/1.1/salt/" target="_blank">', '</a>'),
+                'javascript' => "pro",
+            ),
+            'checkDBPrefix' => array(
+                'name' => esc_html__("Database Prefix", 'hide-my-wp'),
+                'value' => false,
+                'valid' => false,
+                'warning' => false,
+                'message' => __("The WordPress database is like a brain for your entire WordPress site, because every single bit of information about your site is stored there, thus making it a hacker’s favorite target. <br /><br />Spammers and hackers run automated code for SQL injections.<br />Unfortunately, many people forget to change the database prefix when they install WordPress. <br />This makes it easier for hackers to plan a mass attack by targeting the default prefix <strong>wp_</strong>.", 'hide-my-wp'),
+                'solution' => sprintf(esc_html__("%s protects your website from most SQL injections but, if possible, use a custom prefix for database tables to avoid SQL injections. %sRead more%s", 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-change-database-prefix-in-wordpress/" target="_blank">', '</a>'),
+                'javascript' => "pro",
+            ),
+            'checkFilePermissions' => array(
+                'name' => esc_html__("File Permissions", 'hide-my-wp'),
+                'value' => false,
+                'valid' => false,
+                'warning' => false,
+                'message' => __("File permissions in WordPress play a critical role in website security. Properly configuring these permissions ensures that unauthorized users cannot gain access to sensitive files and data. <br />Incorrect permissions can inadvertently open your website to attacks, making it vulnerable. <br />As a WordPress administrator, understanding and correctly setting file permissions are essential for safeguarding your site against potential threats.", 'hide-my-wp'),
+                'solution' => sprintf(esc_html__("Even if the default paths are protected by %s after customization, we recommend setting the correct permissions for all directories and files on your website, use File Manager or FTP to check and change the permissions. %sRead more%s", 'hide-my-wp'), HMWP_Classes_Tools::getOption('hmwp_plugin_name'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-change-file-permissions-in-wordpress/" target="_blank">', '</a>'),
+                'javascript' => "pro",
             ),
             'checkDbPassword' => array(
                 'name' => esc_html__("WordPress Database Password", 'hide-my-wp'),
@@ -343,7 +348,7 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'solution' => __("Choose a proper database password, at least 8 characters long with a combination of letters, numbers and special characters. After you change it, set the new password in the wp-config.php file <code>define('DB_PASSWORD', 'NEW_DB_PASSWORD_GOES_HERE');</code>", 'hide-my-wp'),
             ),
             'checkCommonPaths' => array(
-                'name' => esc_html__("/wp-content is visible in source code", 'hide-my-wp'),
+                'name' => sprintf(esc_html__("%s is visible in source code", 'hide-my-wp'), '/' . HMWP_Classes_Tools::getDefault('hmwp_wp-content_url')),
                 'value' => false,
                 'valid' => false,
                 'warning' => false,
@@ -351,7 +356,7 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'solution' => sprintf(esc_html__("Change the wp-content, wp-includes and other common paths with %s %s > Change Paths%s", 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_permalinks#tab=core').'" >', HMWP_Classes_Tools::getOption('hmwp_plugin_menu'), '</a>'),
             ),
             'checkOldPaths' => array(
-                'name' => esc_html__("/wp-content path is accessible", 'hide-my-wp'),
+                'name' => sprintf(esc_html__("%s path is accessible", 'hide-my-wp'), '/' . HMWP_Classes_Tools::getDefault('hmwp_wp-content_url')),
                 'value' => false,
                 'valid' => false,
                 'warning' => false,
@@ -376,23 +381,15 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'solution' => sprintf(esc_html__("%sHide the login path%s from theme menu or widget.", 'hide-my-wp'), '<strong>', '</strong>'),
             ),
             'checkOldLogin' => array(
-                'name' => esc_html__("/wp-login path is accessible", 'hide-my-wp'),
+                'name' => sprintf(esc_html__("%s path is accessible", 'hide-my-wp'), '/' . HMWP_Classes_Tools::getDefault('hmwp_login_url')),
                 'value' => false,
                 'valid' => false,
                 'warning' => false,
                 'message' => __("If your site allows user logins, you need your login page to be easy to find for your users. You also need to do other things to protect against malicious login attempts. <br /><br />However, obscurity is a valid security layer when used as part of a comprehensive security strategy, and if you want to cut down on the number of malicious login attempts. Making your login page difficult to find is one way to do that.", 'hide-my-wp'),
                 'solution' => sprintf(esc_html__("Change the wp-login from %s %s > Change Paths > Custom login URL%s and Switch on %s %s > Brute Force Protection%s", 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_permalinks#tab=newlogin').'" >', HMWP_Classes_Tools::getOption('hmwp_plugin_menu'), '</a><br />', '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_brute#tab=brute').'" >', HMWP_Classes_Tools::getOption('hmwp_plugin_menu'), '</a>'),
             ),
-            'checkConfigChmod' => array(
-                'name' => esc_html__("/wp-config.php file is writable", 'hide-my-wp'),
-                'value' => false,
-                'valid' => false,
-                'warning' => false,
-                'message' => __("One of the most important files in your WordPress installation is the wp-config.php file. <br />This file is located in the root directory of your WordPress installation, and contains your website's base configuration details, such as database connection information.", 'hide-my-wp'),
-                'solution' => sprintf(esc_html__("Try setting chmod to %s0600%s or %s0640%s and if the website works normally that's the best one to use.", 'hide-my-wp'), '<a href="https://wordpress.org/support/article/changing-file-permissions/" target="_blank">', '</a>', '<a href="https://wordpress.org/support/article/changing-file-permissions/" target="_blank">', '</a>'),
-            ),
             'checkConfig' => array(
-                'name' => esc_html__("wp-config.php & wp-config-sample.php files are accessible ", 'hide-my-wp'),
+                'name' => esc_html__("wp-config.php & wp-config-sample.php files are accessible", 'hide-my-wp'),
                 'value' => false,
                 'valid' => false,
                 'warning' => false,
@@ -401,7 +398,7 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'javascript' => "pro",
             ),
             'checkReadme' => array(
-                'name' => esc_html__("readme.html file is accessible ", 'hide-my-wp'),
+                'name' => esc_html__("readme.html file is accessible", 'hide-my-wp'),
                 'value' => false,
                 'valid' => false,
                 'warning' => false,
@@ -410,13 +407,31 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'javascript' => "pro",
             ),
             'checkInstall' => array(
-                'name' => esc_html__( "install.php & upgrade.php files are accessible ", 'hide-my-wp' ),
+                'name' => esc_html__( "install.php & upgrade.php files are accessible", 'hide-my-wp' ),
                 'value' => false,
                 'valid' => false,
                 'warning' => false,
                 'message' => __( "WordPress is well-known for its ease of installation. <br/>It's important to hide the wp-admin/install.php and wp-admin/upgrade.php files because there have already been a couple of security issues regarding these files.", 'hide-my-wp' ),
                 'solution' => sprintf( esc_html__( "Rename wp-admin/install.php & wp-admin/upgrade.php files or switch on %s %s > Change Paths > Hide WordPress Common Paths%s", 'hide-my-wp' ), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_permalinks#tab=core').'" >',  HMWP_Classes_Tools::getOption('hmwp_plugin_menu') , '</a>'),
                 'javascript' => "pro",
+            ),
+            'checkFirewall' => array(
+                'name' => esc_html__( "Firewall against injections is loaded", 'hide-my-wp' ),
+                'value' => false,
+                'valid' => false,
+                'warning' => false,
+                'message' => __( "The most common way to hack a website is by accessing the domain and adding harmful queries in order to reveal information from files and database.<br /> These attacks are made on any website, WordPress or not, and if a call succeeds … it will probably be too late to save the website.", 'hide-my-wp' ),
+                'solution' => sprintf( esc_html__( "Activate the firewall and select the firewall strength that works for your website %s %s > Change Paths > Firewall & Headers %s", 'hide-my-wp' ), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_permalinks#tab=firewall').'" >',  HMWP_Classes_Tools::getOption('hmwp_plugin_menu') , '</a>'),
+                'javascript' => "jQuery(this).hmwp_fixSettings('hmwp_sqlinjection',1);",
+            ),
+            'checkVersionDisplayed' => array(
+                'name' => esc_html__("Versions in Source Code", 'hide-my-wp'),
+                'value' => false,
+                'valid' => false,
+                'warning' => false,
+                'message' => __("WordPress, plugins and themes add their version info to the source code, so anyone can see it. <br /><br />Hackers can easily find a website with vulnerable version plugins or themes, and target these with Zero-Day Exploits.", 'hide-my-wp'),
+                'solution' => sprintf(esc_html__("Switch on %s %s > Tweaks > %s %s", 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_tweaks#tab=hide').'" >', HMWP_Classes_Tools::getOption('hmwp_plugin_menu'),  esc_html__('Hide Versions from Images, CSS and JS', 'hide-my-wp'), '</a>'),
+                'javascript' => "jQuery(this).hmwp_fixSettings('hmwp_hide_version',1);",
             ),
             'checkRegisterGlobals' => array(
                 'name' => esc_html__("PHP register_globals is on", 'hide-my-wp'),
@@ -457,10 +472,10 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'warning' => false,
                 'message' => __("The plugins and themes file editor is a very convenient tool because it enables you to make quick changes without the need to use FTP. <br /><br />Unfortunately, it's also a security issue because it not only shows the PHP source code, it also enables attackers to inject malicious code into your site if they manage to gain access to admin.", 'hide-my-wp'),
                 'solution' => __("Disable DISALLOW_FILE_EDIT for live websites in wp-config.php <code>define('DISALLOW_FILE_EDIT', true);</code>", 'hide-my-wp'),
-                'javascript' => "pro",
+                'javascript' => "jQuery(this).hmwp_fixConfig('DISALLOW_FILE_EDIT',true);",
             ),
             'checkUploadsBrowsable' => array(
-                'name' => sprintf(esc_html__("Folder %s is browsable ", 'hide-my-wp'), HMWP_Classes_Tools::$default['hmwp_upload_url']),
+                'name' => sprintf(esc_html__("Folder %s is browsable", 'hide-my-wp'), HMWP_Classes_Tools::$default['hmwp_upload_url']),
                 'value' => false,
                 'valid' => false,
                 'warning' => false,
@@ -469,13 +484,13 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'javascript' => "pro",
             ),
             'checkWLW' => array(
-                'name' => esc_html__("Windows Live Writer is on ", 'hide-my-wp'),
+                'name' => esc_html__("Windows Live Writer is on", 'hide-my-wp'),
                 'value' => false,
                 'valid' => false,
                 'warning' => false,
                 'message' => esc_html__("If you're not using Windows Live Writer there's really no valid reason to have its link in the page header, because this tells the whole world you're using WordPress.", 'hide-my-wp'),
                 'solution' => sprintf(esc_html__("Switch on %s %s > Tweaks > Hide WLW Manifest scripts%s", 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_tweaks#tab=hide').'" >', HMWP_Classes_Tools::getOption('hmwp_plugin_menu'), '</a>'),
-                'javascript' => "pro",
+                'javascript' => "jQuery(this).hmwp_fixSettings('hmwp_disable_manifest',1);",
             ),
             'checkXmlrpc' => array(
                 'name' => esc_html__("XML-RPC access is on", 'hide-my-wp'),
@@ -484,7 +499,7 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'warning' => false,
                 'message' => __("WordPress XML-RPC is a specification that aims to standardize communications between different systems. It uses HTTP as the transport mechanism and XML as encoding mechanism to enable a wide range of data to be transmitted. <br /><br />The two biggest assets of the API are its extendibility and its security. XML-RPC authenticates using basic authentication. It sends the username and password with each request, which is a big no-no in security circles.", 'hide-my-wp'),
                 'solution' => sprintf(esc_html__("Switch on %s %s > Change Paths > Disable XML-RPC access%s", 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_permalinks#tab=api').'" >', HMWP_Classes_Tools::getOption('hmwp_plugin_menu'), '</a>'),
-                'javascript' => "pro",
+                'javascript' => "jQuery(this).hmwp_fixSettings('hmwp_disable_xmlrpc',1);",
             ),
             'checkRDS' => array(
                 'name' => esc_html__("RDS is visible", 'hide-my-wp'),
@@ -493,16 +508,16 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'warning' => false,
                 'message' => __("If you're not using any Really Simple Discovery services such as pingbacks, there's no need to advertise that endpoint (link) in the header. Please note that for most sites this is not a security issue because they \"want to be discovered\", but if you want to hide the fact that you're using WP, this is the way to go.", 'hide-my-wp'),
                 'solution' => sprintf(esc_html__("Switch on %s %s > Change Paths > Hide RSD Endpoint%s", 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_permalinks#tab=api').'" >', HMWP_Classes_Tools::getOption('hmwp_plugin_menu'), '</a>'),
-                'javascript' => "pro",
+                'javascript' => "jQuery(this).hmwp_fixSettings('hmwp_hide_rsd',1);",
             ),
-            'checkMysqlPermissions' => array(
-                'name' => esc_html__("MySql Grant All Permissions", 'hide-my-wp'),
-                'value' => false,
-                'valid' => false,
-                'warning' => false,
-                'message' => __("If an attacker gains access to your wp-config.php file and gets the MySQL username and password, he'll be able to login to that database and do whatever that account allows. <br /><br />That's why it's important to keep the account's privileges to a bare minimum.<br /><br />For instance, if you're not installing any new plugins or updating WP, that account doesn't need the CREATE or DROP table privileges.<br /><br />For regular, day-to-day usage these are the recommended privileges: SELECT, INSERT, UPDATE and DELETE.", 'hide-my-wp'),
-                'solution' => sprintf(esc_html__("To learn how to revoke permissions from PhpMyAdmin %sClick here%s", 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-grant-and-revoke-permissions-to-database-using-phpmyadmin/" target="_blank">', '</a>'),
-            ),
+//            'checkMysqlPermissions' => array(
+//                'name' => esc_html__("MySql Grant All Permissions", 'hide-my-wp'),
+//                'value' => false,
+//                'valid' => false,
+//                'warning' => false,
+//                'message' => __("If an attacker gains access to your wp-config.php file and gets the MySQL username and password, he'll be able to login to that database and do whatever that account allows. <br /><br />That's why it's important to keep the account's privileges to a bare minimum.<br /><br />For instance, if you're not installing any new plugins or updating WP, that account doesn't need the CREATE or DROP table privileges.<br /><br />For regular, day-to-day usage these are the recommended privileges: SELECT, INSERT, UPDATE and DELETE.", 'hide-my-wp'),
+//                'solution' => sprintf(esc_html__("To learn how to revoke permissions from PhpMyAdmin %sClick here%s", 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-grant-and-revoke-permissions-to-database-using-phpmyadmin/" target="_blank">', '</a>'),
+//            ),
             'checkUsersById' => array(
                 'name' => esc_html__("Author URL by ID access", 'hide-my-wp'),
                 'value' => false,
@@ -510,7 +525,7 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 'warning' => false,
                 'message' => __("Usernames (unlike passwords) are not secret. By knowing someone's username, you can't log in to their account. You also need the password. <br /><br />However, by knowing the username, you are one step closer to logging in using the username to brute-force the password, or to gain access in a similar way. <br /><br />That's why it's advisable to keep the list of usernames private, at least to some degree. By default, by accessing siteurl.com/?author={id} and looping through IDs from 1 you can get a list of usernames, because WP will redirect you to siteurl.com/author/user/ if the ID exists in the system.", 'hide-my-wp'),
                 'solution' => sprintf(esc_html__("Switch on %s %s > Change Paths > Hide Author ID URL%s", 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_permalinks#tab=author').'" >', HMWP_Classes_Tools::getOption('hmwp_plugin_menu'), '</a>'),
-                'javascript' => "pro",
+                'javascript' => "jQuery(this).hmwp_fixSettings('hmwp_hide_authors',1);",
             ),
             'checkBlogDescription' => array(
                 'name' => esc_html__("Default WordPress Tagline", 'hide-my-wp'),
@@ -603,7 +618,11 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                 $url = HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->find_replace_url($url);
                 $urls[] = $url;
 
-                $url = admin_url('admin-ajax.php') . '?hmwp_preview=1';
+                if (HMWP_Classes_Tools::getOption('hmwp_hideajax_admin')) {
+                    $url = home_url(HMWP_Classes_Tools::getOption('hmwp_admin-ajax_url')) . '?hmwp_preview=1';
+                }else{
+                    $url = admin_url(HMWP_Classes_Tools::getOption('hmwp_admin-ajax_url')) . '?hmwp_preview=1';
+                }
                 $url = HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->find_replace_url($url);
                 $urls[] = $url;
 
@@ -624,17 +643,135 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
                     }
                 }
 
+                //Test new admin path. Send all cookies to admin path
+                if (HMWP_Classes_Tools::getDefault('hmwp_admin_url') <> HMWP_Classes_Tools::getOption('hmwp_admin_url') ) {
+
+                    $url = admin_url('admin.php');
+                    $url = HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->find_replace_url($url);
+
+                    if (is_ssl()) {
+                        $url = str_replace('http://', 'https://', $url);
+                    }
+
+                    $response = HMWP_Classes_Tools::hmwp_localcall($url, array('redirection' => 1, 'cookies' => $_COOKIE));
+
+                    if (!is_wp_error($response) && in_array(wp_remote_retrieve_response_code($response), array(404, 302, 301))) {
+                        $error[] = '<a href="' . $url . '" target="_blank" style="word-break: break-word;">' . str_replace('?hmwp_preview=1', '', $url) . '</a> (' . wp_remote_retrieve_response_code($response) . ' ' . wp_remote_retrieve_response_message($response) . ')';
+
+                    }
+                }
+
+                if(!empty($error) && HMWP_Classes_Tools::isNginx()){
+                    $error[] = '<a href="' . esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/how-to-setup-hide-my-wp-on-nginx-server/') . '" target="_blank" style="word-break: break-word;line-height: 35px;font-weight: 700;">' . esc_html__("Don't forget to reload the Nginx service.", 'hide-my-wp') . '</a>';
+                }
+
                 if(empty($error)){
-                    wp_send_json_success(esc_html__('Great! The new paths are loading correctly.', 'hide-my-wp'));
+                    $message = array();
+                    $message[] = esc_html__('Great! The new paths are loading correctly.', 'hide-my-wp');
+                    if(HMWP_Classes_Tools::getOption('prevent_slow_loading')){
+                        $message[] =  '<form id="hmwp_fixsettings_form" method="POST">
+                                         '.wp_nonce_field('hmwp_fixsettings', 'hmwp_nonce', false, false).'
+                                         <input type="hidden" name="action" value="hmwp_fixsettings"/>
+                                         
+                                         <div class="col-sm-12 p-0 my-2 switch switch-xxs" style="font-size: 0.9rem;">
+                                            <input type="checkbox" id="prevent_slow_loading" name="prevent_slow_loading" onChange="jQuery(this).hmwp_fixSettings(\'prevent_slow_loading\',0);" class="switch" '. (HMWP_Classes_Tools::getOption('prevent_slow_loading') ? 'checked="checked"' : '') .' value="1"/>
+                                            <label for="prevent_slow_loading">'.sprintf(esc_html__("You can now turn off '%s' option.", 'hide-my-wp'), __('Prevent Broken Website Layout', 'hide-my-wp')).'</label>
+                                         </div>
+                                       </form>';
+                    }
+                    wp_send_json_success(join('<br />', $message));
                 }else{
                     wp_send_json_error(esc_html__('Error! The new paths are not loading correctly. Clear all cache and try again.', 'hide-my-wp') . "<br /><br />" .  join('<br />', $error));
                 }
 
             case 'hmwp_fixsettings':
+
+
+                $name = HMWP_Classes_Tools::getValue('name');
+                $value = HMWP_Classes_Tools::getValue('value');
+
+                if (HMWP_Classes_Tools::getIsset('name') && HMWP_Classes_Tools::getIsset('value') ) {
+
+                    if (in_array($name, array_keys(HMWP_Classes_Tools::$options)) ) {
+                        HMWP_Classes_Tools::saveOptions($name, $value);
+                        //call it in case of rule change
+                        HMWP_Classes_ObjController::getClass('HMWP_Models_Settings')->saveRules();
+
+                        if (HMWP_Classes_Tools::isIIS() && HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->isConfigWritable() ) {
+                            //Flush the changes for IIS server
+                            HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
+                        }
+
+                        $message = esc_html__('Saved! You can run the test again.', 'hide-my-wp');
+                        if (HMWP_Classes_Tools::isNginx() || HMWP_Classes_Tools::isCloudPanel() ) {
+                            $message .= '<br />' . esc_html__("Don't forget to reload the Nginx service.", 'hide-my-wp') . ' ' . '<strong><a href="'.HMWP_Classes_Tools::getOption('hmwp_plugin_website').'/how-to-setup-hide-my-wp-on-nginx-server/" target="_blank" style="color: red">' . esc_html__("Learn How", 'hide-my-wp') . '</a></strong>';
+                        }
+
+                        if(HMWP_Classes_Tools::isAjax()) {
+                            wp_send_json_success($message);
+                        }
+
+                        break;
+                    }
+                }
+                //refresh the security scan
+                $this->doSecurityCheck();
+
+                if(HMWP_Classes_Tools::isAjax()) {
+                    wp_send_json_error(esc_html__('Could not fix it. You need to change it manually.', 'hide-my-wp'));
+                }
+                break;
+
             case 'hmwp_fixconfig':
 
-                wp_send_json_error(esc_html__('Could not fix it. You need to change it manually.', 'hide-my-wp'));
+                $name = HMWP_Classes_Tools::getValue('name');
+                $value = HMWP_Classes_Tools::getValue('value', null);
+
+                if (!in_array($name, array('WP_DEBUG', 'SCRIPT_DEBUG', 'DISALLOW_FILE_EDIT')) || !in_array($value, array('true', 'false')) ) {
+
+                    if(HMWP_Classes_Tools::isAjax()) {
+                        wp_send_json_error(esc_html__('Could not fix it. You need to change it manually.', 'hide-my-wp'));
+                    }
                     break;
+                }
+
+                if ($name && isset($value) ) {
+                    if ($config_file = HMWP_Classes_Tools::getConfigFile() ) {
+
+                        /** @var HMWP_Models_Rules $rulesModel */
+                        $rulesModel = HMWP_Classes_ObjController::getClass('HMWP_Models_Rules');
+
+                        $wp_filesystem = HMWP_Classes_ObjController::initFilesystem();
+                        if( !$rulesModel->isConfigWritable($config_file)){
+                            $current_permission = $wp_filesystem->getchmod($config_file);
+                            $wp_filesystem->chmod($config_file, 0644);
+                        }
+
+                        if( $rulesModel->isConfigWritable($config_file)){
+                            $find = "define\s?\(\s?'$name'";
+                            $replace = "define('$name',$value);" . PHP_EOL;
+                            if ($rulesModel->findReplace($find, $replace, $config_file) ) {
+
+                                if(isset($current_permission)){
+                                    $wp_filesystem->chmod($config_file, octdec($current_permission));
+                                }
+
+                                if(HMWP_Classes_Tools::isAjax()) {
+                                    wp_send_json_success(esc_html__('Saved! You can run the test again.', 'hide-my-wp'));
+                                }
+                                break;
+                            }
+                        }
+
+                    }
+                }
+                //refresh the security scan
+                $this->doSecurityCheck();
+
+                if(HMWP_Classes_Tools::isAjax()) {
+                    wp_send_json_error(esc_html__('Could not fix it. You need to change it manually.', 'hide-my-wp'));
+                }
+                break;
 
             case 'hmwp_securityexclude':
                 $name = HMWP_Classes_Tools::getValue('name');
@@ -778,8 +915,8 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
      */
     public function checkAdminUsers()
     {
-        if(!$users = get_users(array('role' => 'administrator', 'login' => 'administrator'))) {
-            $users = get_users(array('role' => 'administrator', 'login' => 'admin'));
+        if(!$users = username_exists('admin')) {
+            $users = username_exists('administrator');
         }
 
         return array(
@@ -813,7 +950,7 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
             if ($wp_lastversion ) {
                 return array(
                     'value' => $wp_version,
-                    'valid' => version_compare($wp_version, $wp_lastversion, '=='),
+                    'valid' => version_compare($wp_version, $wp_lastversion, '>='),
                     'version' => $wp_lastversion,
                 );
             }
@@ -1277,6 +1414,17 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
         );
     }
 
+    /**
+     * Check if firewall is activated
+     *
+     * @return array
+     */
+    public function checkFirewall() {
+        return array(
+            'value' => (HMWP_Classes_Tools::getOption('hmwp_sqlinjection') ? esc_html__('Yes') : esc_html__('No')),
+            'valid' => (HMWP_Classes_Tools::getOption('hmwp_sqlinjection')),
+        );
+    }
 
     /**
      * Does WP install.php file exist?
@@ -1641,9 +1789,18 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
 
         $found = strpos($this->html, site_url(HMWP_Classes_Tools::getOption('hmwp_admin_url')));
 
+        if(HMWP_Classes_Tools::getDefault('hmwp_admin-ajax_url') == HMWP_Classes_Tools::getOption('hmwp_admin-ajax_url')){
+            return array(
+                'value' => ($found ? esc_html__('Yes') : esc_html__('No')),
+                'valid' => (!$found),
+                'javascript' => "jQuery(this).hmwp_fixSettings('hmwp_hideajax_admin',1);jQuery(this).hmwp_fixSettings('hmwp_admin-ajax_url','ajax');",
+            );
+        }
+
         return array(
             'value' => ($found ? esc_html__('Yes') : esc_html__('No')),
             'valid' => (!$found),
+            'javascript' => "jQuery(this).hmwp_fixSettings('hmwp_hideajax_admin',1);",
         );
 
     }
@@ -1708,6 +1865,29 @@ class HMWP_Controllers_SecurityCheck extends HMWP_Classes_FrontController
         return array(
             'value' => ($check ? esc_html__('Yes') : esc_html__('No')),
             'valid' => (!$check),
+        );
+    }
+
+    /**
+     * Check if file and directory permissions are correctly set
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function checkFilePermissions() {
+
+        /** @var HMWP_Models_Permissions $permissionModel */
+        $permissionModel = HMWP_Classes_ObjController::getClass('HMWP_Models_Permissions');
+
+        $invalid = $permissionModel->getInvalidPermissions();
+        $values = array();
+        foreach ($invalid as $row){
+            $values[] = $row['display_path'] . ' ('.$row['display_permission'].')';
+        }
+
+        return array(
+            'value' => (!empty($values) ? sprintf(esc_html__("%s don't have the correct permission.", 'hide-my-wp'), '<span style="font-weight: normal; color: #dc3545!important">' . join('<br />',$values) . '</span>' . '<br />') : esc_html__('All files have the correct permissions.', 'hide-my-wp')),
+            'valid' => (empty($values)),
         );
     }
 

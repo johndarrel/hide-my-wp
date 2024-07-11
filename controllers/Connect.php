@@ -43,12 +43,12 @@ class HMWP_Controllers_Connect extends HMWP_Classes_FrontController
 						HMWP_Classes_Tools::saveOptionsBackup();
 
 					} else {
-						HMWP_Classes_Error::setNotification( __( 'ERROR! Please make sure you use a valid token to connect the plugin with WPPlugins', 'hide-my-wp' ) . " <br /> " );
+						HMWP_Classes_Error::setNotification( __( 'ERROR! Please make sure you use a valid token to activate the plugin', 'hide-my-wp' ) . " <br /> " );
 					}
 				} elseif ( $email <> '' ) {
 					HMWP_Classes_Tools::checkAccountApi( $email, $redirect_to );
 				} else {
-					HMWP_Classes_Error::setNotification( __( 'ERROR! Please make sure you use an email address to connect the plugin with WPPlugins', 'hide-my-wp' ) . " <br /> " );
+					HMWP_Classes_Error::setNotification( __( 'ERROR! Please make sure you use the right token to activate the plugin', 'hide-my-wp' ) . " <br /> " );
 				}
 				break;
             case 'hmwp_reconnect':

@@ -104,7 +104,7 @@
 #hmwp_wrap .hmwp_nav .hmwp_nav_item {
     display: block;
     position: relative;
-    font-size: 1rem;
+    font-size: 0.9rem;
     line-height: 1.46154;
     font-weight: 400;
     color: #888;
@@ -124,7 +124,7 @@
     display: block;
     margin-top: 2px;
     color: #ddaa00;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 400;
     line-height: normal;
 }
@@ -134,7 +134,7 @@
     top: calc(50% - 12px);
     right: 18px;
     text-align: center;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     line-height: 1;
     color: #121116;
     opacity: 0.4;
@@ -161,7 +161,7 @@
 }
 
 #hmwp_wrap .small{
-    font-size: .875rem;
+    font-size: .8rem;
 }
 
 #hmwp_wrap .hmwp_col_side {
@@ -169,13 +169,13 @@
 }
 
 #hmwp_wrap .checker label {
-    font-size: 1rem;
-    font-weight: bold;
+    font-size: 0.9rem;
+    font-weight: 600;
 }
 
 #hmwp_wrap .hmwp_header{
     background-color: #f5f8f9;
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 400;
     color: #292929!important;
 
@@ -185,11 +185,10 @@
     line-height: 1.9rem;
 }
 
-#hmwp_wrap .hmwp_header .card-title{
-    font-size: 1.2rem;
+#hmwp_wrap .card-title{
+    font-size: 1.15rem;
     font-weight: 400;
-    color: #292929!important;
-
+    color: #292929 !important;
     line-height: 1.9rem;
 }
 
@@ -303,6 +302,10 @@
     display: block !important;
 }
 
+#hmwp_wrap .table tbody tr.odd {
+    background-color: rgba(0,0,0,.05)
+}
+
 #hmwp_wrap .table_securitycheck .fa {
     font-size: 1.4rem !important;
 }
@@ -377,10 +380,8 @@
     text-align: right;
 }
 
-
-
 #hmwp_wrap .ribbon span {
-    font-size: 12px;
+    font-size: 0.8rem;
     font-weight: bold;
     color: #FFF;
     text-transform: uppercase;
@@ -420,6 +421,28 @@
     border-right: 3px solid #4f6f97;
     border-bottom: 3px solid transparent;
     border-top: 3px solid #4f6f97;
+}
+
+@media (max-width: 1500px) and (min-resolution: 120dpi) {
+    #hmwp_wrap .hmwp_row {
+        flex-direction: column !important;
+    }
+
+    #hmwp_wrap .hmwp_col {
+        width: 100%;
+    }
+
+    #hmwp_wrap .hmwp_col_side {
+        margin-right: 1em;
+    }
+
+    #hmwp_wrap .hmwp_nav .hmwp_nav_item span,
+    #hmwp_wrap .hmwp_nav .hmwp_nav_button,
+    #hmwp_wrap .hmwp_nav .text-logo {
+        display: none;
+    }
+
+
 }
 
 /*** mobile **/

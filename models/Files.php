@@ -690,14 +690,14 @@ class HMWP_Models_Files
 					$urled_redirect_to = $_REQUEST['redirect_to'];
 				}
 
-				if ( is_user_logged_in() ) {
-					$user = wp_get_current_user();
-					if ( ! isset( $_REQUEST['action'] ) ) {
-						$logged_in_redirect = apply_filters( 'hmwp_url_login_redirect', admin_url(), $urled_redirect_to, $user );
-						wp_safe_redirect( $logged_in_redirect );
-						die();
-					}
-				}
+                //if user is logged in
+                if ( function_exists('is_user_logged_in') && is_user_logged_in() ) {
+                    if(HMWP_Classes_Tools::getOption('hmwp_logged_users_redirect')) {
+                        /** @var HMWP_Models_Rewrite $rewriteModel */
+                        $rewriteModel = HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite');
+                        $rewriteModel->dashboard_redirect();
+                    }
+                }
 
 				global $error, $interim_login, $action, $user_login;
 				@require_once ABSPATH . 'wp-login.php';

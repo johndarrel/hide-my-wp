@@ -42,6 +42,20 @@
         }
     };
 
+    //Set stripes in table rows
+    $.hmwp_setStripe = function (rows){
+        var count = 0;
+        $(rows).each(function (index, row) {
+            $(row).removeClass('odd');
+            if ($(row).is(":visible")) {
+                if (count % 2 == 1) { //odd row
+                    $(row).addClass('odd');
+                }
+                count++;
+            }
+        });
+    }
+
     //Add the loading icon to field
     $.fn.hmwp_loading = function (state) {
         var $this = this;
@@ -296,6 +310,24 @@
             }
         );
 
+        $this.find('.show_task_passed').on('click', function (){
+            $('.task_passed').show();
+            $('.hide_task_passed').show();
+            $(this).hide();
+
+            $.hmwp_setStripe('.table_securitycheck tr');
+        });
+
+        $this.find('.hide_task_passed').on('click', function (){
+            $('.task_passed').hide();
+            $('.show_task_passed').show();
+            $(this).hide();
+
+            $.hmwp_setStripe('.table_securitycheck tr');
+        });
+
+        $.hmwp_setStripe('.table_securitycheck tr');
+
     };
 
     //Add the Listener for Settings
@@ -304,6 +336,38 @@
         var $this = this;
         //init settings as saved
         var unsaved = false;
+
+        //search option in features
+        $this.find("#hmwp_features_search").on('keyup', function(){
+
+            if(typeof $searchTimeout !== 'undefined'){
+                clearTimeout($searchTimeout);
+            }
+            if($(this).val() !== ''){
+                var $search = $(this).val();
+
+                var $searchTimeout = setTimeout(function(){
+                    $this.find('.hmwp_feature').each(function (){
+                        if($(this).text().toLowerCase().indexOf($search.toLowerCase()) !== -1){
+                            $(this).parent('div').show();
+                        }else{
+                            $(this).parent('div').hide();
+                        }
+                    });
+
+                    if(!$this.find('.hmwp_feature').is(":visible")){
+                        $this.find('#hmwp_feature_none').show();
+                    }else{
+                        $this.find('#hmwp_feature_none').hide();
+                    }
+                }, 1000);
+            }else{
+                $this.find('.hmwp_feature').each(function (){
+                    $(this).parent('div').show();
+                });
+            }
+
+        });
 
         //listen the SubMenu click
         $this.find(".hmwp_nav_item").on(
@@ -418,8 +482,10 @@
             'keyup', function () {
                 if ($(this).val() !== 'wp-login.php'  && $(this).val() != '') {
                     $this.find('.hmwp_hide_wplogin_div').show();
+                    $this.find('.hmwp_hide_newlogin_div').show();
                 } else {
                     $this.find('.hmwp_hide_wplogin_div').hide();
+                    $this.find('.hmwp_hide_newlogin_div').hide();
                 }
 
                 if ($(this).val() !== 'login'  && $(this).val() != '') {

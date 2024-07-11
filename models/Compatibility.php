@@ -144,63 +144,7 @@ class HMWP_Models_Compatibility
 
     }
 
-	/**
-	 * Check if there are whitelisted IPs for accessing the hidden paths
-	 * @return void
-	 */
-	public function checkWhitelistIPs(){
 
-		if (!HMWP_Classes_Tools::getValue('hmwp_preview') && isset($_SERVER['REMOTE_ADDR']) && strpos($_SERVER['REMOTE_ADDR'], '.') !== false ) {
-
-			$ip = $_SERVER['REMOTE_ADDR'];
-
-			if(HMWP_Classes_Tools::isWhitelistedIP($ip)){
-				add_filter('hmwp_process_hide_urls', '__return_false');
-
-				if(HMWP_Classes_Tools::getOption('whitelist_paths')) {
-					add_filter('hmwp_process_init', '__return_false');
-					add_filter('hmwp_process_buffer', '__return_false');
-					add_filter('hmwp_process_hide_disable', '__return_false');
-					add_filter('hmwp_process_find_replace', '__return_false');
-					HMWP_Classes_ObjController::getClass('HMWP_Models_Cookies')->setWhitelistCookie();
-				}
-			}
-
-		}
-	}
-
-    /**
-     * Check if the IP is in blacklist
-     * Include also the theme detectors
-     * @return void
-     * @throws Exception
-     */
-    public function checkBlacklistIPs(){
-
-        if (!HMWP_Classes_Tools::getValue('hmwp_preview') && isset($_SERVER['REMOTE_ADDR']) && strpos($_SERVER['REMOTE_ADDR'], '.') !== false ) {
-
-
-            $ip = $_SERVER['REMOTE_ADDR'];
-
-            if(!HMWP_Classes_Tools::isWhitelistedIP($ip) && HMWP_Classes_Tools::isBlacklistedIP($ip)){
-                HMWP_Classes_ObjController::getClass('HMWP_Models_Brute')->brute_kill_login();
-            }
-
-            if(isset($_SERVER['HTTP_USER_AGENT'])){
-                $agent = $_SERVER['HTTP_USER_AGENT'];
-                if(strpos($agent, 'wpthemedetector') !== false ||
-                    strpos($agent, 'builtwith') !== false ||
-                    strpos($agent, 'wapalyzer') !== false ||
-                    strpos($agent, 'mShots') !== false ||
-                    strpos($agent, 'WhatCMS') !== false ||
-                    strpos($agent, 'isitwp') !== false){
-
-                    HMWP_Classes_ObjController::getClass('HMWP_Models_Brute')->brute_kill_login();
-                }
-            }
-
-        }
-    }
 
     /**
      * Check if the cache plugins are loaded and have cached files
@@ -793,10 +737,6 @@ class HMWP_Models_Compatibility
 	        if (HMWP_Classes_Tools::isPluginActive('wp-user-manager/wp-user-manager.php') && HMWP_Classes_Tools::getOption('hmwp_bruteforce') && HMWP_Classes_Tools::getOption('brute_use_captcha_v3')  ) {
 		        HMWP_Classes_Error::setNotification(sprintf(esc_html__("Google reCaptcha V3 is not working with the current login form of %s .", 'hide-my-wp'), 'Ultimate Member plugin'));
 	        }
-
-            if(HMWP_Classes_Tools::getOption('hmwp_mode') <> 'default' && HMWP_Classes_Tools::getOption('prevent_slow_loading') && HMWP_Classes_Tools::getOption('test_frontend')){
-                HMWP_Classes_Error::setNotification(sprintf(esc_html__('Prevent Broken Website option is active. Test the website using a different browser before turning this option off. %s Go to option %s', 'hide-my-wp'), '<a href="'.HMWP_Classes_Tools::getSettingsUrl('hmwp_advanced', true).'" >', '</a>'));
-            }
 
         }
 

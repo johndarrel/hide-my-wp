@@ -81,6 +81,7 @@ class HMWP_Classes_Action extends HMWP_Classes_FrontController
                         "hmwp_restore_settings",
                         "hmwp_manualrewrite",
                         "hmwp_mappsettings",
+                        "hmwp_firewall",
                         "hmwp_advsettings",
                         "hmwp_devsettings",
                         "hmwp_devdownload",

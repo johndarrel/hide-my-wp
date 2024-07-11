@@ -39,7 +39,10 @@ class HMWP_Models_Cookies
                 switch_to_blog($blog_id);
 
                 ms_cookie_constants();
-                if (! is_subdomain_install() || trim(parse_url(get_option('siteurl'), PHP_URL_PATH), '/') ) {
+                //Set current site path
+                $path = parse_url(get_option('siteurl'), PHP_URL_PATH);
+                //is path based and path exists
+                if (! is_subdomain_install() || ($path && trim($path, '/')) ) {
                     $this->_admin_cookie_path = SITECOOKIEPATH;
                 } else {
                     $this->_admin_cookie_path = SITECOOKIEPATH . HMWP_Classes_Tools::getOption('hmwp_admin_url');
@@ -139,24 +142,6 @@ class HMWP_Models_Cookies
         }
     }
 
-	/**
-	 * Add the test cookie in the login form
-	 *
-	 * @return void
-	 */
-	public function setWhitelistCookie()
-	{
-
-		if(headers_sent()) {
-			return;
-		}
-
-		$secure = is_ssl() && 'https' === parse_url(get_option('home'), PHP_URL_SCHEME);
-		setcookie(HMWP_LOGGED_IN_COOKIE . 'whitelist', 'whitelist', 0, COOKIEPATH, $this->getCookieDomain(), $secure);
-		if (SITECOOKIEPATH != COOKIEPATH ) {
-			setcookie(HMWP_LOGGED_IN_COOKIE . 'whitelist', 'whitelist', 0, SITECOOKIEPATH, COOKIE_DOMAIN, $secure);
-		}
-	}
 
     /**
      * Set the plugin cookies for the custom admin path

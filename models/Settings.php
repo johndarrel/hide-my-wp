@@ -277,7 +277,6 @@ class HMWP_Models_Settings
 			return;
 		}
 
-
 		//INSERT SEURITY RULES
 		if (!HMWP_Classes_Tools::isIIS()) {
 			//For Nginx and Apache the rules can be inserted separately
@@ -557,4 +556,104 @@ class HMWP_Models_Settings
 			HMWP_Classes_Error::setNotification(sprintf(esc_html__("Weak name detected: %s. You need to use another name to increase your website security.", 'hide-my-wp'), '<strong>' . $name . '</strong>'));
 		}
 	}
+
+
+    /**
+     * This function applies changes to permalinks.
+     * It deletes the restore transient and clears the cache if there are no errors.
+     * If no changes are made on settings and $force is false, the function returns true.
+     * It forces the recheck security notification, clears the cache, removes the redirects, and flushes the WordPress rewrites.
+     * If there are no errors, it checks if there is any main path change and saves the working options into backup.
+     * It sends an email notification about the path changed, sets the cookies for the current path, activates frontend test, and triggers an action after applying the permalink changes.
+     *
+     * @param bool $force If true, the function will always apply the permalink changes.
+     * @return bool Returns true if the changes are applied successfully; otherwise, returns false.
+     *
+     * @throws Exception
+     */
+    public function applyPermalinksChanged($force = false){
+
+        // Delete the restore transient
+        delete_transient('hmwp_restore');
+
+        //Clear the cache if there are no errors
+        if (HMWP_Classes_Tools::getOption('error') ) {
+            return false;
+        }
+
+        //If no change is made on settings, just return
+        if(!$force && !$this->checkOptionsChange()) {
+            return true;
+        }
+
+        //Force the recheck security notification
+        delete_option(HMWP_SECURITY_CHECK_TIME);
+
+        //Clear the cache and remove the redirects
+        HMWP_Classes_Tools::emptyCache();
+
+        //Flush the WordPress rewrites
+        HMWP_Classes_Tools::flushWPRewrites();
+
+        //check if the config file is writable or is WP-engine server
+        if (!HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->isConfigWritable() || HMWP_Classes_Tools::isWpengine()) {
+            //if not writeable, call the rules to show manually changes
+            //show rules to be added manually
+            if (!HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->clearRedirect()->setRewriteRules()->flushRewrites()) {
+                HMWP_Classes_Tools::saveOptions('test_frontend', false);
+                HMWP_Classes_Tools::saveOptions('error', true);
+            }
+        }else{
+            //Flush the changes
+            HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
+        }
+
+        //If there are no errors
+        if (!HMWP_Classes_Error::isError() ) {
+
+            //Check if there is any main path change
+            $this->checkMainPathsChange();
+
+            if ( HMWP_Classes_Tools::getOption( 'hmwp_mode' ) == 'default' ) {
+                //Save the working options into backup
+                HMWP_Classes_Tools::saveOptionsBackup();
+            }
+
+            //Redirect to the new admin URL
+            if ( HMWP_Classes_Tools::getOption( 'logout' ) ) {
+
+                //Send email notification about the path changed
+                HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' )->sendEmail();
+
+                //Set the cookies for the current path
+                $cookies = HMWP_Classes_ObjController::newInstance( 'HMWP_Models_Cookies' );
+
+                if ( HMWP_Classes_Tools::isNginx() || HMWP_Classes_Tools::isCloudPanel() || $cookies->setCookiesCurrentPath() ) {
+
+                    HMWP_Classes_Tools::saveOptions( 'logout', false );
+                    //activate frontend test
+                    HMWP_Classes_Tools::saveOptions( 'test_frontend', true );
+
+                    remove_all_filters( 'wp_redirect' );
+                    remove_all_filters( 'admin_url' );
+
+                    //trigger action after apply the permalink changes
+                    do_action('hmwp_apply_permalink_changes');
+
+                    if(!HMWP_Classes_Tools::isNginx() && !HMWP_Classes_Tools::isCloudPanel()){
+                        wp_redirect(HMWP_Classes_Tools::getSettingsUrl(HMWP_Classes_Tools::getValue('page')));
+                        exit();
+                    }
+                }
+
+            }
+
+            //trigger action after apply the permalink changes
+            do_action('hmwp_apply_permalink_changes');
+
+            return true;
+        }
+
+        return false;
+    }
 }

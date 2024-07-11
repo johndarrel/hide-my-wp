@@ -6,8 +6,8 @@
   Plugin Name: Hide My WP Ghost Lite
   Plugin URI: https://wordpress.org/plugins/hide-my-wp/
   Description: Hide WP paths, wp-admin, wp-login, wp-content, plugins, themes, authors, XML-RPC, API, etc. Add 7G Firewall Security, Brute Force protection & more.
-  Version: 5.1.01
-  Author: WPPlugins - WordPress Security Plugins
+  Version: 5.2.04
+  Author: WPPlugins
   Author URI: https://hidemywp.com
   License: GPLv2 or later
   License URI: http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -21,10 +21,10 @@
 if ( defined( 'ABSPATH' ) && !defined( 'HMW_VERSION' ) ) {
 
     //Set current plugin version
-    define( 'HMWP_VERSION', '5.1.01' );
+    define( 'HMWP_VERSION', '5.2.04' );
 
     //Set the last stable version of the plugin
-    define( 'HMWP_STABLE_VERSION', '5.0.29' );
+    define( 'HMWP_STABLE_VERSION', '5.2.02' );
 
     //Set the plugin basename
     define( 'HMWP_BASENAME',  plugin_basename(__FILE__) );
@@ -94,7 +94,7 @@ if ( defined( 'ABSPATH' ) && !defined( 'HMW_VERSION' ) ) {
                 //on core or plugins update
 	            add_action('automatic_updates_complete', function($options)
 	            {
-		            if($options['action'] == 'update') {
+		            if(isset($options['action']) && $options['action'] == 'update') {
 			            set_transient( 'hmwp_update', 1 );
 		            }
 	            }, 10, 1);
@@ -104,7 +104,7 @@ if ( defined( 'ABSPATH' ) && !defined( 'HMW_VERSION' ) ) {
 	            {
 		            $our_plugin = plugin_basename( __FILE__ );
 
-		            if($options['action'] == 'update') {
+		            if(isset($options['action']) && $options['action'] == 'update') {
 			            if( $options['type'] == 'plugin' && isset( $options['plugins'] ) ) {
 				            foreach( $options['plugins'] as $plugin ) {
 					            if( $plugin <> $our_plugin ) {

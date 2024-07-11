@@ -11,7 +11,7 @@
 
                     <div id="text" class="card col-sm-12 p-0 m-0 tab-panel tab-panel-first">
                         <h3 class="card-title hmwp_header p-2 m-0"><?php echo esc_html__('Text Mapping', 'hide-my-wp'); ?>
-                            <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#text_mapping') ?>" target="_blank" class="d-inline-block ml-2" style="color: white"><i class="dashicons dashicons-editor-help"></i></a>
+                            <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#text_mapping') ?>" target="_blank" class="d-inline-block float-right mr-2" style="color: white"><i class="dashicons dashicons-editor-help"></i></a>
                         </h3>
                         <?php if (HMWP_Classes_Tools::getOption('hmwp_mode') == 'default' ) { ?>
                             <div class="card-body">
@@ -42,9 +42,9 @@
                                                 <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#text_mapping_style') ?>" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a>
                                                 <span class="text-black-50 small">(<?php echo esc_html__("recommended", 'hide-my-wp'); ?>)</span>
                                             </label>
-                                            <div class="offset-1 text-black-50"><?php echo esc_html__("Change the text only in classes, styles & scrips. (Recommended ON)", 'hide-my-wp'); ?></div>
-                                            <div class="offset-1 text-black-50"><?php echo esc_html__("If this option is switched off, the text is changed brutally in source-code.", 'hide-my-wp'); ?></div>
-                                            <div class="offset-1 text-danger my-2"><?php echo esc_html__("Avoid using text mapping for commonly used paths such as wp-content, wp-admin, wp-includes because it can cause errors. Instead, use the 'Change Paths' feature in the Hide My Wp plugin to safely hide these paths.", 'hide-my-wp'); ?></div>
+                                            <div class="text-black-50 ml-5"><?php echo esc_html__("Change the text only in classes, styles & scrips. (Recommended ON)", 'hide-my-wp'); ?></div>
+                                            <div class="text-black-50 ml-5"><?php echo esc_html__("If this option is switched off, the text is changed brutally in source-code.", 'hide-my-wp'); ?></div>
+                                            <div class="text-danger my-2 ml-5"><?php echo esc_html__("Avoid using text mapping for commonly used paths such as wp-content, wp-admin, wp-includes because it can cause errors. Instead, use the 'Change Paths' feature in the Hide My Wp plugin to safely hide these paths.", 'hide-my-wp'); ?></div>
                                         </div>
                                     </div>
                                 </div>
@@ -124,7 +124,7 @@
                     </div>
                     <div id="url" class="card col-sm-12 p-0 m-0 tab-panel">
                             <h3 class="card-title hmwp_header p-2 m-0"><?php echo esc_html__('URL Mapping', 'hide-my-wp'); ?>
-                                <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#url_mapping') ?>" target="_blank" class="d-inline-block ml-2" style="color: white"><i class="dashicons dashicons-editor-help"></i></a>
+                                <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#url_mapping') ?>" target="_blank" class="d-inline-block float-right mr-2" style="color: white"><i class="dashicons dashicons-editor-help"></i></a>
                             </h3>
                             <?php if (HMWP_Classes_Tools::getOption('hmwp_mode') == 'default' ) { ?>
                                 <div class="card-body">
@@ -196,7 +196,7 @@
                         </div>
                     <div id="cdn" class="card col-sm-12 p-0 m-0 tab-panel">
                         <h3 class="card-title hmwp_header p-2 m-0"><?php echo esc_html__('CDN URLs', 'hide-my-wp'); ?>
-                            <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#cdn_urls') ?>" target="_blank" class="d-inline-block ml-2" style="color: white"><i class="dashicons dashicons-editor-help"></i></a>
+                            <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#cdn_urls') ?>" target="_blank" class="d-inline-block float-right mr-2" style="color: white"><i class="dashicons dashicons-editor-help"></i></a>
                         </h3>
                         <?php if (HMWP_Classes_Tools::getOption('hmwp_mode') == 'default' ) { ?>
                             <div class="card-body">
@@ -260,8 +260,8 @@
                                                 <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#optimize_css') ?>" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a>
                                                 <span class="text-black-50 small">(<?php echo esc_html__("not recommended", 'hide-my-wp'); ?>)</span> </label>
                                             </label>
-                                            <div class="offset-1 text-black-50"><?php echo esc_html__('Cache CSS, JS and Images to increase the frontend loading speed.', 'hide-my-wp'); ?></div>
-                                            <div class="offset-1 text-black-50"><?php echo sprintf(esc_html__('Check the website loading speed with %sPingdom Tool%s', 'hide-my-wp'), '<a href="https://tools.pingdom.com/" target="_blank">', '</a>'); ?></div>
+                                            <div class="text-black-50 ml-5"><?php echo esc_html__('Cache CSS, JS and Images to increase the frontend loading speed.', 'hide-my-wp'); ?></div>
+                                            <div class="text-black-50 ml-5"><?php echo sprintf(esc_html__('Check the website loading speed with %sPingdom Tool%s', 'hide-my-wp'), '<a href="https://tools.pingdom.com/" target="_blank">', '</a>'); ?></div>
                                         </div>
                                     </div>
                                 </div>
@@ -280,8 +280,8 @@
                                                <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/url-mapping-text-mapping/#text_mapping_files') ?>" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a>
                                                <span class="text-black-50 small">(<?php echo esc_html__("not recommended", 'hide-my-wp'); ?>)</span> </label>
                                             </label>
-                                            <div class="offset-1 text-black-50"><?php echo esc_html__("Change the text in all CSS and JS files including cached files generated by cache plugins.", 'hide-my-wp'); ?></div>
-                                            <div class="offset-1 mt-1 p-2 alert-danger"><?php echo esc_html__("If you switch this option on, it will significantly slow down the website as CSS and JS files are loaded dynamically and not through rewrites to be able to change the text within all of them", 'hide-my-wp'); ?></div>
+                                            <div class="text-black-50 ml-5"><?php echo esc_html__("Change the text in all CSS and JS files including cached files generated by cache plugins.", 'hide-my-wp'); ?></div>
+                                            <div class="alert-danger mt-1 p-2 ml-5"><?php echo esc_html__("If you switch this option on, it will significantly slow down the website as CSS and JS files are loaded dynamically and not through rewrites to be able to change the text within all of them", 'hide-my-wp'); ?></div>
                                         </div>
                                     </div>
                                 </div>

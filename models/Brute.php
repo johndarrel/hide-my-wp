@@ -304,19 +304,12 @@ class HMWP_Models_Brute
 
             if ($attempts >= HMWP_Classes_Tools::getOption('brute_max_attempts')) {
 
-                $info['ip'] = $ip;
-                $info['host'] = $this->brute_get_local_host();
-                $info['protocol'] = $this->brute_get_protocol();
-                $info['headers'] = json_encode($this->brute_get_headers());
+                //block current IP address
+                $this->block_ip($ip);
 
-                $response = array_merge($response, $info);
-                $response['attempts'] = $attempts;
-                $response['status'] = 'blocked';
-
-                $this->set_transient($transient_name, $response, (int)HMWP_Classes_Tools::getOption('brute_max_timeout'));
-
-                //Log the block IP on the server
-                HMWP_Classes_ObjController::getClass('HMWP_Models_Log')->hmwp_log_actions('block_ip', array('ip' => $ip));
+                if(!function_exists('wp_redirect')){
+                    include_once ABSPATH . WPINC . '/pluggable.php';
+                }
 
                 wp_redirect(home_url());
                 exit();
@@ -341,6 +334,39 @@ class HMWP_Models_Brute
         }
 
         return $response;
+    }
+
+    /**
+     * Block current IP address
+     *
+     * @param $ip
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function block_ip($ip) {
+
+        $transient_name = 'hmwp_brute_' . md5($ip);
+
+        if(!$response = $this->get_transient($transient_name)){
+            $response = array();
+        }
+
+        $attempts = (isset($response['attempts']) ? (int)$response['attempts'] : 0);
+
+        $info['ip'] = $ip;
+        $info['host'] = $this->brute_get_local_host();
+        $info['protocol'] = $this->brute_get_protocol();
+        $info['headers'] = json_encode($this->brute_get_headers());
+
+        $response = array_merge($response, $info);
+        $response['attempts'] = $attempts;
+        $response['status'] = 'blocked';
+
+        $this->set_transient($transient_name, $response, (int)HMWP_Classes_Tools::getOption('brute_max_timeout'));
+
+        //Log the block IP on the server
+        HMWP_Classes_ObjController::getClass('HMWP_Models_Log')->hmwp_log_actions('block_ip', array('ip' => $ip));
     }
 
     /**

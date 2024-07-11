@@ -53,6 +53,7 @@ abstract class HMWP_Models_Compatibility_Abstract
 	 */
 	public function findReplaceCache( $content)
 	{
+
 		//if called from cache plugins or hooks, stop the buffer replace
 		add_filter('hmwp_process_buffer', '__return_false');
 

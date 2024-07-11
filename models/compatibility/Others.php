@@ -14,7 +14,6 @@ class HMWP_Models_Compatibility_Others extends HMWP_Models_Compatibility_Abstrac
 	public function __construct() {
 		parent::__construct();
 
-
 		//Compatibility with iThemes security plugin
 		if (HMWP_Classes_Tools::isPluginActive('wps-hide-login/wps-hide-login.php') ) {
 			if ($whl_page = get_option('whl_page') ) {
@@ -61,58 +60,6 @@ class HMWP_Models_Compatibility_Others extends HMWP_Models_Compatibility_Abstrac
 			add_filter('hmwp_option_hmwp_hideajax_paths', '__return_false');
 		}
 
-		//Hook the Hide URLs before the plugin
-		//Check params and compatibilities
-		add_action(
-			'init', function () {
-			//Compatibility with iThemes Security, Temporary Login Plugin, LoginPress, Wordfence
-			if (function_exists('is_user_logged_in') && !is_user_logged_in() && isset($_SERVER['REQUEST_URI'])) {
-
-				if (HMWP_Classes_Tools::getValue('action') == 'itsec-check-loopback') {
-					$exp = HMWP_Classes_Tools::getValue('exp');
-					$action = 'itsec-check-loopback';
-					$hash = hash_hmac('sha1', "$action|$exp", wp_salt());
-
-					if ($hash <> HMWP_Classes_Tools::getValue('hash', '')) {
-						add_filter('hmwp_process_hide_urls', '__return_false');
-					}
-				}
-
-				//?wtlwp_token=value
-				if (HMWP_Classes_Tools::getValue('wtlwp_token') && HMWP_Classes_Tools::isPluginActive('temporary-login-without-password/temporary-login-without-password.php')) {
-					add_filter('hmwp_process_hide_urls', '__return_false');
-				}
-
-				//?aam-jwt=value
-				if (HMWP_Classes_Tools::getValue('aam-jwt') && HMWP_Classes_Tools::isPluginActive('advanced-access-manager/aam.php')) {
-					add_filter('hmwp_process_hide_urls', '__return_false');
-				}
-
-				//?loginpress_code=value
-				if (HMWP_Classes_Tools::getValue('loginpress_code') && HMWP_Classes_Tools::isPluginActive('loginpress/loginpress.php')) {
-					add_filter('hmwp_process_hide_urls', '__return_false');
-				}
-
-				//If Ajax
-				if(HMWP_Classes_Tools::isAjax()) {
-					//?action=backup_guard_awake on backupguard scans
-					if (HMWP_Classes_Tools::getValue('action') == 'backup_guard_awake' && HMWP_Classes_Tools::isPluginActive('backup-guard-gold/backup-guard-pro.php')) {
-						add_filter('hmwp_process_hide_urls', '__return_false');
-					}
-
-					//?action=hmbkp_cron_test on backupguard scans
-					if (HMWP_Classes_Tools::getValue('action') == 'hmbkp_cron_test' && HMWP_Classes_Tools::isPluginActive('backupwordpress/backupwordpress.php')) {
-						add_filter('hmwp_process_hide_urls', '__return_false');
-					}
-				}
-
-				//If there is a process that need to access the wp-admin
-				if (get_transient('hmwp_disable_hide_urls')) {
-					add_filter('hmwp_process_hide_urls', '__return_false');
-				}
-			}
-		}, 10
-		);
 	}
 
 	public function hookAdmin(){
@@ -132,45 +79,23 @@ class HMWP_Models_Compatibility_Others extends HMWP_Models_Compatibility_Abstrac
 
 	public function hookFrontend() {
 
+        //don't hide login path on CloudPanel and WP Engine
+        if(HMWP_Classes_Tools::isCloudPanel() || HMWP_Classes_Tools::isWpengine() ){
+            add_filter('hmwp_option_hmwp_hide_login', '__return_false');
+        }
+
 		//If in preview mode of the front page
 		if (HMWP_Classes_Tools::getValue('hmwp_preview') ) {
 			$_COOKIE = array();
 			@header_remove("Cookie");
 		}
 
-        //Check if login recaptcha is loaded
-        add_filter('hmwp_option_brute_use_math', function ($check){
-            global $hmwp_bruteforce;
+        //Hook the Hide URLs before the plugin
+        //Check params and compatibilities
+        add_action('plugins_loaded', array( $this, 'fixHideUrls' ), 10);
 
-            //check if the shortcode was called
-            if(isset($hmwp_bruteforce) && $hmwp_bruteforce){
-                return true;
-            }
-
-            //check the brute force
-            if($check && !HMWP_Classes_Tools::getValue('brute_ck')){
-                if(isset($_SERVER['REQUEST_URI'])){
-                    $url = $_SERVER['REQUEST_URI'];
-                    if (HMWP_Classes_Tools::$default['hmwp_login_url'] <> HMWP_Classes_Tools::getOption('hmwp_login_url') ) {
-                        $paths= array();
-                        $paths[] = '/' . HMWP_Classes_Tools::$default['hmwp_login_url'];
-                        $paths[] = '/' . HMWP_Classes_Tools::getOption('hmwp_login_url');
-
-                        if( $post_id = get_option('woocommerce_myaccount_page_id')){
-                            if($post = get_post($post_id)) {
-                                $paths[] = '/' . $post->post_name;
-                            }
-                        }
-
-                        if (!HMWP_Classes_Tools::searchInString($url, $paths) ) {
-                             return false;
-                        }
-                    }
-                }
-            }
-
-            return $check;
-        });
+        //Check if login auth check is required
+        add_filter('hmwp_preauth_check', array($this, 'fixRecaptchaCheck'));
 
 		//Compatibility with CDN Enabler - tested 01102021
 		if (HMWP_Classes_Tools::isPluginActive('cdn-enabler/cdn-enabler.php') ) {
@@ -268,7 +193,143 @@ class HMWP_Models_Compatibility_Others extends HMWP_Models_Compatibility_Abstrac
 			}
 		}
 
+        //Gravity Form security fix
+        add_filter('wp_redirect', function($redirect, $status = ''){
+            //prevent redirect to new login
+            if (HMWP_Classes_Tools::getDefault('hmwp_login_url') <> HMWP_Classes_Tools::getOption('hmwp_login_url') ) {
+                if(HMWP_Classes_Tools::getValue('gf_page')){
+                    if (strpos($redirect, '/' . HMWP_Classes_Tools::getOption('hmwp_login_url')) !== false) {
+                        if (function_exists('is_user_logged_in') && !is_user_logged_in()) {
+                            $redirect = home_url();
+                        }
+                    }
+                }
+            }
+
+            return $redirect;
+        }, PHP_INT_MAX, 2);
+
 	}
+
+
+    /**
+     * Fix compatibility on hide URLs
+     *
+     * @return void
+     */
+    public function fixHideUrls() {
+
+        $url = (isset($_SERVER['REQUEST_URI']) ? untrailingslashit(strtok($_SERVER["REQUEST_URI"], '?')) : false);
+
+        //Compatibility with iThemes Security, Temporary Login Plugin, LoginPress, Wordfence
+        if ($url && function_exists('is_user_logged_in') && !is_user_logged_in()) {
+
+            //if the /login path is hidden but there is a page with the same URL
+            if($url == home_url('login', 'relative') && get_page_by_path('login')){
+                add_filter('hmwp_process_hide_urls', '__return_false');
+            }
+
+            //If there is a loopback from itsec
+            if (HMWP_Classes_Tools::getValue('action') == 'itsec-check-loopback') {
+                $exp = HMWP_Classes_Tools::getValue('exp');
+                $action = 'itsec-check-loopback';
+                $hash = hash_hmac('sha1', "$action|$exp", wp_salt());
+
+                if ($hash <> HMWP_Classes_Tools::getValue('hash', '')) {
+                    add_filter('hmwp_process_hide_urls', '__return_false');
+                }
+            }
+
+            //?wtlwp_token=value
+            if (HMWP_Classes_Tools::getValue('wtlwp_token') && HMWP_Classes_Tools::isPluginActive('temporary-login-without-password/temporary-login-without-password.php')) {
+                add_filter('hmwp_process_hide_urls', '__return_false');
+            }
+
+            //?aam-jwt=value
+            if (HMWP_Classes_Tools::getValue('aam-jwt') && HMWP_Classes_Tools::isPluginActive('advanced-access-manager/aam.php')) {
+                add_filter('hmwp_process_hide_urls', '__return_false');
+            }
+
+            //?loginpress_code=value
+            if (HMWP_Classes_Tools::getValue('loginpress_code') && HMWP_Classes_Tools::isPluginActive('loginpress/loginpress.php')) {
+                add_filter('hmwp_process_hide_urls', '__return_false');
+            }
+
+            //If Ajax
+            if(HMWP_Classes_Tools::isAjax()) {
+                //?action=backup_guard_awake on backupguard scans
+                if (HMWP_Classes_Tools::getValue('action') == 'backup_guard_awake' && HMWP_Classes_Tools::isPluginActive('backup-guard-gold/backup-guard-pro.php')) {
+                    add_filter('hmwp_process_hide_urls', '__return_false');
+                }
+
+                //?action=hmbkp_cron_test on backupguard scans
+                if (HMWP_Classes_Tools::getValue('action') == 'hmbkp_cron_test' && HMWP_Classes_Tools::isPluginActive('backupwordpress/backupwordpress.php')) {
+                    add_filter('hmwp_process_hide_urls', '__return_false');
+                }
+            }
+
+        }
+    }
+
+    /**
+     * Fix compatibility on brute force recaptcha
+     *
+     * @param $check
+     *
+     * @return bool
+     */
+    public function fixRecaptchaCheck($check) {
+        global $hmwp_bruteforce;
+
+        //check if the shortcode was called
+        if(isset($hmwp_bruteforce) && $hmwp_bruteforce){
+            return true;
+        }
+
+        $url = (isset($_SERVER['REQUEST_URI']) ? untrailingslashit(strtok($_SERVER["REQUEST_URI"], '?')) : false);
+        $http_post = (isset($_SERVER['REQUEST_METHOD']) && 'POST' == $_SERVER['REQUEST_METHOD']);
+
+        //check the brute force
+        if($check && $url && $http_post  && !HMWP_Classes_Tools::getIsset('brute_ck') && !HMWP_Classes_Tools::getIsset('g-recaptcha-response')){
+
+            if (HMWP_Classes_Tools::getDefault('hmwp_login_url') <> HMWP_Classes_Tools::getOption('hmwp_login_url') ) {
+                $paths = array();
+                $paths[] = '/' . HMWP_Classes_Tools::getDefault('hmwp_login_url');
+                $paths[] = '/' . HMWP_Classes_Tools::getOption('hmwp_login_url');
+
+                //add lostpass path
+                if(HMWP_Classes_Tools::getOption('hmwp_lostpassword_url') <> ''){
+                    $paths[] = '/' . HMWP_Classes_Tools::getOption('hmwp_lostpassword_url');
+                }
+
+                //add register path
+                if(HMWP_Classes_Tools::getOption('hmwp_register_url') <> ''){
+                    $paths[] = '/' . HMWP_Classes_Tools::getOption('hmwp_register_url');
+                }
+
+                if( $post_id = get_option('woocommerce_myaccount_page_id')){
+                    if($post = get_post($post_id)) {
+                        $paths[] = '/' . $post->post_name;
+                    }
+                }
+
+                if (!HMWP_Classes_Tools::searchInString($url, $paths) ) {
+                    return false;
+                }
+
+                if(HMWP_Classes_Tools::getValue('ltk') && isset($_COOKIE['elementor_pro_login'])){
+                    $login_tck = $_COOKIE['elementor_pro_login'];
+
+                    if(HMWP_Classes_Tools::getValue('ltk') == $login_tck){
+                        return false;
+                    }
+                }
+            }
+
+        }
+
+        return $check;
+    }
 
 	/**
 	 * Fix compatibility with WooGC plugin

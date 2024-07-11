@@ -64,6 +64,15 @@ if(!$sorted) {
 
                                 <div id="features" class="inside">
                                     <div class="card-body p-0">
+
+                                        <div class="hmwp_row col-12">
+                                            <label for="hmwp_features_search" class="my-1 mx-3"><?php echo esc_html__('Search', 'hide-my-wp'); ?></label>
+                                            <input id="hmwp_features_search" type="text" class="col-3"/>
+                                        </div>
+                                        <div id="hmwp_feature_none" class="hmwp_row col-12 text-center my-5" style="display: none">
+                                            <?php echo esc_html__('Could not found anything based on your search.', 'hide-my-wp'); ?>
+                                        </div>
+
                                         <?php defined('ABSPATH') || die('Cheatin\' uh?'); ?>
                                         <?php $features = $view->getFeatures(); ?>
                                         <div class="hmwp_features m-0 p-0">

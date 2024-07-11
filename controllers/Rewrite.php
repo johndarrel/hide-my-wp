@@ -80,8 +80,11 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController
             add_filter('hmwp_process_hide_urls', '__return_false');
         }
 
-        //Check the whitelist IPs for accessing the hide paths
-        HMWP_Classes_ObjController::getClass('HMWP_Models_Compatibility')->checkWhitelistIPs();
+        //Check the whitelist IPs & Paths for accessing the hide paths
+        /** @var HMWP_Controllers_Firewall $firewall */
+        $firewall = HMWP_Classes_ObjController::getClass('HMWP_Controllers_Firewall');
+        $firewall->checkWhitelistIPs();
+        $firewall->checkWhitelistPaths();
 
 	    //load the compatibility class when the plugin loads
 	    //Check boot compatibility for some plugins and functionalities
@@ -157,12 +160,6 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController
         //If not dashboard
         if(!is_admin() && !is_network_admin()) {
 
-            //Load firewall on request for all server types
-            HMWP_Classes_ObjController::getClass('HMWP_Controllers_Firewall')->run();
-            if (HMWP_Classes_Tools::getOption('hmwp_sqlinjection')){
-            }
-
-
             //Check if buffer priority
 	        if(apply_filters('hmwp_priority_buffer', HMWP_Classes_Tools::getOption('hmwp_priorityload'))) {
                 //Starte the buffer
@@ -202,8 +199,12 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController
 
         }
 
+        //Load firewall on request for all server types
+        add_action('plugins_loaded', array($firewall, 'run'));
+
         //hide the URLs from admin and login
-        add_action('init', array($this->model, 'hideUrls'));
+        //load the hook on plugins_loaded to prevent any wp redirect
+        add_action('plugins_loaded', array($this->model, 'hideUrls'));
 
     }
 

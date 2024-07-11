@@ -119,6 +119,11 @@ class HMWP_Models_Log
                     $post_id = $posts['post_id'];
                 }
                 if (! isset($posts['username']) || $posts['username'] == '' ) {
+
+                    if(!function_exists('wp_get_current_user')){
+                        include_once ABSPATH . WPINC . '/pluggable.php';
+                    }
+
                     $current_user = wp_get_current_user();
                     if (isset($current_user->user_login) ) {
                         $posts['username'] = $current_user->user_login;
