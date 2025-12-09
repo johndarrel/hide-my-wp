@@ -37,58 +37,22 @@ class HMWP_Models_Compatibility_MemberPress extends HMWP_Models_Compatibility_Ab
         }
     }
 
-    public function hookBruteForce(){
+	public function hookBruteForce() {
 
-        if (HMWP_Classes_Tools::getOption('brute_use_math')) { //math brute force
+		// Get the active brute force class
+		$bruteforce = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Brute' )->getInstance();
 
-	        add_filter('mepr-validate-login', array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute'), 'hmwp_failed_attempt'));
-	        add_action('mepr-login-form-before-submit', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_math_form'));
+		add_action( 'mepr-validate-login', array( $bruteforce, 'failed' ) );
+		add_action( 'mepr-login-form-before-submit', array( $bruteforce, 'head' ) );
+		add_action( 'mepr-login-form-before-submit', array( $bruteforce, 'form' ) );
 
-//	        if(HMWP_Classes_Tools::getOption('hmwp_bruteforce_register')) {
-//		        add_filter('mepr-validate-signup', array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute'), 'hmwp_failed_attempt'));
-//	        }
+		if ( HMWP_Classes_Tools::getOption( 'hmwp_bruteforce_lostpassword' ) ) {
+			add_action( 'mepr-validate-forgot-password', array( $bruteforce, 'failed' ) );
+			add_action( 'mepr-forgot-password-form', array( $bruteforce, 'head' ) );
+			add_action( 'mepr-forgot-password-form', array( $bruteforce, 'form' ) );
+		}
 
-	        if(HMWP_Classes_Tools::getOption('hmwp_bruteforce_lostpassword')) {
-		        add_filter('mepr-validate-forgot-password', array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute'), 'hmwp_failed_attempt'));
-		        add_action('mepr-forgot-password-form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_math_form'));
-            }
-
-        } elseif (HMWP_Classes_Tools::getOption('brute_use_captcha')) { //recaptcha V2
-
-	        add_filter('mepr-validate-login', array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute'), 'hmwp_failed_attempt'));
-	        add_action('mepr-login-form-before-submit', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_head'));
-	        add_action('mepr-login-form-before-submit', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_form'));
-
-//	        if(HMWP_Classes_Tools::getOption('hmwp_bruteforce_register')) {
-//		        add_filter('mepr-validate-signup', array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute'), 'hmwp_failed_attempt'));
-//	        }
-
-	        if(HMWP_Classes_Tools::getOption('hmwp_bruteforce_lostpassword')) {
-		        add_filter('mepr-validate-forgot-password', array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute'), 'hmwp_failed_attempt'));
-		        add_action('mepr-forgot-password-form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_head'));
-                add_action('mepr-forgot-password-form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_form'));
-			}
-
-        } elseif (HMWP_Classes_Tools::getOption('brute_use_captcha_v3')) { //recaptcha v3
-
-	        add_filter('mepr-validate-login', array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute'), 'hmwp_failed_attempt'));
-	        add_action('mepr-login-form-before-submit', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_head_v3'));
-	        add_action('mepr-login-form-before-submit', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_form_v3'));
-
-//	        if(HMWP_Classes_Tools::getOption('hmwp_bruteforce_register')) {
-//		        add_filter('mepr-validate-signup', array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute'), 'hmwp_failed_attempt'));
-//	        }
-
-	        if(HMWP_Classes_Tools::getOption('hmwp_bruteforce_lostpassword')) {
-		        add_filter('mepr-validate-forgot-password', array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute'), 'hmwp_failed_attempt'));
-		        add_action('mepr-forgot-password-form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_head_v3'));
-                add_action('mepr-forgot-password-form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_form_v3'));
-            }
-
-        }
-
-
-    }
+	}
 
     /**
      * Get the options
@@ -126,7 +90,10 @@ class HMWP_Models_Compatibility_MemberPress extends HMWP_Models_Compatibility_Ab
     public function checkReCaptcha( $args ){
         if(class_exists('UM')){
 
-            $errors = HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute')->hmwp_check_preauth(false);
+	        // Get the active brute force class
+	        $bruteforce = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Brute' )->getInstance();
+
+	        $errors = $bruteforce->pre_authentication( false );
 
             if ( is_wp_error($errors) ) {
                 if(isset($args['mode'])){

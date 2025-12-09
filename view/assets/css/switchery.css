@@ -60,7 +60,7 @@
 }
 
 .switch input:checked + label::before {
-    background-color: #5f82a9
+    background-color: #3f72af
 }
 
 .switch input:checked + label::after {

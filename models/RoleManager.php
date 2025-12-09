@@ -8,136 +8,135 @@
  * @since 5.0.0
  */
 
-class HMWP_Models_RoleManager
-{
+class HMWP_Models_RoleManager {
 
-    public $roles;
+	public $roles;
 
-    public function __construct()
-    {
-        add_action('admin_init', array( $this, 'addHMWPCaps' ), PHP_INT_MAX);
-    }
+	public function __construct() {
+		add_action( 'admin_init', array( $this, 'addHMWPCaps' ), PHP_INT_MAX );
+		add_filter( 'user_has_cap', array( $this, 'setUserHasCap' ), PHP_INT_MAX, 4);
+	}
 
-    /**
-     * Get all the  Caps
-     *
-     * @param $role
-     *
-     * @return array
-     */
-    public function getHMWPCaps( $role = '' )
-    {
-        $caps = array();
+	/**
+	 * Make sure the user has the capability if set in any role
+	 * @param $allcaps
+	 * @param $caps
+	 * @param $args
+	 * @param $user
+	 *
+	 * @return mixed
+	 */
+	public function setUserHasCap( $allcaps, $caps, $args, $user ) {
 
-        $caps['hmwp_admin'] = array(
-        'hmwp_manage_settings' => true,
-        );
+		if ( ! in_array( HMWP_CAPABILITY, $caps ) ) {
+			return $allcaps;
+		}
 
-        $caps = array_filter($caps);
+		if( isset($allcaps[HMWP_CAPABILITY]) && $allcaps[HMWP_CAPABILITY] ) {
+			return $allcaps;
+		}elseif( ! isset($allcaps[HMWP_CAPABILITY]) && user_can( $user->ID, 'manage_options' ) ){
+			$allcaps[HMWP_CAPABILITY] = 1;
+		}
 
-        if (isset($caps[ $role ]) ) {
-            return $caps[ $role ];
-        }
+		//If the user has multiple roles
+		if ( !empty( $user->roles ) && is_array( $user->roles ) ) {
+			foreach ( $user->roles as $role ) {
 
-        return $caps;
-    }
+				/** @var WP_Role $allroles */
+				$role_object = get_role( $role );
 
-    /**
-     * Register HMWP Caps
-     * in case they don't exist
-     */
-    public function addHMWPCaps()
-    {
+				foreach ( (array) $caps as $cap ) {
+					if ( $role_object->has_cap( $cap ) ) {
+						$allcaps[$cap] = 1;
+					}
+				}
 
-        if (function_exists('wp_roles') ) {
-            $allroles = wp_roles()->get_names();
-            if (! empty($allroles) ) {
-                $allroles = array_keys($allroles);
-            }
+			}
+		}
 
-            if (! empty($allroles) ) {
-                foreach ( $allroles as $role ) {
-                    if ($role == 'administrator' ) {
-                        $this->addHMWPCap('hmwp_admin', $role);
-                    }
-                }
-            }
-        }
-    }
+		return $allcaps;
+	}
 
-    public function removeHMWPCaps()
-    {
-        if (function_exists('wp_roles') ) {
-            $allroles = wp_roles()->get_names();
-            $caps     = $this->getHMWPCaps('hmwp_admin');
+	/**
+	 * Register HMWP Caps
+	 * in case they don't exist
+	 */
+	public function addHMWPCaps() {
 
-            if (! empty($allroles) ) {
-                $allroles = array_keys($allroles);
-            }
+		if ( function_exists( 'wp_roles' ) ) {
 
-            if (! empty($allroles) && ! empty($caps) ) {
-                foreach ( $allroles as $role ) {
-                    $this->removeCap($role, $caps);
-                }
-            }
-        }
+			/** @var WP_Role[] $allroles */
+			$allroles = wp_roles()->get_names();
 
-    }
+			if ( ! empty( $allroles ) ) {
+				$allroles = array_keys( $allroles );
+			}
 
-    /**
-     * Update the HMWP Caps into WP Roles
-     *
-     * @param $hmwprole
-     * @param $wprole
-     */
-    public function addHMWPCap( $hmwprole, $wprole )
-    {
-        $hmwpcaps = $this->getHMWPCaps($hmwprole);
+			if ( ! empty( $allroles ) ) {
+				foreach ( $allroles as $role ) {
+					if ( $role == 'administrator' ) {
+						/** @var WP_Role $allroles */
+						$wp_role = get_role( $role );
+						$this->addCap( $wp_role, HMWP_CAPABILITY );
+					}
+				}
+			}
+		}
+	}
 
-        $this->addCap($wprole, $hmwpcaps);
-    }
+	public function removeHMWPCaps() {
+		if ( function_exists( 'wp_roles' ) ) {
+			/** @var WP_Role[] $allroles */
+			$allroles = wp_roles()->get_names();
 
-    /**
-     * Add a cap into WP for a role
-     *
-     * @param $name
-     * @param $capabilities
-     */
-    public function addCap( $name, $capabilities )
-    {
-        $role = get_role($name);
+			if ( ! empty( $allroles ) ) {
+				$allroles = array_keys( $allroles );
+			}
 
-        if (! $role || ! method_exists($role, 'add_cap') ) {
-            return;
-        }
+			if ( ! empty( $allroles ) ) {
+				foreach ( $allroles as $role ) {
+					/** @var WP_Role $allroles */
+					$wp_role = get_role( $role );
+					$this->removeCap( $wp_role, HMWP_CAPABILITY );
+				}
+			}
+		}
 
-        foreach ( $capabilities as $capability => $grant ) {
-            if (! $role->has_cap($capability) ) {
-                $role->add_cap($capability, $grant);
-            }
-        }
-    }
+	}
 
-    /**
-     * Remove the caps for a role
-     *
-     * @param $name
-     * @param $capabilities
-     */
-    public function removeCap( $name, $capabilities )
-    {
-        $role = get_role($name);
+	/**
+	 * Add a cap into WP for a role
+	 *
+	 * @param WP_Role $role
+	 * @param string $capability
+	 */
+	public function addCap( $role, $capability ) {
 
-        if (! $role || ! method_exists($role, 'remove_cap') ) {
-            return;
-        }
+		if ( ! $role || ! method_exists( $role, 'add_cap' ) ) {
+			return;
+		}
 
-        foreach ( $capabilities as $capability => $grant ) {
-            if ($role->has_cap($capability) ) {
-                $role->remove_cap($capability);
-            }
-        }
-    }
+		if ( ! isset( $role->capabilities[$capability] ) ) {
+			$role->add_cap( $capability );
+		}
+	}
+
+	/**
+	 * Remove the caps for a role
+	 *
+	 * @param WP_Role $role
+	 * @param string $capability
+	 */
+	public function removeCap( $role, $capability ) {
+
+		if ( ! $role || ! method_exists( $role, 'remove_cap' ) ) {
+			return;
+		}
+
+		if ( isset( $role->capabilities[$capability] ) ) {
+			$role->remove_cap( $capability );
+		}
+	}
 
 
 }

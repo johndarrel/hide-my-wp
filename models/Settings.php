@@ -7,30 +7,32 @@
  * @package HMWP/SettingsModel
  * @since 4.0.0
  */
-defined('ABSPATH') || die('Cheatin\' uh?');
+defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
 
-class HMWP_Models_Settings
-{
+class HMWP_Models_Settings {
 
 	/**
 	 * Filter the keys that need validation
+	 *
 	 * @var array $validate_keys
 	 */
 	private $validate_keys;
 
 	/**
 	 * Filter the names that need validation
+	 *
 	 * @var array $validate_keys
 	 */
 	private $invalid_names;
 
 	/**
 	 * Initialize the validation keys and names
+	 *
 	 * @return void
 	 */
 	public function initValidationFields() {
 
-		$this->validate_keys = apply_filters('hmwp_validate_keys', array(
+		$this->validate_keys = apply_filters( 'hmwp_validate_keys', array(
 			'hmwp_admin_url',
 			'hmwp_login_url',
 			'hmwp_activate_url',
@@ -47,9 +49,9 @@ class HMWP_Models_Settings
 			'hmwp_wp-comments-post',
 			'hmwp_themes_style',
 			'hmwp_wp-json',
-		));
+		) );
 
-		$this->invalid_names = apply_filters('hmwp_invalid_names', array(
+		$this->invalid_names = apply_filters( 'hmwp_invalid_names', array(
 			'index.php',
 			'readme.html',
 			'sitemap.xml',
@@ -71,7 +73,7 @@ class HMWP_Models_Settings
 			'css',
 			'js',
 			'font',
-		));
+		) );
 
 	}
 
@@ -80,85 +82,63 @@ class HMWP_Models_Settings
 	 *
 	 * @param  array
 	 *  $params
+	 *
 	 * @throws Exception
 	 */
-	public function savePermalinks($params)
-	{
-		HMWP_Classes_Tools::saveOptions('error', false);
-		HMWP_Classes_Tools::saveOptions('changes', false);
+	public function savePermalinks( $params ) {
+		HMWP_Classes_Tools::saveOptions( 'error', false );
+		HMWP_Classes_Tools::saveOptions( 'changes', false );
 
-		if ($params['hmwp_admin_url'] == $params['hmwp_login_url'] && $params['hmwp_admin_url'] <> '') {
-			HMWP_Classes_Tools::saveOptions('error', true);
-			HMWP_Classes_Tools::saveOptions('test_frontend', false);
-			HMWP_Classes_Error::setNotification(esc_html__("You can't set both ADMIN and LOGIN with the same name. Please use different names", 'hide-my-wp'));
+		if ( $params['hmwp_admin_url'] == $params['hmwp_login_url'] && $params['hmwp_admin_url'] <> '' ) {
+			HMWP_Classes_Tools::saveOptions( 'error', true );
+			HMWP_Classes_Tools::saveOptions( 'test_frontend', false );
+			HMWP_Classes_Error::setNotification( esc_html__( "You can't set both ADMIN and LOGIN with the same name. Please use different names", 'hide-my-wp' ) );
+
 			return;
 		}
 
 		//send email when the admin is changed
-		if (isset($params['hmwp_send_email'])) {
+		if ( isset( $params['hmwp_send_email'] ) ) {
 			HMWP_Classes_Tools::$default['hmwp_send_email'] = $params['hmwp_send_email'];
 		}
 
-		if ($params['hmwp_mode'] == 'default') {
+		if ( $params['hmwp_mode'] == 'default' ) {
 			$params = HMWP_Classes_Tools::$default;
 		}
 
 		////////////////////////////////////////////
-		//Set the Category and Tags dirs
-		global $wp_rewrite;
-		$blog_prefix = '';
-		if (HMWP_Classes_Tools::isMultisites() && !is_subdomain_install() && is_main_site() && 0 === strpos(get_option('permalink_structure'), '/blog/')) {
-			$blog_prefix = '/blog';
-		}
-
-		if (isset($params['hmwp_category_base']) && method_exists($wp_rewrite, 'set_category_base')) {
-			$category_base = $params['hmwp_category_base'];
-			if (!empty($category_base)) {
-				$category_base = $blog_prefix . preg_replace('#/+#', '/', '/' . str_replace('#', '', $category_base));
-			}
-			$wp_rewrite->set_category_base($category_base);
-		}
-
-		if (isset($params['hmwp_tag_base']) && method_exists($wp_rewrite, 'set_tag_base')) {
-			$tag_base = $params['hmwp_tag_base'];
-			if (!empty($tag_base)) {
-				$tag_base = $blog_prefix . preg_replace('#/+#', '/', '/' . str_replace('#', '', $tag_base));
-			}
-			$wp_rewrite->set_tag_base($tag_base);
-		}
-		////////////////////////////////////////////
 
 		//Save all values
-		$this->saveValues($params, true);
+		$this->saveValues( $params, true );
 
 		//Some values need to be saved as blank is case no data is received
 		//Set them to blank or value
-		HMWP_Classes_Tools::saveOptions('hmwp_lostpassword_url', HMWP_Classes_Tools::getValue('hmwp_lostpassword_url', ''));
-		HMWP_Classes_Tools::saveOptions('hmwp_register_url', HMWP_Classes_Tools::getValue('hmwp_register_url', ''));
-		HMWP_Classes_Tools::saveOptions('hmwp_logout_url', HMWP_Classes_Tools::getValue('hmwp_logout_url', ''));
+		HMWP_Classes_Tools::saveOptions( 'hmwp_lostpassword_url', HMWP_Classes_Tools::getValue( 'hmwp_lostpassword_url', '' ) );
+		HMWP_Classes_Tools::saveOptions( 'hmwp_register_url', HMWP_Classes_Tools::getValue( 'hmwp_register_url', '' ) );
+		HMWP_Classes_Tools::saveOptions( 'hmwp_logout_url', HMWP_Classes_Tools::getValue( 'hmwp_logout_url', '' ) );
 
 		//Make sure the theme style name is ending with .css to be a static file
-		if($stylename = HMWP_Classes_Tools::getValue('hmwp_themes_style')) {
-			if(strpos($stylename, '.css') === false) {
-				HMWP_Classes_Tools::saveOptions('hmwp_themes_style', $stylename . '.css');
+		if ( $stylename = HMWP_Classes_Tools::getValue( 'hmwp_themes_style' ) ) {
+			if ( strpos( $stylename, '.css' ) === false ) {
+				HMWP_Classes_Tools::saveOptions( 'hmwp_themes_style', $stylename . '.css' );
 			}
 		}
 
 		//generate unique names for plugins if needed
-		if (HMWP_Classes_Tools::getOption('hmwp_hide_plugins')) {
-			HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->hidePluginNames();
+		if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_plugins' ) ) {
+			HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' )->hidePluginNames();
 		}
-		if (HMWP_Classes_Tools::getOption('hmwp_hide_themes')) {
-			HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->hideThemeNames();
+		if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_themes' ) ) {
+			HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' )->hideThemeNames();
 		}
 
-		if(!HMWP_Classes_Tools::getOption('hmwp_hide_oldpaths')) {
-			HMWP_Classes_Tools::saveOptions('hmwp_hide_oldpaths_plugins', 0);
-			HMWP_Classes_Tools::saveOptions('hmwp_hide_oldpaths_themes', 0);
+		if ( ! HMWP_Classes_Tools::getOption( 'hmwp_hide_oldpaths' ) ) {
+			HMWP_Classes_Tools::saveOptions( 'hmwp_hide_oldpaths_plugins', 0 );
+			HMWP_Classes_Tools::saveOptions( 'hmwp_hide_oldpaths_themes', 0 );
 		}
 
 		//If no change is made on settings, just return
-		if(!$this->checkOptionsChange()) {
+		if ( ! $this->checkOptionsChange() ) {
 			return;
 		}
 
@@ -172,12 +152,11 @@ class HMWP_Models_Settings
 	 *
 	 * @return bool
 	 */
-	public function checkOptionsChange()
-	{
-		$lastsafeoptions = HMWP_Classes_Tools::getOptions(true);
+	public function checkOptionsChange() {
+		$lastsafeoptions = HMWP_Classes_Tools::getOptions( true );
 
-		foreach ($lastsafeoptions as $index => $value){
-			if(HMWP_Classes_Tools::getOption($index) <> $value) {
+		foreach ( $lastsafeoptions as $index => $value ) {
+			if ( HMWP_Classes_Tools::getOption( $index ) <> $value ) {
 				return true;
 			}
 		}
@@ -190,24 +169,24 @@ class HMWP_Models_Settings
 	 *
 	 * @return void
 	 */
-	public function checkMainPathsChange(){
+	public function checkMainPathsChange() {
 		//If the admin is changed, require a logout if necessary
-		$lastsafeoptions = HMWP_Classes_Tools::getOptions(true);
-		$options = HMWP_Classes_Tools::getOptions();
+		$lastsafeoptions = HMWP_Classes_Tools::getOptions( true );
+		$options         = HMWP_Classes_Tools::getOptions();
 
-		if(!empty($lastsafeoptions)) {
-			if ($lastsafeoptions['hmwp_admin_url'] <> HMWP_Classes_Tools::getOption('hmwp_admin_url')) {
-				HMWP_Classes_Tools::saveOptions('logout', true);
-			} elseif ($lastsafeoptions['hmwp_login_url'] <> HMWP_Classes_Tools::getOption('hmwp_login_url')) {
-				HMWP_Classes_Tools::saveOptions('logout', true);
-			} elseif ($lastsafeoptions['hmwp_admin-ajax_url'] <> HMWP_Classes_Tools::getOption('hmwp_admin-ajax_url')) {
-				HMWP_Classes_Tools::saveOptions('logout', true);
-			} elseif ($lastsafeoptions['hmwp_wp-json'] <> HMWP_Classes_Tools::getOption('hmwp_wp-json')) {
-				HMWP_Classes_Tools::saveOptions('logout', true);
-			} elseif ($lastsafeoptions['hmwp_upload_url'] <> HMWP_Classes_Tools::getOption('hmwp_upload_url')) {
-				HMWP_Classes_Tools::saveOptions('logout', true);
-			} elseif ($lastsafeoptions['hmwp_wp-content_url'] <> HMWP_Classes_Tools::getOption('hmwp_wp-content_url')) {
-				HMWP_Classes_Tools::saveOptions('logout', true);
+		if ( ! empty( $lastsafeoptions ) ) {
+			if ( $lastsafeoptions['hmwp_admin_url'] <> HMWP_Classes_Tools::getOption( 'hmwp_admin_url' ) ) {
+				HMWP_Classes_Tools::saveOptions( 'logout', true );
+			} elseif ( $lastsafeoptions['hmwp_login_url'] <> HMWP_Classes_Tools::getOption( 'hmwp_login_url' ) ) {
+				HMWP_Classes_Tools::saveOptions( 'logout', true );
+			} elseif ( $lastsafeoptions['hmwp_admin-ajax_url'] <> HMWP_Classes_Tools::getOption( 'hmwp_admin-ajax_url' ) ) {
+				HMWP_Classes_Tools::saveOptions( 'logout', true );
+			} elseif ( $lastsafeoptions['hmwp_wp-json'] <> HMWP_Classes_Tools::getOption( 'hmwp_wp-json' ) ) {
+				HMWP_Classes_Tools::saveOptions( 'logout', true );
+			} elseif ( $lastsafeoptions['hmwp_upload_url'] <> HMWP_Classes_Tools::getOption( 'hmwp_upload_url' ) ) {
+				HMWP_Classes_Tools::saveOptions( 'logout', true );
+			} elseif ( $lastsafeoptions['hmwp_wp-content_url'] <> HMWP_Classes_Tools::getOption( 'hmwp_wp-content_url' ) ) {
+				HMWP_Classes_Tools::saveOptions( 'logout', true );
 			}
 
 		}
@@ -217,47 +196,52 @@ class HMWP_Models_Settings
 	 * Save the Values in database
 	 *
 	 * @param $params
-	 * @param bool $validate
+	 * @param  bool  $validate
 	 */
-	public function saveValues($params, $validate = false)
-	{
+	public function saveValues( $params, $validate = false ) {
 		//Save the option values
-		foreach ($params as $key => $value) {
-			if (in_array($key, array_keys(HMWP_Classes_Tools::$options))) {
+		foreach ( $params as $key => $value ) {
+			if ( in_array( $key, array_keys( HMWP_Classes_Tools::$options ) ) ) {
+
+				// Don't save these keys as they are handled later
+				if ( in_array( $key, array('whitelist_ip', 'whitelist_urls',  'banlist_ip', 'banlist_hostname', 'banlist_user_agent', 'banlist_referrer', 'hmwp_geoblock_urls') ) ){
+					continue;
+				}
+
 				//Make sure is set in POST
-				if (HMWP_Classes_Tools::getIsset($key)) {
+				if ( HMWP_Classes_Tools::getIsset( $key ) ) {
 					//sanitize the value first
-					$value = HMWP_Classes_Tools::getValue($key);
+					$value = HMWP_Classes_Tools::getValue( $key );
 
 					//set the default value in case of nothing to prevent empty paths and errors
-					if ($value == '') {
-						if (isset(HMWP_Classes_Tools::$default[$key])) {
-							$value = HMWP_Classes_Tools::$default[$key];
-						} elseif (isset(HMWP_Classes_Tools::$init[$key])) {
-							$value = HMWP_Classes_Tools::$init[$key];
+					if ( $value == '' ) {
+						if ( isset( HMWP_Classes_Tools::$default[ $key ] ) ) {
+							$value = HMWP_Classes_Tools::$default[ $key ];
+						} elseif ( isset( HMWP_Classes_Tools::$init[ $key ] ) ) {
+							$value = HMWP_Classes_Tools::$init[ $key ];
 						}
 					}
 
 					//Detect Invalid Names
-					if ($validate) {
+					if ( $validate ) {
 						//if there is no the default mode
 						//Don't check the validation for whitlist URLs
-						if (isset($params['hmwp_mode']) && $params['hmwp_mode'] <> 'default') {
+						if ( isset( $params['hmwp_mode'] ) && $params['hmwp_mode'] <> 'default' ) {
 
 							//check if the name is valid
-							if ($this->checkValidName($key, $value) && $this->checkValidPath($key, $value)) {
+							if ( $this->checkValidName( $key, $value ) && $this->checkValidPath( $key, $value ) ) {
 								//Detect Weak Names
-								$this->checkWeakName($value); //show weak names
+								$this->checkWeakName( $value ); //show weak names
 
-								HMWP_Classes_Tools::saveOptions($key, $value);
+								HMWP_Classes_Tools::saveOptions( $key, $value );
 							}
 
 						} else {
-							HMWP_Classes_Tools::saveOptions($key, $value);
+							HMWP_Classes_Tools::saveOptions( $key, $value );
 						}
 
 					} else {
-						HMWP_Classes_Tools::saveOptions($key, $value);
+						HMWP_Classes_Tools::saveOptions( $key, $value );
 					}
 				}
 			}
@@ -269,26 +253,23 @@ class HMWP_Models_Settings
 	 *
 	 * @throws Exception
 	 */
-	public function saveRules()
-	{
+	public function saveRules() {
 		//CLEAR RULES ON DEFAULT
-		if (HMWP_Classes_Tools::getOption('hmwp_mode') == 'default') {
-			HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->writeToFile('', 'HMWP_VULNERABILITY');
+		if ( HMWP_Classes_Tools::getOption( 'hmwp_mode' ) == 'default' ) {
+			HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rules' )->writeToFile( '', 'HMWP_VULNERABILITY' );
+
 			return;
 		}
 
 		//INSERT SEURITY RULES
-		if (!HMWP_Classes_Tools::isIIS()) {
+		if ( ! HMWP_Classes_Tools::isIIS() ) {
 			//For Nginx and Apache the rules can be inserted separately
-			$rules = HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->getInjectionRewrite();
-			if (HMWP_Classes_Tools::getOption('hmwp_hide_oldpaths') || HMWP_Classes_Tools::getOption('hmwp_hide_commonfiles')) {
-				$rules .= HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->getHideOldPathRewrite();
-			}
+			$rules = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rules' )->getInjectionRewrite();
 
-			if(strlen($rules) > 1) {
-				if (!HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->writeToFile($rules, 'HMWP_VULNERABILITY') ) {
-					$config_file = HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->getConfFile();
-					HMWP_Classes_Error::setNotification(sprintf(esc_html__('Config file is not writable. Create the file if not exists or copy to %s file with the following lines: %s', 'hide-my-wp'), '<strong>' . $config_file . '</strong>', '<br /><br /><pre><strong># BEGIN HMWP_VULNERABILITY<br />' . htmlentities(str_replace('    ', ' ', $rules)) . '# END HMWP_VULNERABILITY</strong></pre>'));
+			if ( strlen( $rules ) > 1 ) {
+				if ( ! HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rules' )->writeToFile( $rules, 'HMWP_VULNERABILITY' ) ) {
+					$config_file = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rules' )->getConfFile();
+					HMWP_Classes_Error::setNotification( sprintf( esc_html__( 'Config file is not writable. Create the file if not exists or copy to %s file with the following lines: %s', 'hide-my-wp' ), '<strong>' . $config_file . '</strong>', '<br /><br /><pre><strong># BEGIN HMWP_VULNERABILITY<br />' . htmlentities( str_replace( '    ', ' ', $rules ) ) . '# END HMWP_VULNERABILITY</strong></pre>' ) );
 				}
 			}
 		}
@@ -297,21 +278,23 @@ class HMWP_Models_Settings
 
 	/**
 	 * Save the Text mapping
+	 *
 	 * @param $hmwp_url_mapping_from
 	 * @param $hmwp_url_mapping_to
+	 *
 	 * @return void
 	 * @throws Exception
 	 */
-	public function saveTextMapping($hmwp_text_mapping_from, $hmwp_text_mapping_to){
+	public function saveTextMapping( $hmwp_text_mapping_from, $hmwp_text_mapping_to ) {
 		$hmwp_text_mapping = array();
 
-		add_filter('hmwp_validate_keys', function ($keys){
+		add_filter( 'hmwp_validate_keys', function ( $keys ) {
 			return array(
 				'hmwp_text_mapping'
 			);
-		});
+		} );
 
-		add_filter('hmwp_invalid_names', function ($invalid_paths){
+		add_filter( 'hmwp_invalid_names', function ( $invalid_paths ) {
 			return array(
 				'wp-post-image',
 				'wp-content',
@@ -320,78 +303,88 @@ class HMWP_Models_Settings
 				'wp-login.php',
 				'uploads',
 			);
-		});
+		} );
 
 		foreach ( $hmwp_text_mapping_from as $index => $from ) {
-			if ($hmwp_text_mapping_from[$index] <> '' && $hmwp_text_mapping_to[$index] <> '' ) {
-				$hmwp_text_mapping_from[$index] = preg_replace('/[^A-Za-z0-9-_.{}\/]/', '', $hmwp_text_mapping_from[$index]);
-				$hmwp_text_mapping_to[$index] = preg_replace('/[^A-Za-z0-9-_.{}\/]/', '', $hmwp_text_mapping_to[$index]);
+
+			if ( $hmwp_text_mapping_from[ $index ] <> '' && $hmwp_text_mapping_to[ $index ] <> '' ) {
+
+				$hmwp_text_mapping_from[ $index ] = preg_replace( '/[^A-Za-z0-9-_.+*#:~{}\!\s\/]/', '', $hmwp_text_mapping_from[ $index ] );
+				$hmwp_text_mapping_to[ $index ]   = preg_replace( '/[^A-Za-z0-9-_.+*#:~{}\!\s\/]/', '', $hmwp_text_mapping_to[ $index ] );
 
 				//check for invalid names
-				if($this->checkValidName('hmwp_text_mapping', $hmwp_text_mapping_from[$index]) && $this->checkValidName('hmwp_text_mapping', $hmwp_text_mapping_to[$index])) {
-					if (!isset($hmwp_text_mapping['from']) || !in_array($hmwp_text_mapping_from[$index], (array)$hmwp_text_mapping['from'])) {
+				if ( $this->checkValidName( 'hmwp_text_mapping', $hmwp_text_mapping_from[ $index ] ) && $this->checkValidName( 'hmwp_text_mapping', $hmwp_text_mapping_to[ $index ] ) ) {
+					if ( ! isset( $hmwp_text_mapping['from'] ) || ! in_array( $hmwp_text_mapping_from[ $index ], (array) $hmwp_text_mapping['from'] ) ) {
 
 						//Don't save the wp-posts for Woodmart theme
-						if (HMWP_Classes_Tools::isPluginActive('woocommerce/woocommerce.php')) {
-							if ($hmwp_text_mapping_from[$index] == 'wp-post-image') {
+						if ( HMWP_Classes_Tools::isPluginActive( 'woocommerce/woocommerce.php' ) ) {
+							if ( $hmwp_text_mapping_from[ $index ] == 'wp-post-image' ) {
 								continue;
 							}
 						}
 
-						if ($hmwp_text_mapping_from[$index] <> $hmwp_text_mapping_to[$index]) {
-							$hmwp_text_mapping['from'][] = $hmwp_text_mapping_from[$index];
-							$hmwp_text_mapping['to'][] = $hmwp_text_mapping_to[$index];
+						if ( ! HMW_DYNAMIC_FILES && ! HMWP_Classes_Tools::getOption( 'hmwp_mapping_file' ) ) {
+							if ( in_array( $hmwp_text_mapping_from[ $index ], array( 'elementor', 'wp-block', 'woocommerce', 'bricks' ) ) ) {
+								HMWP_Classes_Error::setNotification( sprintf( esc_html__( 'Global class name detected: %s. Read this article first: %s' ), '<strong>' . $hmwp_text_mapping_from[ $index ] . '</strong>', '<a href="' . esc_url( HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/hiding-plugins-like-woocommerce-and-elementor/' ) . '" target="_blank">Hiding plugins like WooCommerce and Elementor</a>' ) );
+							}
+						}
+
+						if ( $hmwp_text_mapping_from[ $index ] <> $hmwp_text_mapping_to[ $index ] ) {
+							$hmwp_text_mapping['from'][] = $hmwp_text_mapping_from[ $index ];
+							$hmwp_text_mapping['to'][]   = $hmwp_text_mapping_to[ $index ];
 						}
 
 					} else {
-						HMWP_Classes_Error::setNotification(esc_html__('Error: You entered the same text twice in the Text Mapping. We removed the duplicates to prevent any redirect errors.'));
+						HMWP_Classes_Error::setNotification( esc_html__( 'Error: You entered the same text twice in the Text Mapping. We removed the duplicates to prevent any redirect errors.' ) );
 					}
 				}
 			}
 		}
 
 		//let other plugins to change
-		$hmwp_text_mapping = apply_filters('hmwp_text_mapping_before_save', $hmwp_text_mapping);
+		$hmwp_text_mapping = apply_filters( 'hmwp_text_mapping_before_save', $hmwp_text_mapping );
 
-		HMWP_Classes_Tools::saveOptions('hmwp_text_mapping', json_encode($hmwp_text_mapping));
+		HMWP_Classes_Tools::saveOptions( 'hmwp_text_mapping', json_encode( $hmwp_text_mapping ) );
 
 	}
 
 
 	/**
 	 * Save the URL mapping
+	 *
 	 * @param $hmwp_url_mapping_from
 	 * @param $hmwp_url_mapping_to
+	 *
 	 * @return void
 	 * @throws Exception
 	 */
-	public function saveURLMapping($hmwp_url_mapping_from, $hmwp_url_mapping_to) {
+	public function saveURLMapping( $hmwp_url_mapping_from, $hmwp_url_mapping_to ) {
 		$hmwp_url_mapping = array();
 
-		add_filter('hmwp_validate_keys', function ($keys){
+		add_filter( 'hmwp_validate_keys', function ( $keys ) {
 			return array(
 				'hmwp_url_mapping'
 			);
-		});
+		} );
 
-		add_filter('hmwp_invalid_names', function ($invalid_paths){
+		add_filter( 'hmwp_invalid_names', function ( $invalid_paths ) {
 			return array(
 				'wp-content',
 				'/wp-content',
-				site_url('wp-content'),
-				site_url('wp-content','relative'),
+				site_url( 'wp-content' ),
+				site_url( 'wp-content', 'relative' ),
 				'wp-includes',
 				'/wp-includes',
-				site_url('wp-includes'),
-				site_url('wp-includes','relative'),
+				site_url( 'wp-includes' ),
+				site_url( 'wp-includes', 'relative' ),
 				'wp-admin',
 				'/wp-admin',
-				site_url('wp-admin'),
-				site_url('wp-admin','relative'),
+				site_url( 'wp-admin' ),
+				site_url( 'wp-admin', 'relative' ),
 				'wp-login.php',
 				'/wp-login.php',
-				home_url('wp-login.php'),
-				home_url('wp-login.php','relative'),
+				home_url( 'wp-login.php' ),
+				home_url( 'wp-login.php', 'relative' ),
 				'uploads',
 				'wp-content/uploads',
 				'/wp-content/uploads',
@@ -402,21 +395,21 @@ class HMWP_Models_Settings
 				'wp-content/themes',
 				'/wp-content/themes',
 			);
-		});
+		} );
 
 		foreach ( $hmwp_url_mapping_from as $index => $from ) {
-			if ($hmwp_url_mapping_from[$index] <> '' && $hmwp_url_mapping_to[$index] <> '') {
-				$hmwp_url_mapping_from[$index] = preg_replace('/[^A-Za-z0-9-_;:=%.#\/\?]/', '', $hmwp_url_mapping_from[$index]);
-				$hmwp_url_mapping_to[$index] = preg_replace('/[^A-Za-z0-9-_;:%=.#\/\?]/', '', $hmwp_url_mapping_to[$index]);
+			if ( $hmwp_url_mapping_from[ $index ] <> '' && $hmwp_url_mapping_to[ $index ] <> '' ) {
+				$hmwp_url_mapping_from[ $index ] = preg_replace( '/[^A-Za-z0-9-_;:=%.#\/\?]/', '', $hmwp_url_mapping_from[ $index ] );
+				$hmwp_url_mapping_to[ $index ]   = preg_replace( '/[^A-Za-z0-9-_;:%=.#\/\?]/', '', $hmwp_url_mapping_to[ $index ] );
 
-				if($this->checkValidName('hmwp_url_mapping', $hmwp_url_mapping_from[$index]) && $this->checkValidName('hmwp_url_mapping', $hmwp_url_mapping_to[$index])) {
-					if (!isset($hmwp_url_mapping['from']) || (!in_array($hmwp_url_mapping_from[$index], (array)$hmwp_url_mapping['from']) && !in_array($hmwp_url_mapping_to[$index], (array)$hmwp_url_mapping['to']))) {
-						if ($hmwp_url_mapping_from[$index] <> $hmwp_url_mapping_to[$index]) {
-							$hmwp_url_mapping['from'][] = $hmwp_url_mapping_from[$index];
-							$hmwp_url_mapping['to'][] = $hmwp_url_mapping_to[$index];
+				if ( $this->checkValidName( 'hmwp_url_mapping', $hmwp_url_mapping_from[ $index ] ) && $this->checkValidName( 'hmwp_url_mapping', $hmwp_url_mapping_to[ $index ] ) ) {
+					if ( ! isset( $hmwp_url_mapping['from'] ) || ( ! in_array( $hmwp_url_mapping_from[ $index ], (array) $hmwp_url_mapping['from'] ) && ! in_array( $hmwp_url_mapping_to[ $index ], (array) $hmwp_url_mapping['to'] ) ) ) {
+						if ( $hmwp_url_mapping_from[ $index ] <> $hmwp_url_mapping_to[ $index ] ) {
+							$hmwp_url_mapping['from'][] = $hmwp_url_mapping_from[ $index ];
+							$hmwp_url_mapping['to'][]   = $hmwp_url_mapping_to[ $index ];
 						}
 					} else {
-						HMWP_Classes_Error::setNotification(esc_html__('Error: You entered the same URL twice in the URL Mapping. We removed the duplicates to prevent any redirect errors.'));
+						HMWP_Classes_Error::setNotification( esc_html__( 'Error: You entered the same URL twice in the URL Mapping. We removed the duplicates to prevent any redirect errors.' ) );
 					}
 				}
 
@@ -424,16 +417,16 @@ class HMWP_Models_Settings
 		}
 
 		//let other plugins to change
-		$hmwp_url_mapping = apply_filters('hmwp_url_mapping_before_save', $hmwp_url_mapping);
+		$hmwp_url_mapping = apply_filters( 'hmwp_url_mapping_before_save', $hmwp_url_mapping );
 
-		HMWP_Classes_Tools::saveOptions('hmwp_url_mapping', json_encode($hmwp_url_mapping));
+		HMWP_Classes_Tools::saveOptions( 'hmwp_url_mapping', json_encode( $hmwp_url_mapping ) );
 
-		if (!empty($hmwp_url_mapping) ) {
+		if ( ! empty( $hmwp_url_mapping ) ) {
 			//show rules to be added manually
-			if (!HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->clearRedirect()->setRewriteRules()->flushRewrites() ) {
-				HMWP_Classes_Tools::saveOptions('test_frontend', false);
-				HMWP_Classes_Tools::saveOptions('file_mappings', array());
-				HMWP_Classes_Tools::saveOptions('error', true);
+			if ( ! HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' )->clearRedirect()->setRewriteRules()->flushRewrites() ) {
+				HMWP_Classes_Tools::saveOptions( 'test_frontend', false );
+				HMWP_Classes_Tools::saveOptions( 'file_mappings', array() );
+				HMWP_Classes_Tools::saveOptions( 'error', true );
 			}
 		}
 	}
@@ -441,20 +434,20 @@ class HMWP_Models_Settings
 	/**
 	 * Check invalid name and avoid errors
 	 *
-	 * @param string $key  DB Option name
-	 * @param string $name Option value
+	 * @param  string  $key  DB Option name
+	 * @param  string  $name  Option value
+	 *
 	 * @return bool
 	 */
-	public function checkValidName($key, $name)
-	{
+	public function checkValidName( $key, $name ) {
 
-		if(is_array($name)) {
-			foreach ($name as $current){
-				if(!$this->checkValidName($key, $current)){
+		if ( is_array( $name ) ) {
+			foreach ( $name as $current ) {
+				if ( ! $this->checkValidName( $key, $current ) ) {
 					return false;
 				}
 			}
-		}else {
+		} else {
 
 			//initialize validation fields
 			$this->initValidationFields();
@@ -462,10 +455,7 @@ class HMWP_Models_Settings
 			if ( in_array( $key, $this->validate_keys ) ) {
 
 				// Avoid names that lead to WordPress errors
-				if ( ( $key <> 'hmwp_themes_url' && $name == 'themes' ) ||
-				     ( $key == 'hmwp_themes_url' && $name == 'assets' ) ||
-				     ( $key <> 'hmwp_upload_url' && $name == 'uploads' ) ||
-				     in_array( $name, $this->invalid_names ) ) {
+				if ( ( $key <> 'hmwp_themes_url' && $name == 'themes' ) || ( $key == 'hmwp_themes_url' && $name == 'assets' ) || ( $key <> 'hmwp_upload_url' && $name == 'uploads' ) || in_array( $name, $this->invalid_names ) ) {
 
 					HMWP_Classes_Error::setNotification( sprintf( esc_html__( "Invalid name detected: %s. You need to use another name to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
 
@@ -486,12 +476,12 @@ class HMWP_Models_Settings
 	 *
 	 * @return bool
 	 */
-	public function checkValidPath($key, $name){
+	public function checkValidPath( $key, $name ) {
 
 		//initialize validation fields
 		$this->initValidationFields();
 
-		if(in_array($key, $this->validate_keys)) {
+		if ( in_array( $key, $this->validate_keys ) ) {
 
 			if ( strlen( $name ) > 1 && strlen( $name ) < 3 ) {
 				HMWP_Classes_Error::setNotification( sprintf( esc_html__( "Short name detected: %s. You need to use unique paths with more than 4 chars to avoid WordPress errors.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
@@ -535,10 +525,9 @@ class HMWP_Models_Settings
 	/**
 	 * Check if the name is week for security
 	 *
-	 * @param string $name
+	 * @param  string  $name
 	 */
-	public function checkWeakName($name)
-	{
+	public function checkWeakName( $name ) {
 		$invalit_paths = array(
 			'login',
 			'mylogin',
@@ -552,108 +541,109 @@ class HMWP_Models_Settings
 			'wp-include',
 		);
 
-		if (in_array($name, $invalit_paths)) {
-			HMWP_Classes_Error::setNotification(sprintf(esc_html__("Weak name detected: %s. You need to use another name to increase your website security.", 'hide-my-wp'), '<strong>' . $name . '</strong>'));
+		if ( in_array( $name, $invalit_paths ) ) {
+			HMWP_Classes_Error::setNotification( sprintf( esc_html__( "Weak name detected: %s. You need to use another name to increase your website security.", 'hide-my-wp' ), '<strong>' . $name . '</strong>' ) );
 		}
 	}
 
 
-    /**
-     * This function applies changes to permalinks.
-     * It deletes the restore transient and clears the cache if there are no errors.
-     * If no changes are made on settings and $force is false, the function returns true.
-     * It forces the recheck security notification, clears the cache, removes the redirects, and flushes the WordPress rewrites.
-     * If there are no errors, it checks if there is any main path change and saves the working options into backup.
-     * It sends an email notification about the path changed, sets the cookies for the current path, activates frontend test, and triggers an action after applying the permalink changes.
-     *
-     * @param bool $force If true, the function will always apply the permalink changes.
-     * @return bool Returns true if the changes are applied successfully; otherwise, returns false.
-     *
-     * @throws Exception
-     */
-    public function applyPermalinksChanged($force = false){
+	/**
+	 * This function applies changes to permalinks.
+	 * It deletes the restore transient and clears the cache if there are no errors.
+	 * If no changes are made on settings and $force is false, the function returns true.
+	 * It forces the recheck security notification, clears the cache, removes the redirects, and flushes the WordPress rewrites.
+	 * If there are no errors, it checks if there is any main path change and saves the working options into backup.
+	 * It sends an email notification about the path changed, sets the cookies for the current path, activates frontend test, and triggers an action after applying the permalink changes.
+	 *
+	 * @param  bool  $force  If true, the function will always apply the permalink changes.
+	 *
+	 * @return bool Returns true if the changes are applied successfully; otherwise, returns false.
+	 *
+	 * @throws Exception
+	 */
+	public function applyPermalinksChanged( $force = false ) {
 
-        // Delete the restore transient
-        delete_transient('hmwp_restore');
+		// Delete the restore transient
+		delete_transient( 'hmwp_restore' );
 
-        //Clear the cache if there are no errors
-        if (HMWP_Classes_Tools::getOption('error') ) {
-            return false;
-        }
+		// Clear the cache if there are no errors
+		if ( HMWP_Classes_Tools::getOption( 'error' ) ) {
+			return false;
+		}
 
-        //If no change is made on settings, just return
-        if(!$force && !$this->checkOptionsChange()) {
-            return true;
-        }
+		// If no change is made on settings, just return
+		if ( ! $force && ! $this->checkOptionsChange() ) {
+			return true;
+		}
 
-        //Force the recheck security notification
-        delete_option(HMWP_SECURITY_CHECK_TIME);
+		// Force the recheck security notification
+		delete_option( HMWP_SECURITY_CHECK_TIME );
 
-        //Clear the cache and remove the redirects
-        HMWP_Classes_Tools::emptyCache();
+		// Clear the cache and remove the redirects
+		HMWP_Classes_Tools::emptyCache();
 
-        //Flush the WordPress rewrites
-        HMWP_Classes_Tools::flushWPRewrites();
+		// Flush the WordPress rewrites
+		HMWP_Classes_Tools::flushWPRewrites();
 
-        //check if the config file is writable or is WP-engine server
-        if (!HMWP_Classes_ObjController::getClass('HMWP_Models_Rules')->isConfigWritable() || HMWP_Classes_Tools::isWpengine()) {
-            //if not writeable, call the rules to show manually changes
-            //show rules to be added manually
-            if (!HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->clearRedirect()->setRewriteRules()->flushRewrites()) {
-                HMWP_Classes_Tools::saveOptions('test_frontend', false);
-                HMWP_Classes_Tools::saveOptions('error', true);
-            }
-        }else{
-            //Flush the changes
-            HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite')->flushChanges();
-        }
+		// Check if the config file is writable or is WP-engine server
+		if ( ! HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rules' )->isConfigWritable() || HMWP_Classes_Tools::isWpengine() ) {
+			// If not writeable, call the rules to show manually changes
+			//show rules to be added manually
+			if ( ! HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' )->clearRedirect()->setRewriteRules()->flushRewrites() ) {
+				HMWP_Classes_Tools::saveOptions( 'test_frontend', false );
+				HMWP_Classes_Tools::saveOptions( 'error', true );
+			}
+		} else {
+			// Flush the changes
+			HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' )->flushChanges();
+		}
 
-        //If there are no errors
-        if (!HMWP_Classes_Error::isError() ) {
+		// If there are no errors
+		if ( ! HMWP_Classes_Error::isError() ) {
 
-            //Check if there is any main path change
-            $this->checkMainPathsChange();
+			// Check if there is any main path change
+			$this->checkMainPathsChange();
 
-            if ( HMWP_Classes_Tools::getOption( 'hmwp_mode' ) == 'default' ) {
-                //Save the working options into backup
-                HMWP_Classes_Tools::saveOptionsBackup();
-            }
+			if ( HMWP_Classes_Tools::getOption( 'hmwp_mode' ) == 'default' ) {
+				// Save the working options into backup
+				HMWP_Classes_Tools::saveOptionsBackup();
+			}
 
-            //Redirect to the new admin URL
-            if ( HMWP_Classes_Tools::getOption( 'logout' ) ) {
+			// Redirect to the new admin URL
+			if ( HMWP_Classes_Tools::getOption( 'logout' ) ) {
 
-                //Send email notification about the path changed
-                HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' )->sendEmail();
+				// Send email notification about the path changed
+				HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' )->sendEmail();
 
-                //Set the cookies for the current path
-                $cookies = HMWP_Classes_ObjController::newInstance( 'HMWP_Models_Cookies' );
+				// Set the cookies for the current path
+				$cookies = HMWP_Classes_ObjController::newInstance( 'HMWP_Models_Cookies' );
 
-                if ( HMWP_Classes_Tools::isNginx() || HMWP_Classes_Tools::isCloudPanel() || $cookies->setCookiesCurrentPath() ) {
+				if ( HMWP_Classes_Tools::isNginx() || HMWP_Classes_Tools::isCloudPanel() || $cookies->setCookiesCurrentPath() ) {
 
-                    HMWP_Classes_Tools::saveOptions( 'logout', false );
-                    //activate frontend test
-                    HMWP_Classes_Tools::saveOptions( 'test_frontend', true );
+					HMWP_Classes_Tools::saveOptions( 'logout', false );
+					// Activate frontend test
+					HMWP_Classes_Tools::saveOptions( 'test_frontend', true );
 
-                    remove_all_filters( 'wp_redirect' );
-                    remove_all_filters( 'admin_url' );
+					remove_all_filters( 'wp_redirect' );
+					remove_all_filters( 'admin_url' );
 
-                    //trigger action after apply the permalink changes
-                    do_action('hmwp_apply_permalink_changes');
+					// Trigger action after apply the permalink changes
+					do_action( 'hmwp_apply_permalink_changes' );
 
-                    if(!HMWP_Classes_Tools::isNginx() && !HMWP_Classes_Tools::isCloudPanel()){
-                        wp_redirect(HMWP_Classes_Tools::getSettingsUrl(HMWP_Classes_Tools::getValue('page')));
-                        exit();
-                    }
-                }
+					if ( ! HMWP_Classes_Tools::isNginx() && ! HMWP_Classes_Tools::isCloudPanel() ) {
+						wp_redirect( HMWP_Classes_Tools::getSettingsUrl( HMWP_Classes_Tools::getValue( 'page' ) ) );
+						exit();
+					}
+				}
 
-            }
+			}
 
-            //trigger action after apply the permalink changes
-            do_action('hmwp_apply_permalink_changes');
+			// Trigger action after apply the permalink changes
+			do_action( 'hmwp_apply_permalink_changes' );
 
-            return true;
-        }
+			return true;
+		}
 
-        return false;
-    }
+		return false;
+	}
 }

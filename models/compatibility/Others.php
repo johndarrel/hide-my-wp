@@ -70,7 +70,7 @@ class HMWP_Models_Compatibility_Others extends HMWP_Models_Compatibility_Abstrac
 		        HMWP_Classes_Tools::getValue('action') == 'breakdance_load_document' ||
 		        HMWP_Classes_Tools::getValue('action') == 'breakdance_image_metadata' ||
 		        HMWP_Classes_Tools::getValue('action') == 'breakdance_image_sizes') {
-			    //Stop Hide My WP Ghost from loading while on editor
+			    //Stop  WP Ghost from loading while on editor
 			    add_filter('hmwp_process_buffer', '__return_false');
 		    }
 	    }
@@ -88,6 +88,7 @@ class HMWP_Models_Compatibility_Others extends HMWP_Models_Compatibility_Abstrac
 		if (HMWP_Classes_Tools::getValue('hmwp_preview') ) {
 			$_COOKIE = array();
 			@header_remove("Cookie");
+			add_filter( 'show_admin_bar', '__return_false' ); //phpcs:ignore
 		}
 
         //Hook the Hide URLs before the plugin
@@ -209,6 +210,27 @@ class HMWP_Models_Compatibility_Others extends HMWP_Models_Compatibility_Abstrac
             return $redirect;
         }, PHP_INT_MAX, 2);
 
+        // Prevent Kadence from loading the script rules in frontend
+        if ( HMWP_Classes_Tools::isPluginActive( 'kadence-blocks/kadence-blocks.php' ) || HMWP_Classes_Tools::isPluginActive( 'kadence-blocks-pro/kadence-blocks-pro.php' ) ) {
+            add_filter( 'hmwp_buffer', function( $buffer ) {
+                return preg_replace('/<script type="speculationrules">.*?<\/script>/s', '', $buffer);
+            } );
+        }
+
+		// Add Riode theme compatibility on comment recaptcha
+		if (  HMWP_Classes_Tools::getOption( 'hmwp_bruteforce' ) && HMWP_Classes_Tools::getOption( 'hmwp_bruteforce_comments' ) ) {
+			add_filter( 'riode_filter_comment_form_args',  array(HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_Comments' ), 'formArgs'), 99 );
+
+			if ( HMWP_Classes_Tools::getOption( 'hmwp_bruteforce_woocommerce' ) ) {
+				// Load brute force comments on Woocommerce reviews
+				add_filter( 'woocommerce_product_review_comment_form_args', array(HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_Comments' ), 'formArgs'), 99 );
+			}
+		}
+
+		// Add compatibility with Debloat
+		if ( HMWP_Classes_Tools::isPluginActive( 'debloat/debloat.php' ) ) {
+			add_filter( 'hmwp_priority_hook', function( $priority ) { return -1000; } );
+		}
 	}
 
 
@@ -307,9 +329,12 @@ class HMWP_Models_Compatibility_Others extends HMWP_Models_Compatibility_Abstrac
                     $paths[] = '/' . HMWP_Classes_Tools::getOption('hmwp_register_url');
                 }
 
-                if( $post_id = get_option('woocommerce_myaccount_page_id')){
-                    if($post = get_post($post_id)) {
-                        $paths[] = '/' . $post->post_name;
+                //integrate with woocommerce only when Safe Mode or ghost Mode
+                if ( HMWP_Classes_Tools::getOption( 'hmwp_mode' ) <> 'default' ) {
+                    if ( $post_id = get_option( 'woocommerce_myaccount_page_id' ) ) {
+                        if ( $post = get_post( $post_id ) ) {
+                            $paths[] = '/' . $post->post_name;
+                        }
                     }
                 }
 

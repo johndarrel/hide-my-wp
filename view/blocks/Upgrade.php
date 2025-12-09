@@ -1,8 +1,10 @@
+<?php defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' ); ?>
+<?php if ( ! isset( $view ) ) { return; } ?>
 <div id="hmwp_ghost_mode_modal" class="modal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-danger"><?php echo esc_html__('Upgrade and activate new security features!', 'hide-my-wp') ?></h5>
+                <h5 class="modal-title text-danger"><?php echo esc_html__( 'Upgrade and activate new security features!', 'hide-my-wp' ) ?></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>

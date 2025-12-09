@@ -35,49 +35,32 @@ class HMWP_Models_Compatibility_Wpum extends HMWP_Models_Compatibility_Abstract
         }
     }
 
-    public function hookBruteForce(){
+	public function hookBruteForce() {
 
-	    //remove default check
-	    remove_action('authenticate', array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute'),'hmwp_check_preauth'), 99);
+		// Get the active brute force class
+		$bruteforce = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Brute' )->getInstance();
 
-	    if (!HMWP_Classes_Tools::getOption('brute_use_captcha_v3')){
-		    add_action('authenticate', array( $this, 'checkLoginReCaptcha'), 99, 1);
-	    }
+		//remove default check
+		remove_action( 'authenticate', array( $bruteforce, 'pre_authentication' ), 99 );
 
-	    if (HMWP_Classes_Tools::getOption('brute_use_math')) { //math brute force
+		if ( HMWP_Classes_Tools::getOption( 'hmwp_bruteforce_login' ) ) {
+			add_action( 'wpum_before_submit_button_login_form', array( $bruteforce, 'head' ) );
+			add_action( 'wpum_before_submit_button_login_form', array( $bruteforce, 'form' ) );
+		}
 
-		    add_action('wpum_before_submit_button_login_form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_math_form'));
+		if ( HMWP_Classes_Tools::getOption( 'hmwp_bruteforce_lostpassword' ) ) {
+			add_filter( 'submit_wpum_form_validate_fields', array( $this, 'checkLPasswordReCaptcha' ), 99, 3 );
+			add_filter( 'wpum_before_submit_button_password_recovery_form', array( $bruteforce, 'head' ) );
+			add_filter( 'wpum_before_submit_button_password_recovery_form', array( $bruteforce, 'form' ) );
+		}
 
-		    if(HMWP_Classes_Tools::getOption('hmwp_bruteforce_lostpassword')) {
-			    add_filter('submit_wpum_form_validate_fields', array($this, 'checkLPasswordReCaptcha'), 99, 3);
-			    add_filter('wpum_before_submit_button_password_recovery_form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_math_form'));
-		    }
+		if ( HMWP_Classes_Tools::getOption( 'hmwp_bruteforce_register' ) ) {
+			add_filter( 'submit_wpum_form_validate_fields', array( $this, 'checkRegisterReCaptcha' ), 99, 3 );
+			add_filter( 'wpum_before_submit_button_registration_form', array( $bruteforce, 'head' ) );
+			add_filter( 'wpum_before_submit_button_registration_form', array( $bruteforce, 'form' ) );
+		}
 
-		    if(HMWP_Classes_Tools::getOption('hmwp_bruteforce_register')) {
-		        add_filter('submit_wpum_form_validate_fields', array($this, 'checkRegisterReCaptcha'), 99, 3);
-		        add_filter('wpum_before_submit_button_registration_form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_math_form'));
-	        }
-
-	    } elseif (HMWP_Classes_Tools::getOption('brute_use_captcha')) { //recaptcha V2
-
-		    add_action('wpum_before_submit_button_login_form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_head'));
-		    add_action('wpum_before_submit_button_login_form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_form'));
-
-		    if(HMWP_Classes_Tools::getOption('hmwp_bruteforce_lostpassword')) {
-			    add_filter('submit_wpum_form_validate_fields', array($this, 'checkLPasswordReCaptcha'), 99, 3);
-			    add_filter('wpum_before_submit_button_password_recovery_form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_head'));
-			    add_filter('wpum_before_submit_button_password_recovery_form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_form'));
-		    }
-
-	        if(HMWP_Classes_Tools::getOption('hmwp_bruteforce_register')) {
-		        add_filter('submit_wpum_form_validate_fields', array($this, 'checkRegisterReCaptcha'), 99, 3);
-		        add_filter('wpum_before_submit_button_registration_form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_head'));
-		        add_filter('wpum_before_submit_button_registration_form', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Brute'), 'brute_recaptcha_form'));
-	        }
-
-
-	    }
-    }
+	}
 
     /**
      * Get the login path
@@ -105,15 +88,22 @@ class HMWP_Models_Compatibility_Wpum extends HMWP_Models_Compatibility_Abstract
 	 * @return void
 	 * @throws Exception
 	 */
-	public function checkLoginReCaptcha( $user ){
-		return HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute')->hmwp_check_preauth($user);
+	public function checkLoginReCaptcha( $user ) {
+		// Get the active brute force class
+		$bruteforce = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Brute' )->getInstance();
+
+		return $bruteforce->pre_authentication( false );
+
 	}
 
 
 	/**
 	 * Check the reCaptcha on register
 	 *
-	 * @param $args
+	 * @param $validate
+	 * @param $fields
+	 * @param $values
+	 *
 	 * @return void
 	 * @throws Exception
 	 */
@@ -121,7 +111,7 @@ class HMWP_Models_Compatibility_Wpum extends HMWP_Models_Compatibility_Abstract
 
 		//check the user
 		if(isset($values['register']['user_password']) && isset($values['register']['user_email'])){
-			$validate =  HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute')->hmwp_check_registration($validate, $fields, $values);
+			$validate = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_Registration' )->call( $validate, $fields, $values );
 		}
 
 		return $validate;
@@ -143,7 +133,7 @@ class HMWP_Models_Compatibility_Wpum extends HMWP_Models_Compatibility_Abstract
 
 		//check the user
 		if(isset($values['user']['username_email'])){
-			$validate =  HMWP_Classes_ObjController::getClass('HMWP_Controllers_Brute')->hmwp_check_registration($validate, $fields, $values);
+			$validate = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_Registration' )->call( $validate, $fields, $values );
 		}
 
 		return $validate;

@@ -15,7 +15,9 @@ class HMWP_Models_Compatibility_Squirrly extends HMWP_Models_Compatibility_Abstr
 
 		add_filter('sq_option_sq_minify', '__return_true');
 
-		add_filter('sq_buffer', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite'), 'find_replace'), PHP_INT_MAX);
+        if(!HMWP_Classes_Tools::isCachePlugin()){
+            add_filter('sq_buffer', array(HMWP_Classes_ObjController::getClass('HMWP_Models_Rewrite'), 'find_replace'), PHP_INT_MAX);
+        }
 
 		//Compatibility with Robots.txt - tested 09032022
 		if (HMWP_Classes_Tools::getOption('hmwp_robots') && isset($_SERVER['REQUEST_URI'])) {

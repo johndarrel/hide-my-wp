@@ -1,10 +1,12 @@
-<?php if(!isset($view)) return; ?>
+<?php defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' ); ?>
+<?php if ( ! isset( $view ) ) { return; } ?>
 <div id="hmwp_wrap" class="d-flex flex-row p-0 my-3">
     <div class="hmwp_row d-flex flex-row p-0 m-0">
-        <div class="hmwp_col flex-grow-1 px-0 py-0 mr-3 mb-3 bg-white">
-            <h3 class="card-title hmwp_header p-2 m-0"><?php echo esc_html__('Recommended Plugins', 'hide-my-wp'); ?></h3>
+        <div class="hmwp_col flex-grow-1 px-2 py-0 mr-2 mb-3">
+            <div class="card col-sm-12 p-0 m-0" style="max-width: 100%">
+                <h3 class="card-title hmwp_header p-2 m-0"><?php echo esc_html__('Recommended Plugins', 'hide-my-wp'); ?></h3>
 
-            <div class="row row-cols-1 row-cols-md-3 px-1 mx-1" style="max-width: 1200px;">
+                <div class="row row-cols-1 row-cols-md-3 px-1 mx-1" style="max-width: 1200px;">
                 <?php foreach ($view->plugins as $name => $plugin) { ?>
                     <div class="col px-2 py-0 mb-5">
                         <div class="card h-100 p-0 shadow-0 rounded-0">
@@ -30,8 +32,9 @@
                     </div>
                 <?php } ?>
             </div>
+            </div>
         </div>
-        <div class="hmwp_col hmwp_col_side p-0 m-0 mr-2">
+        <div class="hmwp_col hmwp_col_side p-0 pr-2 mr-2">
             <div class="card col-sm-12 m-0 p-0 rounded-0">
                 <div class="card-body f-gray-dark text-left">
                     <h3 class="panel-title"><?php echo esc_html__('Plugins', 'hide-my-wp'); ?></h3>

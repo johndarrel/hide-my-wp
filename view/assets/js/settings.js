@@ -593,6 +593,7 @@
         $this.find("button.brute_use_math").on(
             'click', function () {
                 $this.find('input[name=brute_use_math]').val(1);
+                $this.find('input[name=brute_use_google]').val(0);
                 $this.find('input[name=brute_use_captcha]').val(0);
                 $this.find('input[name=brute_use_captcha_v3]').val(0);
 
@@ -600,6 +601,24 @@
                 $(this).addClass('active');
 
                 $this.find('div.brute_use_math').show();
+                $this.find('div.brute_use_google').hide();
+                $this.find('div.brute_use_captcha').hide();
+                $this.find('div.brute_use_captcha_v3').hide();
+            }
+        );
+
+        $this.find("button.brute_use_google").on(
+            'click', function () {
+                $this.find('input[name=brute_use_math]').val(0);
+                $this.find('input[name=brute_use_google]').val(1);
+                $this.find('input[name=brute_use_captcha]').val(0);
+                $this.find('input[name=brute_use_captcha_v3]').val(0);
+
+                $this.find('.group_autoload button').removeClass('active');
+                $(this).addClass('active');
+
+                $this.find('div.brute_use_math').hide();
+                $this.find('div.brute_use_google').show();
                 $this.find('div.brute_use_captcha').hide();
                 $this.find('div.brute_use_captcha_v3').hide();
             }
@@ -607,30 +626,34 @@
 
         $this.find("button.brute_use_captcha").on(
             'click', function () {
-                $this.find('input[name=brute_use_captcha]').val(1);
                 $this.find('input[name=brute_use_math]').val(0);
+                $this.find('input[name=brute_use_google]').val(0);
+                $this.find('input[name=brute_use_captcha]').val(1);
                 $this.find('input[name=brute_use_captcha_v3]').val(0);
 
                 $this.find('.group_autoload button').removeClass('active');
                 $(this).addClass('active');
 
-                $this.find('div.brute_use_captcha').show();
                 $this.find('div.brute_use_math').hide();
+                $this.find('div.brute_use_google').hide();
+                $this.find('div.brute_use_captcha').show();
                 $this.find('div.brute_use_captcha_v3').hide();
             }
         );
 
         $this.find("button.brute_use_captcha_v3").on(
             'click', function () {
-                $this.find('input[name=brute_use_captcha]').val(0);
                 $this.find('input[name=brute_use_math]').val(0);
+                $this.find('input[name=brute_use_google]').val(0);
+                $this.find('input[name=brute_use_captcha]').val(0);
                 $this.find('input[name=brute_use_captcha_v3]').val(1);
 
                 $this.find('.group_autoload button').removeClass('active');
                 $(this).addClass('active');
 
-                $this.find('div.brute_use_captcha').hide();
                 $this.find('div.brute_use_math').hide();
+                $this.find('div.brute_use_google').hide();
+                $this.find('div.brute_use_captcha').hide();
                 $this.find('div.brute_use_captcha_v3').show();
             }
         );
@@ -744,6 +767,20 @@
                 return "You have unsaved changes.";
             }
         };
+
+        if ($('.hmwp_clipboard_copy').length > 0) {
+            var clipboard_link = new Clipboard('.hmwp_clipboard_copy');
+
+            clipboard_link.on(
+                'success', function (e) {
+                    var elem = e.trigger;
+                    var id = elem.getAttribute('id');
+                    var $copied = $('<span class="hmwp-clipboard-copied">Copied</span>').appendTo($('#'+id));
+                    $copied.show();
+                    setTimeout(function (){$copied.remove();}, 1000);
+                }
+            );
+        }
 
     };
 

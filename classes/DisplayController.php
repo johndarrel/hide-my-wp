@@ -7,100 +7,101 @@
  *
  */
 
-defined('ABSPATH') || die('Cheatin\' uh?');
+defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
 
-class HMWP_Classes_DisplayController
-{
+class HMWP_Classes_DisplayController {
 
-    private static $cache;
+	private static $cache;
 
-    /**
-     * echo the css link from theme css directory
-     *
-     * @param string $uri        The name of the css file or the entire uri path of the css file
-     * @param array  $dependency
-     *
-     * @return void
-     */
-    public static function loadMedia($uri = '', $dependency = null)
-    {
-        $css_uri = '';
-        $js_uri = '';
+	/**
+	 * echo the css link from theme css directory
+	 *
+	 * @param  string  $uri  The name of the css file or the entire uri path of the css file
+	 * @param  array  $dependency
+	 *
+	 * @return void
+	 */
+	public static function loadMedia( $uri = '', $dependency = null ) {
+		$css_uri = '';
+		$js_uri  = '';
 
-        if (HMWP_Classes_Tools::isAjax()) {
-            return;
-        }
+		if ( HMWP_Classes_Tools::isAjax() ) {
+			return;
+		}
 
-        if (isset(self::$cache[$uri])) {
-            return;
-        }
+		if ( isset( self::$cache[ $uri ] ) ) {
+			return;
+		}
 
-        //Initialize WordPress Filesystem
-        $wp_filesystem = HMWP_Classes_ObjController::initFilesystem();
+		//Initialize WordPress Filesystem
+		$wp_filesystem = HMWP_Classes_ObjController::initFilesystem();
 
-        self::$cache[$uri] = true;
+		self::$cache[ $uri ] = true;
 
-	    /* if is a custom css file */
-	    $name = strtolower($uri);
-	    $id = strtolower(_HMWP_NAMESPACE_) . '_' . $name;
+		/* if is a custom css file */
+		$name = strtolower( $uri );
+		$id   = strtolower( _HMWP_NAMESPACE_ ) . '_' . $name;
 
-	    if ($wp_filesystem->exists(_HMWP_ASSETS_DIR_ . 'css/' . $name .'.min.css')) {
-		    $css_uri = _HMWP_ASSETS_URL_ . 'css/' . $name . '.min.css?ver=' . HMWP_VERSION_ID;
-	    }
-	    if ($wp_filesystem->exists(_HMWP_ASSETS_DIR_ . 'css/' . $name . '.min.scss')) {
-		    $css_uri = _HMWP_ASSETS_URL_ . 'css/' . $name . '.min.scss?ver=' . HMWP_VERSION_ID;
-	    }
-	    if ($wp_filesystem->exists(_HMWP_ASSETS_DIR_ . 'js/' . $name . '.min.js')) {
-		    $js_uri = _HMWP_ASSETS_URL_ . 'js/' . $name . '.min.js?ver=' . HMWP_VERSION_ID;
-	    }
+		if ( $wp_filesystem->exists( _HMWP_ASSETS_DIR_ . 'css/' . $name . '.min.css' ) ) {
+			$css_uri = _HMWP_ASSETS_URL_ . 'css/' . $name . '.min.css?ver=' . HMWP_VERSION_ID;
+		}
+		if ( $wp_filesystem->exists( _HMWP_ASSETS_DIR_ . 'css/' . $name . '.min.scss' ) ) {
+			$css_uri = _HMWP_ASSETS_URL_ . 'css/' . $name . '.min.scss?ver=' . HMWP_VERSION_ID;
+		}
+		if ( $wp_filesystem->exists( _HMWP_ASSETS_DIR_ . 'js/' . $name . '.min.js' ) ) {
+			$js_uri = _HMWP_ASSETS_URL_ . 'js/' . $name . '.min.js?ver=' . HMWP_VERSION_ID;
+		}
 
-	    if ($css_uri <> '') {
-		    if (!wp_style_is($id)) {
-			    if (did_action('wp_print_styles')) {
-				    echo "<link rel='stylesheet' id='$id-css'  href='$css_uri' type='text/css' media='all' />";
-			    } elseif (is_admin() || is_network_admin()) { //load CSS for admin or on triggered
-				    wp_enqueue_style($id, $css_uri, $dependency, HMWP_VERSION_ID);
-				    wp_print_styles(array($id));
-			    }
-		    }
-	    }
+		if ( $css_uri <> '' ) {
+			if ( ! wp_style_is( $id ) ) {
+				if ( did_action( 'wp_print_styles' ) ) {
+					echo "<link rel='stylesheet' id='$id-css'  href='$css_uri' type='text/css' media='all' />";
+				} elseif ( is_admin() || is_network_admin() ) { //load CSS for admin or on triggered
+					wp_enqueue_style( $id, $css_uri, $dependency, HMWP_VERSION_ID );
+					wp_print_styles( array( $id ) );
+				}
+			}
+		}
 
-	    if ($js_uri <> '') {
-		    if (!wp_script_is($id)) {
-			    if (did_action('wp_print_scripts')) {
-				    echo "<script type='text/javascript' src='$js_uri'></script>";
-			    } elseif (is_admin() || is_network_admin()) { //load CSS for admin or on triggered
-				    wp_enqueue_script($id, $js_uri, $dependency, HMWP_VERSION_ID, true);
-				    wp_print_scripts(array($id));
-			    }
-		    }
-	    }
-    }
+		if ( $js_uri <> '' ) {
+			if ( ! wp_script_is( $id ) ) {
+				if ( did_action( 'wp_print_scripts' ) ) {
+					echo "<script type='text/javascript' src='$js_uri'></script>";
+				} elseif ( is_admin() || is_network_admin() ) { //load CSS for admin or on triggered
+					wp_enqueue_script( $id, $js_uri, $dependency, HMWP_VERSION_ID, true );
+					wp_print_scripts( array( $id ) );
+				}
+			}
+		}
+	}
 
-    /**
-     * return the block content from theme directory
-     *
-     * @param  string $block
-     * @param  HMWP_Classes_FrontController $view Used in the included file
-     * @return null|string
-     */
-    public function getView($block, $view)
-    {
-        $output = null;
+	/**
+	 * Fetches and renders the view file associated with the given block.
+	 *
+	 * @param  string  $block  The name of the block whose view file is to be rendered.
+	 * @param  mixed  $view  Additional data or context to be used within the view.
+	 *
+	 * @return string|null The rendered output of the view file, or null if the file does not exist.
+	 */
+	public function getView( $block, $view ) {
+		$output = null;
 
-        //Initialize WordPress Filesystem
-        $wp_filesystem = HMWP_Classes_ObjController::initFilesystem();
+		// Initialize WordPress Filesystem
+		$wp_filesystem = HMWP_Classes_ObjController::initFilesystem();
 
-        //Set the current view file from /view
-        $file = _HMWP_THEME_DIR_ . $block . '.php';
+		// Set the current view file from /view
+		$file = _HMWP_THEME_DIR_ . $block . '.php';
 
-        if ($wp_filesystem->exists($file)) {
-            ob_start();
-            include $file;
-            $output .= ob_get_clean();
-        }
+		// If the current view file exists, load view file and get the output buffer
+		if ( $wp_filesystem->exists( $file ) ) {
+			ob_start();
+			include $file;
+			$output .= ob_get_clean();
+		}
 
-        return $output;
-    }
+		// Return getview buffer for the current block name
+		// Apply hmwp_getview for third party use
+		return apply_filters( 'hmwp_getview', $output, $block );
+	}
 
 }

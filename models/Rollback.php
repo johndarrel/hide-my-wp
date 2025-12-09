@@ -31,17 +31,27 @@ class HMWP_Models_Rollback
      */
     protected $plugin_slug;
 
-    public function set_plugin($args = array())
-    {
+    /**
+     * Set the plugin's properties based on provided arguments.
+     *
+     * @param  array  $args  Associative array of properties to set.
+     *
+     * @return void
+     */
+    public function set_plugin( $args = array() ) {
         foreach ( $args as $key => $value ) {
             $this->{$key} = $value;
         }
+
+        return $this;
     }
 
     /**
      * Print inline style.
      *
-     * @access private
+     * This method outputs inline styles for specific HTML elements.
+     *
+     * @return void
      */
     private function print_inline_style()
     {
@@ -93,15 +103,16 @@ class HMWP_Models_Rollback
     }
 
     /**
-     * Upgrade.
+     * Initiates the plugin upgrade process by setting up the necessary arguments
+     * and invoking the Plugin_Upgrader class to perform the upgrade.
      *
-     * @access protected
+     * @return void
      */
     protected function upgrade()
     {
         include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
-	    $logo_url = _HMWP_ASSETS_URL_ . 'img/logo.png';
+	    $logo_url = _HMWP_ASSETS_URL_ . 'img/logo.svg';
 
 	    $upgrader_args = [
 		    'url' => 'update.php?action=upgrade-plugin&plugin=' . rawurlencode($this->plugin_name),
@@ -116,14 +127,68 @@ class HMWP_Models_Rollback
     }
 
     /**
-     * Run.
+     * Executes the primary flow for applying a package and subsequently performing an upgrade.
      *
-     * Rollback to previous versions.
+     * @return void
      */
     public function run()
     {
         $this->apply_package();
         $this->upgrade();
+    }
+
+    /**
+     * Handles the installation process of a plugin by setting up necessary
+     * includes and running the Plugin_Upgrader with the provided arguments.
+     *
+     * @param  mixed  $args  The arguments needed to set up the installation process.
+     *
+     * @return bool|WP_Error True if installation was successful, WP_Error on failure.
+     */
+    public function install( $args ) {
+
+        // Includes necessary for Plugin_Upgrader and Plugin_Installer_Skin
+        include_once( ABSPATH . 'wp-admin/includes/file.php' );
+        include_once( ABSPATH . 'wp-admin/includes/misc.php' );
+        include_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
+
+        $this->set_plugin( $args )->apply_package();
+
+        $upgrader = new Plugin_Upgrader( new WP_Ajax_Upgrader_Skin() );
+
+        return $upgrader->install( $this->package_url, array( 'overwrite_package' => true ) );
+
+    }
+
+    /**
+     * Activates a specified plugin by updating the list of active plugins
+     * and triggering activation hooks.
+     *
+     * @param  string  $plugin  The plugin to be activated.
+     *
+     * @return null
+     */
+    public function activate( $plugin ) {
+
+        $plugin  = trim( $plugin );
+        $current = get_option( 'active_plugins' );
+        $plugin  = plugin_basename( $plugin );
+
+        if ( $plugin <> '' && ! in_array( $plugin, $current ) ) {
+
+            $current[] = $plugin;
+            sort( $current );
+
+            try {
+                do_action( 'activate_plugin', $plugin, true );
+                update_option( 'active_plugins', $current );
+                do_action( 'activate_' . $plugin );
+                do_action( 'activated_plugin', $plugin, true );
+            } catch ( Exception $e ) {
+            }
+        }
+
+        return null;
     }
 
 }

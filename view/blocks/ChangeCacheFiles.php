@@ -1,9 +1,10 @@
-<?php if(!isset($view)) return; ?>
+<?php defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' ); ?>
+<?php if ( ! isset( $view ) ) { return; } ?>
 <?php if (HMWP_Classes_Tools::getOption('hmwp_mode') <> 'default' && HMWP_Classes_Tools::isCachePlugin() ) { ?>
 <div class="card col-sm-12 m-0 mb-2 p-0 rounded-0">
     <div class="card-body f-gray-dark text-center">
         <h4 class="card-title"><?php echo esc_html__('Change Paths in Cached Files', 'hide-my-wp'); ?></h4>
-        <div class="border-top mt-3 pt-3"></div>
+        <div class="border-top mt-2 pt-2"></div>
         <div class="col-sm-12 row mb-1 ml-1 p-2">
 
             <div class="col-sm-12 my-2 p-0 text-center">
@@ -17,7 +18,7 @@
                             <input type="hidden" name="hmwp_change_in_cache" value="0"/>
                             <input type="checkbox" id="hmwp_change_in_cache" name="hmwp_change_in_cache" onchange="jQuery('form#hmwp_savecachepath').submit()" class="switch nopopup" <?php echo(HMWP_Classes_Tools::getOption('hmwp_change_in_cache') ? 'checked="checked"' : '') ?> value="1"/>
                             <label for="hmwp_change_in_cache">
-                                <a href="<?php echo esc_url(HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/activate-security-tweaks/#change_paths_cached_files') ?>" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a>
+                                <a href="<?php echo esc_url( HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/change-paths-in-cached-files/' ) ?>" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a>
                             </label>
                         </div>
                     </div>

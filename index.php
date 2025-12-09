@@ -1,131 +1,153 @@
 <?php
 /*
-  Copyright (c) 2016 - 2024, WPPlugins.
+  Copyright (c) 2016 - 2025, Hide My WP Ghost
   The copyrights to the software code in this file are licensed under the (revised) BSD open source license.
 
-  Plugin Name: Hide My WP Ghost Lite
+  Plugin Name: WP Ghost Lite
   Plugin URI: https://wordpress.org/plugins/hide-my-wp/
-  Description: Hide WP paths, wp-admin, wp-login, wp-content, plugins, themes, authors, XML-RPC, API, etc. Add 7G Firewall Security, Brute Force protection & more.
-  Version: 5.2.04
-  Author: WPPlugins
-  Author URI: https://hidemywp.com
+  Description: #1 Hack Prevention Security Solution: Hide WP CMS, 7G/8G Firewall, Brute Force Protection, 2FA, GEO Security, Temporary Logins, Alerts & more.
+  Version: 5.4.08
+  Author: Hide My WP Ghost
+  Author URI: https://wpghost.com
   License: GPLv2 or later
   License URI: http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
   Text Domain: hide-my-wp
   Domain Path: /languages
   Network: true
-  Requires at least: 4.6
+  Requires at least: 5.3
   Requires PHP: 7.0
  */
 
-if ( defined( 'ABSPATH' ) && !defined( 'HMW_VERSION' ) ) {
+if ( defined( 'ABSPATH' ) && ! defined( 'HMW_VERSION' ) ) {
 
-    //Set current plugin version
-    define( 'HMWP_VERSION', '5.2.04' );
+	// Set current plugin version
+	define( 'HMWP_VERSION', '5.4.08' );
 
-    //Set the last stable version of the plugin
-    define( 'HMWP_STABLE_VERSION', '5.2.02' );
+	// Set the last stable version of the plugin
+	define( 'HMWP_STABLE_VERSION', '5.4.07' );
 
-    //Set the plugin basename
-    define( 'HMWP_BASENAME',  plugin_basename(__FILE__) );
+	// Set the plugin basename
+	define( 'HMWP_BASENAME', plugin_basename( __FILE__ ) );
 
-    //Set the PHP version ID for later use
-    defined( 'PHP_VERSION_ID' ) || define( 'PHP_VERSION_ID', (int)str_replace( '.', '', PHP_VERSION ) );
-    
-    //Set the HMWP id for later verification
-    defined( 'HMWP_VERSION_ID' ) || define( 'HMWP_VERSION_ID', (int)str_replace( '.', '', HMWP_VERSION ) );
+	// Set the PHP version ID for later use
+	defined( 'PHP_VERSION_ID' ) || define( 'PHP_VERSION_ID', (int) str_replace( '.', '', PHP_VERSION ) );
 
-    try {
+	// Set the HMWP id for later verification
+	defined( 'HMWP_VERSION_ID' ) || define( 'HMWP_VERSION_ID', (int) str_replace( '.', '', HMWP_VERSION ) );
 
-        //Call config files
-        require(dirname( __FILE__ ) . '/config/config.php');
+	try {
 
-        //inport main classes
-        require_once(_HMWP_CLASSES_DIR_ . 'ObjController.php');
+		// Call config files
+		require( dirname( __FILE__ ) . '/config/config.php' );
 
-        if(class_exists('HMWP_Classes_ObjController')) {
+		// Import main classes
+		require_once( _HMWP_CLASSES_DIR_ . 'ObjController.php' );
 
-            //Load Exception, Error and Tools class
-            HMWP_Classes_ObjController::getClass('HMWP_Classes_Error');
-            HMWP_Classes_ObjController::getClass('HMWP_Classes_Tools');
+		if ( class_exists( 'HMWP_Classes_ObjController' ) ) {
 
-            //Load Front Controller
-            HMWP_Classes_ObjController::getClass('HMWP_Classes_FrontController');
+			// Load Exception, Error and Tools class
+			HMWP_Classes_ObjController::getClass( 'HMWP_Classes_Tools' );
+			HMWP_Classes_ObjController::getClass( 'HMWP_Classes_Error' );
 
-            //if the disable signal is on, return
-	        //don't run cron hooks and update if there are installs
-	        if (defined('HMWP_DISABLE') && HMWP_DISABLE) {
-                return;
-            }elseif (!is_multisite() && defined('WP_INSTALLING') && WP_INSTALLING) {
-                return;
-            } elseif (is_multisite() && defined('WP_INSTALLING_NETWORK') && WP_INSTALLING_NETWORK) {
-                return;
-            }
+			// Load Front Controller
+			HMWP_Classes_ObjController::getClass( 'HMWP_Classes_FrontController' );
 
-	        if(!defined('DOING_CRON') || !DOING_CRON) {
-				//If Brute Force is activated
-		        if ( HMWP_Classes_Tools::getOption( 'hmwp_bruteforce' ) ) {
-			        HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Brute' );
-		        }
-	        }
+			// If the disable signal is on, return
+			// Don't run cron hooks and update if there are installs
+			if ( defined( 'HMWP_DISABLE' ) && HMWP_DISABLE ) {
+				return;
+			} elseif ( ! is_multisite() && defined( 'WP_INSTALLING' ) && WP_INSTALLING ) {
+				return;
+			} elseif ( is_multisite() && defined( 'WP_INSTALLING_NETWORK' ) && WP_INSTALLING_NETWORK ) {
+				return;
+			}
 
-            if (is_admin() || is_network_admin()) {
+			if ( ! HMWP_Classes_Tools::isCron() ) {
+				// If Brute Force is activated
+				if ( HMWP_Classes_Tools::getOption( 'hmwp_bruteforce' ) ) {
+					HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Brute' );
+				}
+			}
 
-                //Check the user roles
-                HMWP_Classes_ObjController::getClass('HMWP_Models_RoleManager');
+			if ( is_admin() || is_network_admin() ) {
 
-	            //Make sure to write the rewrites with other plugins
-	            add_action('rewrite_rules_array', array(HMWP_Classes_ObjController::getClass('HMWP_Classes_Tools'), 'checkRewriteUpdate'), 11, 1);
+				// Check the user roles
+				HMWP_Classes_ObjController::getClass( 'HMWP_Models_RoleManager' );
 
-                //hook activation and deactivation
-                register_activation_hook(__FILE__, array(HMWP_Classes_ObjController::getClass('HMWP_Classes_Tools'), 'hmwp_activate'));
-                register_deactivation_hook(__FILE__, array(HMWP_Classes_ObjController::getClass('HMWP_Classes_Tools'), 'hmwp_deactivate'));
+				// Make sure to write the rewrites with other plugins
+				add_action( 'rewrite_rules_array', array(
+					HMWP_Classes_ObjController::getClass( 'HMWP_Classes_Tools' ),
+					'checkRewriteUpdate'
+				), 11, 1 );
 
-                //verify if there are updated and all plugins and themes are in the right list
-                add_action('activated_plugin', array(HMWP_Classes_ObjController::getClass('HMWP_Classes_Tools'), 'checkPluginsThemesUpdates'), 11, 0);
-                //When a theme is changed
-                add_action('after_switch_theme', array(HMWP_Classes_ObjController::getClass('HMWP_Classes_Tools'), 'checkPluginsThemesUpdates'), 11, 0);
+				// Hook activation and deactivation
+				register_activation_hook( __FILE__, array(
+					HMWP_Classes_ObjController::getClass( 'HMWP_Classes_Tools' ),
+					'hmwp_activate'
+				) );
+				register_deactivation_hook( __FILE__, array(
+					HMWP_Classes_ObjController::getClass( 'HMWP_Classes_Tools' ),
+					'hmwp_deactivate'
+				) );
 
-            }
+				// Verify if there are updated and all plugins and themes are in the right list
+				add_action( 'activated_plugin', array(
+					HMWP_Classes_ObjController::getClass( 'HMWP_Classes_Tools' ),
+					'checkPluginsThemesUpdates'
+				), 11, 0 );
 
-            //Check if the cron is loaded in advanced settings
-            if ((HMWP_Classes_Tools::getOption('hmwp_mode') <> 'default')) {
+				// When a theme is changed
+				add_action( 'after_switch_theme', array(
+					HMWP_Classes_ObjController::getClass( 'HMWP_Classes_Tools' ),
+					'checkPluginsThemesUpdates'
+				), 11, 0 );
 
-                //on core or plugins update
-	            add_action('automatic_updates_complete', function($options)
-	            {
-		            if(isset($options['action']) && $options['action'] == 'update') {
-			            set_transient( 'hmwp_update', 1 );
-		            }
-	            }, 10, 1);
+			}
 
-	            //on plugins are update
-	            add_action('upgrader_process_complete', function($upgrader_object, $options)
-	            {
-		            $our_plugin = plugin_basename( __FILE__ );
+			// Check if the cron is loaded in advanced settings
+			if ( ( HMWP_Classes_Tools::getOption( 'hmwp_mode' ) <> 'default' ) ) {
 
-		            if(isset($options['action']) && $options['action'] == 'update') {
-			            if( $options['type'] == 'plugin' && isset( $options['plugins'] ) ) {
-				            foreach( $options['plugins'] as $plugin ) {
-					            if( $plugin <> $our_plugin ) {
-						            set_transient( 'hmwp_update', 1 );
-					            }
-				            }
-			            }
-		            }
-	            }, 10, 2);
+				// Update rules in .htaccess on other plugins update to avoid rule deletion
+				if ( ! HMWP_Classes_Tools::isApache() || HMWP_Classes_Tools::isLitespeed() ) {
 
-                if (HMWP_Classes_Tools::getOption('hmwp_change_in_cache') || HMWP_Classes_Tools::getOption('hmwp_mapping_file')) {
-                    //Run the HMWP crons
-                    HMWP_Classes_ObjController::getClass('HMWP_Controllers_Cron');
-                    add_action(HMWP_CRON, array(HMWP_Classes_ObjController::getClass('HMWP_Controllers_Cron'), 'processCron'));
-                }
-            }
+					add_action( 'automatic_updates_complete', function ( $options ) {
+						if ( isset( $options['action'] ) && $options['action'] == 'update' ) {
+							set_transient( 'hmwp_update', 1 );
+						}
+					}, 10, 1 );
 
-        }
+					// On plugins are update
+					add_action( 'upgrader_process_complete', function ( $upgrader_object, $options ) {
+						$our_plugin = plugin_basename( __FILE__ );
 
-    } catch ( Exception $e ) {
+						if ( isset( $options['action'] ) && $options['action'] == 'update' ) {
+							if ( $options['type'] == 'plugin' && isset( $options['plugins'] ) ) {
+								foreach ( $options['plugins'] as $plugin ) {
+									if ( $plugin <> $our_plugin ) {
+										set_transient( 'hmwp_update', 1 );
+									}
+								}
+							}
+						}
+					}, 10, 2 );
 
-    }
+				}
+
+				if ( HMWP_Classes_Tools::getOption( 'hmwp_change_in_cache' ) || HMWP_Classes_Tools::getOption( 'hmwp_mapping_file' ) ) {
+					// Run the HMWP cron
+					HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Cron' );
+
+					add_action( HMWP_CRON, array(
+						HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Cron' ),
+						'processCron'
+					) );
+				}
+			}
+
+		}
+
+	} catch ( Exception $e ) {
+
+	}
 
 }

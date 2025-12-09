@@ -21,23 +21,25 @@
 
 .hmwp_notice.danger {
     font-size: 1rem;
-    background-color: #dc3545!important;
+    background-color: #e5765c!important;
     color: white;
 }
 
 .hmwp_notice.notice {
     font-size: 1rem;
-    background: #ffffe2 !important;
+    background: #fff !important;
     color: #444;
-    border-left: 2px solid #ffffe2;
-    border-bottom: 2px solid #e5765c;
+    border: none;
+    border-left: 4px solid #e5765c;
 }
 
-.hmwp_notice.notice  pre{
+.hmwp_notice.notice pre{
     display: block;
-    font-size: 0.9rem;
-    font-weight: 400;
-    color: #686f76;
+    font-size: .9rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 300;
+    color: var(--hmwp-color-primary);
+    margin: 10px 0;
 }
 
 .hmwp_notice.bg-danger {

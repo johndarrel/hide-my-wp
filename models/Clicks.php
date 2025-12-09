@@ -10,15 +10,27 @@ defined('ABSPATH') || die('Cheatin\' uh?');
 class HMWP_Models_Clicks
 {
 
-    public function __construct()
+	/**
+	 * Constructor method for initializing the class.
+	 *
+	 * Sets up the necessary action to disable keys and clicks in the WordPress footer by attaching the 'disableKeysAndClicks' method.
+	 *
+	 * @return void
+	 */
+	public function __construct()
     {
         add_action('wp_footer', array($this, 'disableKeysAndClicks'), PHP_INT_MAX);
     }
 
 
-    /**
-     * Disable website keys and clicks
-     */
+	/**
+	 * Disables various keyboard shortcuts and mouse actions typically used for inspecting
+	 * and copying web page content. This method prevents actions like right-clicking,
+	 * viewing the source code, keyboard shortcut for opening developer tools, cutting,
+	 * copying, pasting, and dragging.
+	 *
+	 * @return void
+	 */
     public function disableKeysAndClicks()
     {
         $hmwp_disable_inspect_message = ((HMWP_Classes_Tools::getOption('hmwp_disable_inspect_message') <> '') ? str_replace("'", "`", HMWP_Classes_Tools::getOption('hmwp_disable_inspect_message')) : '');
@@ -46,7 +58,7 @@ document.addEventListener("keydown", function(event) {
 document.addEventListener("contextmenu", function(event) {event.preventDefault();return false;});
 <?php }?>
 <?php  if(HMWP_Classes_Tools::getOption('hmwp_disable_click')) { ?>__disableEventListener(document, 'contextmenu', '<?php echo esc_attr($hmwp_disable_click_message) ?>');<?php }?>
-<?php  if(HMWP_Classes_Tools::getOption('hmwp_disable_copy_paste')) { ?>__disableEventListener(document, 'cut copy paste print', '<?php echo esc_attr($hmwp_disable_copy_paste_message) ?>');<?php }?>
+<?php  if(HMWP_Classes_Tools::getOption('hmwp_disable_copy_paste')) { ?>__disableEventListener(document, 'cut copy print <?php echo (HMWP_Classes_Tools::getOption( 'hmwp_disable_paste' ) ? 'paste' : '') ?>', '<?php echo esc_attr($hmwp_disable_copy_paste_message) ?>');<?php }?>
 <?php  if(HMWP_Classes_Tools::getOption('hmwp_disable_drag_drop')) { ?>document.querySelectorAll('img').forEach(function(img) {img.setAttribute('draggable', false);});document.ondragstart = __returnFalse;__disableEventListener(document, 'drag drop', '<?php echo esc_attr($hmwp_disable_drag_drop_message) ?>');<?php }?>
 })();
 //]]>
