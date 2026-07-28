@@ -7,20 +7,15 @@
  *
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
-/**
- * The class FrontController from /classes
- *
- * @var object of the model class
- */
 class HMWP_Classes_FrontController {
 
-	/**
-	 * The class Model from /models
-	 *
-	 * @var object of the model class
-	 */
+    /**
+     * The class Model from /models
+     *
+     * @var object of the model class
+     */
 	public $model;
 
 	/**
@@ -33,81 +28,79 @@ class HMWP_Classes_FrontController {
 	/**
 	 * The class name
 	 *
-	 * @var string name of theclass
+	 * @var string name of the class
 	 */
 	protected $name;
 
 	/**
-	 * Constructor initializes the class by setting up model and hook instances, checking for debug mode,
-	 * and loading necessary controller and handler classes for WordPress actions.
+	 * HMWP_Classes_FrontController constructor.
 	 *
-	 * @return void
 	 * @throws Exception
 	 */
 	public function __construct() {
 
-		// Get the name of the current class
+		/* get the name of the current class */
 		$this->name = get_class( $this );
 
-		// Load the model and hooks here for WordPress actions to take effect
-		// Create the model and view instances
+		/* load the model and hooks here for WordPress actions to take effect */
+		/* create the model and view instances */
 		$model_classname = str_replace( 'Controllers', 'Models', $this->name );
 		if ( HMWP_Classes_ObjController::getClassByPath( $model_classname ) ) {
 			$this->model = HMWP_Classes_ObjController::getClass( $model_classname );
 		}
 
 		//IMPORTANT TO LOAD HOOKS HERE
-		// Check if there is a hook defined in the controller clients class
+		/* check if there is a hook defined in the controller clients class */
 		HMWP_Classes_ObjController::getClass( 'HMWP_Classes_HookController' )->setHooks( $this );
 
-		// Set the debug if activated in wp_config file
-		if ( defined( 'HMWP_DEBUG' ) && HMWP_DEBUG ) {
-			HMWP_Classes_ObjController::getClass( 'HMWP_Classes_Debug' );
-		}
+		/* Set the debug class */
+		HMWP_Classes_ObjController::getClass( 'HMWP_Classes_Debug' );
 
-		// Load the rewrite
+		/* Load the rewrite */
 		HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Rewrite' );
 
-		// Load the Main classes Actions Handler
+		/* Load the Main classes Actions Handler */
 		HMWP_Classes_ObjController::getClass( 'HMWP_Classes_Action' );
 		HMWP_Classes_ObjController::getClass( 'HMWP_Classes_DisplayController' );
 		HMWP_Classes_ObjController::getClass( 'HMWP_Models_Compatibility_Abstract' );
 		HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_Abstract' );
-
+		HMWP_Classes_ObjController::getClass( 'HMWP_Models_Twofactor_Abstract' );
+		HMWP_Classes_ObjController::getClass( 'HMWP_Models_Translate' );
 	}
 
 	/**
-	 * Initializes the instance
-	 * This function prepares and returns the current instance
+	 * load sequence of classes
+	 * Function called usually when the controller is loaded in WP
 	 *
-	 * @return $this The current instance
+	 * @return HMWP_Classes_FrontController
+	 * @throws Exception
 	 */
 	public function init() {
 		return $this;
 	}
 
 	/**
-	 * Retrieve and display the specified view
-	 * Similar to the MVC pattern, this method fetches and renders a view.
+	 * Get the block view
 	 *
-	 * @param  string|null  $view  The name of the view to be fetched. If not provided, it will attempt to derive it.
-	 * @param  object|null  $obj  The object related to the view context. Defaults to the current object if not specified.
+	 * @param string $view
+	 * @param stdClass $obj
 	 *
-	 * @return string The rendered view, or an empty string if the view could not be determined.
+	 * @return string HTML
+	 * @throws Exception
 	 */
 	public function getView( $view = null, $obj = null ) {
 		if ( ! isset( $obj ) ) {
 			$obj = $this;
 		}
 
-		// Get the view class name if not defined
+		//Get the view class name if not defined
 		if ( ! isset( $view ) ) {
 			if ( $class = HMWP_Classes_ObjController::getClassByPath( $this->name ) ) {
 				$view = $class['name'];
 			}
 		}
 
-		// Call the display class to load the view
+		//Call the display class to load the view
 		if ( isset( $view ) ) {
 			$this->view = HMWP_Classes_ObjController::getClass( 'HMWP_Classes_DisplayController' );
 
@@ -118,57 +111,47 @@ class HMWP_Classes_FrontController {
 	}
 
 	/**
-	 * Displays the specified view
-	 * This function will output the content of the provided view.
+	 * Called as menu callback to show the block
 	 *
-	 * @param  string|null  $view  The name of the view to display. If null, a default view will be used.
+	 * @param string $view
 	 *
-	 * @return void
+	 * @throws Exception
 	 */
 	public function show( $view = null ) {
-		echo $this->getView( $view );
+		echo $this->getView( $view ); //phpcs:ignore
 	}
 
 	/**
-	 * Performs the designated action.
-	 * This method is called within each class that defines an action.
-	 *
-	 * @return void
+	 * first function call for any class on form submit
 	 */
 	protected function action() {
-		// Called within each class with the action
+		// called within each class with the action
 	}
 
 
 	/**
-	 * Initialize the hook
-	 * This function executes initial setup tasks when the hook is triggered
+	 * initialize settings
+	 * Called from index
 	 *
 	 * @return void
 	 */
 	public function hookInit() {
-		// Called within each class with the action
 	}
 
 
 	/**
-	 * Hook the front initialization
-	 * This function will be called during the front office initialization process
-	 *
-	 * @return void
+	 * Called on frontend. For disconnected users
 	 */
 	public function hookFrontinit() {
-		// Called within each class with the action
 	}
 
 	/**
-	 * Executes actions or filters to be applied to the head section of the HTML document.
-	 * This method is typically used to insert additional scripts, styles, or meta tags.
+	 * Hook the admin head
+	 * This function will load the media in the header for each class
 	 *
 	 * @return void
 	 */
 	public function hookHead() {
-		// Called within each class with the action
 	}
 
 }

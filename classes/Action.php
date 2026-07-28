@@ -7,7 +7,7 @@
  * @since 4.0.0
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Classes_Action extends HMWP_Classes_FrontController {
 
@@ -32,7 +32,9 @@ class HMWP_Classes_Action extends HMWP_Classes_FrontController {
 	}
 
 	/**
-	 * The hookSubmit is loaded when action si posted
+	 * Fires on the admin_menu hook.
+	 *
+	 * Dispatches non-AJAX form actions when a POST request is made from the admin panel.
 	 *
 	 * @return void
 	 * @throws Exception
@@ -57,10 +59,13 @@ class HMWP_Classes_Action extends HMWP_Classes_FrontController {
 	}
 
 	/**
-	 * Get the list with all the plugin actions
+	 * Returns the full action routing table for the plugin.
 	 *
-	 * @return array
-	 * @since 6.1.1
+	 * Each entry maps an action name (the `action` POST/GET parameter value) to the
+	 * controller class that should handle it. This table is consumed by {@see getActions()}
+	 * to look up and dispatch the correct controller after nonce verification.
+	 *
+	 * @return array[]
 	 */
 	public function getActionsTable() {
 		return array(
@@ -78,16 +83,20 @@ class HMWP_Classes_Action extends HMWP_Classes_FrontController {
 						"hmwp_manualrewrite",
 						"hmwp_mappsettings",
 						"hmwp_firewall",
+						"hmwp_firewall_whitelist_path",
+						"hmwp_firewall_whitelist_rule",
+						"hmwp_firewall_blacklist_ip",
+						"hmwp_geo_download",
 						"hmwp_advsettings",
-						"hmwp_devsettings",
-						"hmwp_devdownload",
+						"hmwp_logsettings",
+						"hmwp_export_threats_csv",
+						"hmwp_export_events_csv",
 						"hmwp_changepathsincache",
 						"hmwp_savecachepath",
 						"hmwp_backup",
 						"hmwp_restore",
 						"hmwp_rollback",
 						"hmwp_rollback_stable",
-						"hmwp_download_settings",
 						"hmwp_advanced_install",
 						"hmwp_pause_enable",
 						"hmwp_pause_disable",
@@ -104,6 +113,17 @@ class HMWP_Classes_Action extends HMWP_Classes_FrontController {
 				),
 			),
 			array(
+				"name"    => "HMWP_Controllers_Ghostdoctor",
+				"actions" => array(
+					"action" => array(
+						"hmwp_ghostdoctor_diagnose",
+						"hmwp_ghostdoctor_repair",
+						"hmwp_ghostdoctor_keep",
+						"hmwp_ghostdoctor_undo"
+					)
+				),
+			),
+			array(
 				"name"    => "HMWP_Controllers_SecurityCheck",
 				"actions" => array(
 					"action" => array(
@@ -111,6 +131,11 @@ class HMWP_Classes_Action extends HMWP_Classes_FrontController {
 						"hmwp_frontendcheck",
 						"hmwp_fixsettings",
 						"hmwp_fixconfig",
+						"hmwp_fixprefix",
+						"hmwp_fixpermissions",
+						"hmwp_fixsalts",
+						"hmwp_fixadmin",
+						"hmwp_fixupgrade",
 						"hmwp_securityexclude",
 						"hmwp_resetexclude"
 					)
@@ -122,17 +147,54 @@ class HMWP_Classes_Action extends HMWP_Classes_FrontController {
 					"action" => array(
 						"hmwp_brutesettings",
 						"hmwp_google_enterprise",
-						"hmwp_blockedips",
 						"hmwp_deleteip",
 						"hmwp_deleteallips"
 					)
 				),
 			),
 			array(
-				"name"    => "HMWP_Controllers_Log",
+				"name"    => "HMWP_Controllers_ThreatsLog",
 				"actions" => array(
 					"action" => array(
-						"hmwp_logsettings"
+						"hmwp_load_threat_map",
+					)
+				),
+			),
+			array(
+				"name"    => "HMWP_Controllers_Templogin",
+				"actions" => array(
+					"action" => array(
+						"hmwp_temploginsettings",
+						"hmwp_templogin_block",
+						"hmwp_templogin_activate",
+						"hmwp_templogin_delete",
+						"hmwp_templogin_new",
+						"hmwp_templogin_update",
+					)
+				),
+			),
+			array(
+				"name"    => "HMWP_Controllers_Uniquelogin",
+				"actions" => array(
+					"action" => array(
+						"hmwp_uniquelogin_new",
+					)
+				),
+			),
+			array(
+				"name"    => "HMWP_Controllers_Twofactor",
+				"actions" => array(
+					"action" => array(
+						"hmwp_2fasettings",
+						"hmwp_2fa_method",
+						"hmwp_totp_submit",
+						"hmwp_totp_reset",
+						"hmwp_codes_generate",
+						"hmwp_email_submit",
+						"hmwp_email_reset",
+						"hmwp_passkey_submit",
+						"hmwp_passkey_register",
+						"hmwp_passkey_remove",
 					)
 				),
 			),

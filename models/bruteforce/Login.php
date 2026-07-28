@@ -8,7 +8,7 @@
  * @since 8.1
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_Bruteforce_Login {
 

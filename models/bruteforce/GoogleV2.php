@@ -8,7 +8,7 @@
  * @since 8.1
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_Bruteforce_GoogleV2 extends HMWP_Models_Bruteforce_Abstract {
 
@@ -50,7 +50,7 @@ class HMWP_Models_Bruteforce_GoogleV2 extends HMWP_Models_Bruteforce_Abstract {
 		$secret  = HMWP_Classes_Tools::getOption( 'brute_captcha_secret_key' );
 
 		if ( $secret <> '' ) {
-			$response = json_decode( HMWP_Classes_Tools::hmwp_remote_get( "https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=" . $captcha . "&remoteip=" . $_SERVER['REMOTE_ADDR'] ), true );
+			$response = json_decode( HMWP_Classes_Tools::hmwp_remote_get( "https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=" . $captcha . "&remoteip=" . wp_unslash( ( $_SERVER['REMOTE_ADDR'] ?? '') ) ), true ); //phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			if ( isset( $response['success'] ) && ! $response['success'] ) {
 				//If captcha errors, let the user login and fix the error
@@ -63,8 +63,9 @@ class HMWP_Models_Bruteforce_GoogleV2 extends HMWP_Models_Bruteforce_Abstract {
 				}
 
 				if ( ! $error_message ) {
-					$error_message = sprintf( esc_html__( '%sIncorrect ReCaptcha%s. Please try again.', 'hide-my-wp' ), '<strong>', '</strong>' );
-				}
+                    /* translators: 1: Opening <strong> tag, 2: Closing </strong> tag. */
+                    $error_message = wp_kses_post( sprintf( __( '%1$sIncorrect ReCaptcha%2$s. Please try again.', 'hide-my-wp' ), '<strong>', '</strong>' ) );
+                }
 			}
 		}
 
@@ -76,10 +77,8 @@ class HMWP_Models_Bruteforce_GoogleV2 extends HMWP_Models_Bruteforce_Abstract {
 	 * reCAPTCHA head and login form
 	 */
 	public function head() {
-		?>
-        <script src='https://www.google.com/recaptcha/api.js?hl=<?php echo esc_attr( HMWP_Classes_Tools::getOption( 'brute_captcha_language' ) <> '' ? HMWP_Classes_Tools::getOption( 'brute_captcha_language' ) : get_locale() ) ?>' async defer></script>
-        <style> #login {  min-width: 354px; } </style>
-		<?php
+        ?><script src='https://www.google.com/recaptcha/api.js?hl=<?php echo esc_attr( HMWP_Classes_Tools::getOption( 'brute_captcha_language' ) <> '' ? HMWP_Classes_Tools::getOption( 'brute_captcha_language' ) : get_locale() ) ?>' async defer></script><?php //phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript ?>
+        <style> #login {  min-width: 354px; } </style><?php
 	}
 
 	/**
@@ -94,9 +93,7 @@ class HMWP_Models_Bruteforce_GoogleV2 extends HMWP_Models_Bruteforce_Abstract {
 				$this->head();
 			}
 
-			?>
-            <div class="g-recaptcha" data-sitekey="<?php echo esc_attr( HMWP_Classes_Tools::getOption( 'brute_captcha_site_key' ) ) ?>" data-theme="<?php echo esc_attr( HMWP_Classes_Tools::getOption( 'brute_captcha_theme' ) ) ?>" style="margin: 12px 0 24px 0;"></div>
-			<?php
+            ?><div class="g-recaptcha" data-sitekey="<?php echo esc_attr( HMWP_Classes_Tools::getOption( 'brute_captcha_site_key' ) ) ?>" data-theme="<?php echo esc_attr( HMWP_Classes_Tools::getOption( 'brute_captcha_theme' ) ) ?>" style="margin: 12px 0 24px 0;"></div><?php
 		}
 	}
 

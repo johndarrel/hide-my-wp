@@ -8,7 +8,7 @@
  * @since 4.0.0
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Controllers_Menu extends HMWP_Classes_FrontController {
 
@@ -20,30 +20,30 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController {
 	 */
 	public function hookInit() {
 
-		// On error or when plugin disabled.
+		//On error or when plugin disabled.
 		if ( defined( 'HMWP_DISABLE' ) && HMWP_DISABLE ) {
 			return;
 		}
 
-		// Add the plugin menu in admin.
+		//Add the plugin menu in admin.
 		if ( HMWP_Classes_Tools::userCan( 'manage_options' ) ) {
 
-			// Check if updates.
+			//Check if updates.
 			if ( get_transient( 'hmwp_update' ) ) {
 
-				// Delete the redirect transient.
+				//Delete the redirect transient.
 				delete_transient( 'hmwp_update' );
 
 				HMWP_Classes_ObjController::getClass( 'HMWP_Classes_Tools' )->checkRewriteUpdate( array() );
 			}
 
-			// Check if activated.
+			//Check if activated.
 			if ( get_transient( 'hmwp_activate' ) ) {
 
-				// Delete the redirect transient.
+				//Delete the redirect transient.
 				delete_transient( 'hmwp_activate' );
 
-				// Make sure this plugin in the loading first.
+				//Make sure the plugin is loading first.
 				HMWP_Classes_Tools::movePluginFirst();
 			}
 
@@ -57,13 +57,10 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController {
 			}
 
 			//Get the error count from security check.
-			add_filter( 'hmwp_alert_count', array(
-				HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_SecurityCheck' ),
-				"getRiskErrorCount"
-			) );
+			add_filter( 'hmwp_alert_count', array( HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_SecurityCheck' ), "getRiskErrorCount" ) );
 
 			//Change the plugin name on customization.
-			if ( HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ) <> _HMWP_PLUGIN_FULL_NAME_ ) {
+			if ( HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ) <> _HMWP_PLUGIN_FULL_NAME_ && HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ) <> 'Hide My WP Ghost' ) {
 
 				$websites = array(
 					'https://wpplugins.tips',
@@ -73,11 +70,12 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController {
 				);
 
 				//Hook plugin details.
-				add_filter( 'gettext', function ( $string ) {
+				add_filter( 'gettext', function( $string ) {
 
 					//Change the plugin name in the plugins list.
-					$string = str_replace( _HMWP_PLUGIN_AUTHOR_NAME_, HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ), $string );
-					$string = str_replace( _HMWP_PLUGIN_FULL_NAME_, HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ), $string );
+					$string = str_ireplace( 'Hide My WP Ghost', HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ), $string );
+					$string = str_ireplace( _HMWP_PLUGIN_AUTHOR_NAME_, HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ), $string );
+					$string = str_ireplace( _HMWP_PLUGIN_FULL_NAME_, HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ), $string );
 
 					//Return the changed text
 					return str_replace( 'WPPlugins', HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ), $string );
@@ -101,37 +99,55 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController {
 					return $plugin_meta;
 				}, 11, 1 );
 
+
 				if( ! in_array(HMWP_Classes_Tools::getOption( 'hmwp_plugin_website' ), $websites) ){
 					add_filter('hmwp_getview', function ($view){
 						$style = '<style>#hmwp_wrap .dashicons-editor-help,.hmwp_help{display: none !important;}</style>';
 						return $style . $view;
 					}, 11, 1);
 				}
-
 			} elseif ( strpos( HMWP_Classes_Tools::getValue( 'page' ), 'hmwp_' ) !== false && apply_filters('hmwp_showaccount', true) ) {
-                add_filter('hmwp_getview', function ($view){
-                    $style = '<script src="https://storage.googleapis.com/contentlook/agent/widget.min.js?key=f07f616c-e167-49fd-94f1-81b42cd874b7&ver=1.0.1"></script>';
-                    return $style . $view;
-                }, 11, 1);
-            }
+				add_filter('hmwp_getview', function ($view){
+					//phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+					$style = '<script src="https://cdn.crawlbrain.com/v2/widget.min.js" data-key="2543bc36-041a-4675-bc41-b22d72132205" data-mode="floating" async ></script>';
+					return $style . $view;
+				}, 11, 1);
+			}
+
 
 			//Hook the show account option in admin.
 			if ( ! HMWP_Classes_Tools::getOption( 'hmwp_plugin_account_show' ) ) {
 				add_filter( 'hmwp_showaccount', '__return_false' );
+			}
+
+			if ( HMWP_Classes_Tools::getOption( 'hmwp_2falogin' ) ) {
+
+				/** @var HMWP_Controllers_Twofactor $twofactor */
+				$twofactor = HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Twofactor' );
+
+				add_action( 'show_user_profile', array( $twofactor, 'hookUserSettings' ), 11, 1 );
+				add_action( 'edit_user_profile', array( $twofactor, 'hookUserSettings' ), 11, 1 );
+			}
+
+			// Show the settings page
+			if ( HMWP_CLASS_CTA ) {
+				add_filter( 'hmwp_getview', function ( $view, $block ) {
+					if ( in_array( $block, array( 'Overview', 'SecurityCheck', 'Firewall', 'Tweaks', 'Log', 'Permalinks' ) ) ) {
+						return $view . $this->getView( 'blocks/Upgrade' );
+					}
+
+					return $view;
+				}, 11, 2 );
 			}
 		}
 
 	}
 
 	/**
-	 * Sets up the admin menu for the HMWP plugin.
+	 * Creates the Setting menu in WordPress
 	 *
-	 * This method configures the main and submenu options for the HMWP plugin based on user capabilities.
-	 * It checks if the plugin is not disabled and ensures appropriate multi-site and user capability checks are done.
-	 * It also updates external links in the menu after setup.
-	 *
-	 * @return void
 	 * @throws Exception
+	 * @since 4.0.0
 	 */
 	public function hookMenu() {
 
@@ -152,12 +168,12 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController {
 				HMWP_Classes_Tools::getOption( 'hmwp_plugin_icon' )
 			) );
 
-			// Add the admin menu
+			/* add the admin menu */
 			$tabs = $this->model->getMenu();
 			foreach ( $tabs as $slug => $tab ) {
 				if ( isset( $tab['parent'] ) && isset( $tab['name'] ) && isset( $tab['title'] ) && isset( $tab['capability'] ) ) {
 
-					if ( isset( $tab['show'] ) && ! $tab['show'] ) {
+					if ( isset( $tab['show'] ) && !$tab['show'] ) {
 						$tab['parent'] = 'hmwp_none';
 					}
 
@@ -171,16 +187,6 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController {
 					) );
 				}
 			}
-
-			//Avoid blank page after upgrade
-			$this->model->addSubmenu( array(
-				'hmw_settings',
-				HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ),
-				HMWP_Classes_Tools::getOption( 'hmwp_plugin_menu' ),
-				HMWP_CAPABILITY,
-				'hmw_settings',
-				array( HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Overview' ), 'init' )
-			) );
 
 			//Update the external links in the menu
 			global $submenu;
@@ -199,19 +205,16 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController {
 	}
 
 	/**
-	 * Adds a custom dashboard widget to the WordPress admin dashboard.
+	 * Load the dashboard widget
 	 *
-	 * This method registers a new dashboard widget and then moves it to the top of the dashboard.
-	 * It ensures the custom widget is prominently displayed for users when they access the dashboard.
-	 *
-	 * @return void
-	 * @throws Exception if there is an issue adding the dashboard widget.
+	 * @throws Exception
+	 * @since 5.1.0
 	 */
 	public function hookDashboardSetup() {
 		wp_add_dashboard_widget( 'hmwp_dashboard_widget', HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ), array(
-			HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Widget' ),
-			'dashboard'
-		) );
+				HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Widget' ),
+				'dashboard'
+			) );
 
 		// Move our widget to top.
 		global $wp_meta_boxes;
@@ -223,18 +226,14 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController {
 
 
 	/**
-	 * Adds a multisite menu for the HMWP plugin based on user capabilities.
+	 * Creates the Setting menu in Multisite WordPress
 	 *
-	 * Checks if the user has the capability 'hmwp_manage_settings'. If so, it adds the main and submenu for the
-	 * HMWP plugin with the relevant settings. If not, it checks if the user has 'manage_options' capability and
-	 * adds the main and submenu accordingly. It also updates external links in the menu after setup.
-	 *
-	 * @return void
 	 * @throws Exception
+	 * @since 5.2.1
 	 */
 	public function hookMultisiteMenu() {
 
-		// If the capability hmwp_manage_settings exists
+		//If the capability hmwp_manage_settings exists
 		$this->model->addMenu( array(
 			HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ),
 			HMWP_Classes_Tools::getOption( 'hmwp_plugin_menu' ),
@@ -244,11 +243,11 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController {
 			HMWP_Classes_Tools::getOption( 'hmwp_plugin_icon' )
 		) );
 
-		// Add the admin menu
+		/* add the admin menu */
 		$tabs = $this->model->getMenu();
 		foreach ( $tabs as $slug => $tab ) {
 
-			if ( isset( $tab['show'] ) && ! $tab['show'] ) {
+			if ( isset( $tab['show'] ) && !$tab['show'] ) {
 				$tab['parent'] = 'hmwp_none';
 			}
 
@@ -260,19 +259,10 @@ class HMWP_Controllers_Menu extends HMWP_Classes_FrontController {
 				$slug,
 				$tab['function'],
 			) );
+
 		}
 
-		// Avoid blank page after upgrade
-		$this->model->addSubmenu( array(
-			'hmw_settings',
-			HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ),
-			HMWP_Classes_Tools::getOption( 'hmwp_plugin_menu' ),
-			HMWP_CAPABILITY,
-			'hmw_settings',
-			array( HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Overview' ), 'init' )
-		) );
-
-		// Update the external links in the menu
+		//Update the external links in the menu
 		global $submenu;
 		if ( ! empty( $submenu['hmwp_settings'] ) ) {
 			foreach ( $submenu['hmwp_settings'] as &$item ) {

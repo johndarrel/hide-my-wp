@@ -4,29 +4,28 @@
  *
  * @file The Hummingbird Model file
  * @package HMWP/Compatibility/Hummingbird
+ * @since 6.0.0
  */
 
-defined('ABSPATH') || die('Cheatin\' uh?');
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
-class HMWP_Models_Compatibility_Hummingbird extends HMWP_Models_Compatibility_Abstract
-{
+class HMWP_Models_Compatibility_Hummingbird extends HMWP_Models_Compatibility_Abstract {
 
 
-    public function hookFrontend() {
-        add_filter('wphb_cache_content', array($this, 'findReplaceCache'), PHP_INT_MAX);
-        add_filter('template_redirect', array($this, 'removeHummingbirdComment'));
-    }
+	public function hookFrontend() {
+		add_filter( 'wphb_cache_content', array( $this, 'findReplaceCache' ), PHP_INT_MAX );
+		add_action( 'template_redirect', array( $this, 'removeHummingbirdComment' ) );
+	}
 
-    /**
-     * Remove Hummingbird Comment
-     */
-    public function removeHummingbirdComment()
-    {
-        global $wphb_cache_config;
-        if (isset($wphb_cache_config->cache_identifier) && $wphb_cache_config->cache_identifier ) {
-            $wphb_cache_config->cache_identifier = false;
-        }
-    }
+	/**
+	 * Remove Hummingbird Comment
+	 */
+	public function removeHummingbirdComment() {
+		global $wphb_cache_config;
+		if ( isset( $wphb_cache_config->cache_identifier ) && $wphb_cache_config->cache_identifier ) {
+			$wphb_cache_config->cache_identifier = false;
+		}
+	}
 
 
 }

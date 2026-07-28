@@ -30,14 +30,14 @@
     background: #fff !important;
     color: #444;
     border: none;
-    border-left: 4px solid #e5765c;
+    border-left: 4px solid #FFA500;
+    line-height: 23px;
 }
 
 .hmwp_notice.notice pre{
     display: block;
     font-size: .9rem;
     font-family: 'IBM Plex Mono', monospace;
-    font-weight: 300;
     color: var(--hmwp-color-primary);
     margin: 10px 0;
 }

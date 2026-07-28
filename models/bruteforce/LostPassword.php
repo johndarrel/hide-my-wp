@@ -8,7 +8,7 @@
  * @since 8.1
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_Bruteforce_LostPassword {
 
@@ -35,7 +35,7 @@ class HMWP_Models_Bruteforce_LostPassword {
 	public function call( $errors, $user ) {
 
 		// Check bruteforce only in frontend for not logged users
-		if ( ! function_exists( 'is_user_logged_in' ) || is_user_logged_in() ) {
+		if ( HMWP_Classes_Tools::isLoggedInUser() ) {
 			return $errors;
 		}
 

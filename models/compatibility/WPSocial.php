@@ -7,11 +7,13 @@
  * * @since 8.2.0
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_Compatibility_WPSocial extends HMWP_Models_Compatibility_Abstract {
 
 	public function __construct() {
+		parent::__construct();
+
 		add_filter('login_body_class', array($this, 'bodyClass'));
 	}
 

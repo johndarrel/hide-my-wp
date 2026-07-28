@@ -8,7 +8,7 @@
  * @since 8.1
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_Bruteforce_Math extends HMWP_Models_Bruteforce_Abstract {
 
@@ -38,14 +38,15 @@ class HMWP_Models_Bruteforce_Math extends HMWP_Models_Bruteforce_Abstract {
 	public function call() {
 		$error_message = false;
 
-		$salt        = HMWP_Classes_Tools::getOption( 'hmwp_disable' ) . get_site_option( 'admin_email' );
+		$salt        = HMWP_Classes_Tools::getOption( 'hmwp_disable_name' ) . get_site_option( 'admin_email' );
 		$ans         = (int) HMWP_Classes_Tools::getValue( 'brute_num', 0 );
 		$salted_ans  = sha1( $salt . $ans );
 		$correct_ans = HMWP_Classes_Tools::getValue( 'brute_ck' );
 
 		if ( $correct_ans === false || $salted_ans != $correct_ans ) {
-			$error_message = sprintf( esc_html__( '%sYou failed to correctly answer the math problem.%s Please try again.', 'hide-my-wp' ), '<strong>', '</strong>' );
-		}
+            /* translators: 1: Opening <strong> tag, 2: Closing </strong> tag. */
+            $error_message = wp_kses_post( sprintf( __( '%1$sYou failed to correctly answer the math problem.%2$s Please try again.', 'hide-my-wp' ), '<strong>', '</strong>' ) );
+        }
 
 		return $error_message;
 	}
@@ -61,7 +62,7 @@ class HMWP_Models_Bruteforce_Math extends HMWP_Models_Bruteforce_Abstract {
 	 */
 	public function form() {
 
-		$salt = HMWP_Classes_Tools::getOption( 'hmwp_disable' ) . get_site_option( 'admin_email' );
+		$salt = HMWP_Classes_Tools::getOption( 'hmwp_disable_name' ) . get_site_option( 'admin_email' );
 		$num1 = wp_rand( 0, 10 );
 		$num2 = wp_rand( 1, 10 );
 		$sum  = $num1 + $num2;

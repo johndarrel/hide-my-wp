@@ -1,21 +1,56 @@
-<?php defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' ); ?>
-<?php if ( ! isset( $view ) ) { return; } ?>
+<?php defined( 'ABSPATH' ) || die( 'Cheating uh?' );
+if ( ! isset( $view ) ) {
+	return;
+} ?>
 <?php
 wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
 wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false );
 
 $page   = HMWP_Classes_Tools::getValue( 'page' );
 $sorted = get_user_option( "meta-box-order_$page" );
+
 if ( ! $sorted ) {
-	$sorted = array( 'hmwp_securitycheck_widget,hmwp_features_widget' );
+	$sorted = array( 'hmwp_securitycheck_widget,hmwp_bruteforce_widget,hmwp_threatsmap_widget,hmwp_features_widget' );
+} else {
+
+    // Inject hmwp_threatsmap_widget for users with a saved order that predates this widget
+	$has_threatsmap = false;
+	foreach ( $sorted as $ids ) {
+        if ( strpos( $ids, 'hmwp_threatsmap_widget' ) !== false ) {
+			$has_threatsmap = true;
+			break;
+		}
+	}
+	if ( ! $has_threatsmap ) {
+		$inserted = false;
+		foreach ( $sorted as $key => $ids ) {
+			$list = explode( ',', $ids );
+			$pos  = array_search( 'hmwp_bruteforce_widget', $list );
+			if ( $pos !== false ) {
+				array_splice( $list, $pos + 1, 0, 'hmwp_threatsmap_widget' );
+				$sorted[ $key ] = implode( ',', $list );
+				$inserted = true;
+				break;
+			}
+		}
+		// If hmwp_bruteforce_widget not found, prepend to first context
+		if ( ! $inserted ) {
+			reset( $sorted );
+			$first_key          = key( $sorted );
+			$sorted[$first_key] = 'hmwp_threatsmap_widget,' . $sorted[$first_key];
+		}
+
+    }
+
 }
+
 ?>
 
 <script>
 
     jQuery(document).ready(function () {
         if (typeof postboxes !== 'undefined') {
-            postboxes.add_postbox_toggles('<?php echo HMWP_Classes_Tools::getValue( 'page' ) ?>');
+            postboxes.add_postbox_toggles('<?php echo esc_attr(HMWP_Classes_Tools::getValue( 'page' )) ?>');
         }
     });
 
@@ -32,12 +67,13 @@ if ( ! $sorted ) {
 		<?php do_action( 'hmwp_notices' ); ?>
 
         <div class="hmwp_col flex-grow-1 mr-2 meta-box-sortables">
+
 			<?php
 			foreach ( $sorted as $box_context => $ids ) {
 				foreach ( explode( ',', $ids ) as $id ) {
 					if ( $id == 'hmwp_securitycheck_widget' ) {
 						?>
-                        <div id="hmwp_securitycheck_widget" class="card col-sm-12 p-0 m-0 mb-3 bg-white postbox <?php echo postbox_classes( 'hmwp_securitycheck_widget', $page ) ?>">
+                        <div id="hmwp_securitycheck_widget" class="card col-sm-12 p-0 m-0 mb-3 bg-white postbox <?php echo esc_attr(postbox_classes( 'hmwp_securitycheck_widget', $page )) ?>">
                             <div class="postbox-header hmwp_header">
                                 <h3 class="card-title p-2 m-0 hndle"><?php echo esc_html__( 'Security Status', 'hide-my-wp' ); ?></h3>
                                 <div class="handle-actions hide-if-no-js mr-2">
@@ -51,12 +87,71 @@ if ( ! $sorted ) {
 									<?php HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Widget' )->dashboard(); ?>
                                 </div>
                             </div>
-                        </div> <?php
-					} elseif ( $id == 'hmwp_features_widget' ) {
-						?>
-                        <div id="hmwp_features_widget" class="card col-sm-12 p-0 m-0 mb-3 bg-white postbox <?php echo postbox_classes( 'hmwp_features_widget', $page ) ?>">
+                        </div>
+                   <?php } elseif ( $id == 'hmwp_threatsmap_widget' ) {
+
+                        if ( HMWP_Classes_Tools::getOption( 'hmwp_threats_log' ) ) {
+
+                            $threats_total = 0;
+
+                            /** @var HMWP_Models_ThreatsLog $threatsLog */
+                            $threatsLog = HMWP_Classes_ObjController::getClass( 'HMWP_Models_ThreatsLog' );
+                            $data       = $threatsLog->getThreatStatsByDay( 7 );
+
+                            // Sum totals across the full 7-day period
+                            if ( ! empty( $data ) && isset( $data['threats'] ) && isset( $data['blocked'] ) ) {
+                                $threats_total = (int) array_sum( $data['threats'] ) + (int) array_sum( $data['blocked'] );
+                            }
+
+                            // If threats, show the threats map
+                            if ( $threats_total ) { ?>
+                            <div id="hmwp_threatsmap_widget" class="card col-sm-12 p-0 m-0 mb-3 bg-white postbox <?php echo esc_attr( postbox_classes( 'hmwp_threatsmap_widget', $page ) ); ?>">
+                                <div class="postbox-header hmwp_header">
+                                    <h3 class="card-title p-2 m-0 hndle"><?php echo esc_html__( 'GEO Threat Map', 'hide-my-wp' ); ?></h3>
+                                    <div class="handle-actions hide-if-no-js mr-2">
+                                        <button type="button" class="handlediv" aria-expanded="true">
+                                            <span class="toggle-indicator" aria-hidden="true"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="inside">
+                                    <div class="card-body p-0">
+                                        <?php $view->show( 'GeoMap' ); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php
+                            }
+                        }
+                    } elseif ( $id == 'hmwp_bruteforce_widget' ) {
+                            $ips = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_Database' )->getBlockedIps();
+                            if ( ! empty( $ips) ){
+                                ?>
+                                <div id="hmwp_bruteforce_widget" class="card col-sm-12 p-0 m-0 mb-3 bg-white postbox <?php echo esc_attr(postbox_classes( 'hmwp_threats_widget', $page )) ?>">
+                                    <div class="postbox-header hmwp_header">
+                                        <h3 class="card-title p-2 m-0 hndle"><?php echo esc_html__( 'Blocked IPs', 'hide-my-wp' ); ?></h3>
+                                        <div class="handle-actions hide-if-no-js mr-2">
+                                            <button type="button" class="handlediv" aria-expanded="true">
+                                                <span class="toggle-indicator" aria-hidden="true"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div id="threats" class="inside">
+                                        <div class="card-body p-0">
+                                            <?php $view->show( 'blocks/BlockedIps' ); ?>
+                                        </div>
+                                    </div>
+
+                                </div>
+                    <?php
+                        }
+                    } elseif ( $id == 'hmwp_features_widget' ) {
+					?>
+                        <div id="hmwp_features_widget"
+                             class="card col-sm-12 p-0 m-0 mb-3bg-white postbox <?php echo esc_attr(postbox_classes( 'hmwp_features_widget', $page )) ?>">
                             <div class="postbox-header hmwp_header">
-                                <h3 class="card-title p-2 m-0 hndle"><?php echo HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ) . ' ' . esc_html__( 'Features', 'hide-my-wp' ); ?></h3>
+                                <h3 class="card-title p-2 m-0 hndle"><?php echo esc_html(HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' )) . ' ' . esc_html__( 'Features', 'hide-my-wp' ); ?></h3>
                                 <div class="handle-actions hide-if-no-js mr-2">
                                     <button type="button" class="handlediv" aria-expanded="true">
                                         <span class="toggle-indicator" aria-hidden="true"></span>
@@ -66,7 +161,6 @@ if ( ! $sorted ) {
 
                             <div id="features" class="inside">
                                 <div class="card-body p-0">
-
                                     <div class="hmwp_row col-12">
                                         <label for="hmwp_features_search" class="my-1 mx-3"><?php echo esc_html__( 'Search', 'hide-my-wp' ); ?></label>
                                         <input id="hmwp_features_search" type="text" class="col-3"/>
@@ -75,7 +169,7 @@ if ( ! $sorted ) {
 										<?php echo esc_html__( 'Could not found anything based on your search.', 'hide-my-wp' ); ?>
                                     </div>
 
-									<?php defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' ); ?>
+									<?php defined( 'ABSPATH' ) || die( 'Cheating uh?' ); ?>
 									<?php $features = $view->getFeatures(); ?>
                                     <div class="hmwp_features m-0 p-0">
 
@@ -87,11 +181,11 @@ if ( ! $sorted ) {
 												}
 
 												?>
-                                                <div class="col px-2 py-0 mb-5">
-                                                    <div id="hmwp_feature_<?php echo esc_attr( $index ) ?>" class="hmwp_feature card h-100 p-0 shadow-0 rounded-0 <?php echo( $feature['free'] ? ( ! $feature['active'] ? 'bg-light' : 'active' ) : 'hmwp_pro' ) ?>">
+                                                <div class="col m-0 px-2 py-0 mb-5">
+                                                    <div id="hmwp_feature_<?php echo esc_attr( $index ) ?>" class="hmwp_feature card h-100 p-0 shadow-sm rounded-0 <?php echo( ! $feature['active'] ? '' : 'active' ) ?>">
                                                         <div class="card-body m-0 p-0">
                                                             <div class="m-0 p-0 text-center">
-                                                                <div class="m-0 py-4 <?php echo esc_attr( $feature['logo'] ) ?>" style="font-size: 1.9rem; line-height: 30px; color:#71512794; width: 30px; height: 80px; margin: 0 auto !important;"></div>
+                                                                <div class="card-title text-info m-0 py-4 <?php echo esc_attr( $feature['logo'] ) ?>"></div>
                                                                 <h5 class="py-0  m-0">
 																	<?php if ( $feature['link'] ) { ?>
                                                                         <a href="<?php echo esc_url( $feature['link'] ) ?>" class="text-dark" style="text-decoration: none"><?php echo wp_kses_post( $feature['title'] ) ?></a>
@@ -101,22 +195,19 @@ if ( ! $sorted ) {
                                                                 </h5>
                                                             </div>
                                                             <div class="mx-3 my-3 p-0 text-black" style="min-height: 60px; font-size: 1.1rem;">
-                                                                <div class="pt-3 pb-1 small" style="color: #696868">
+                                                                <div class="pt-3 pb-1 small">
 																	<?php echo wp_kses_post( $feature['description'] ) ?>
 																	<?php if ( $feature['link'] ) { ?>
                                                                         <div class="col-12 p-0 pt-2">
-																			<?php if ( $feature['free'] ) { ?>
-																				<?php if ( $feature['optional'] ) { ?>
-                                                                                    <a href="<?php echo esc_url( $feature['link'] ) ?>" class="small see_feature" <?php echo( $feature['active'] ? '' : 'style="display:none;"' ) ?>>
-																						<?php echo esc_html__( "start feature setup", 'hide-my-wp' ) ?> >>
-                                                                                    </a>
-																				<?php } else { ?>
-                                                                                    <a href="<?php echo esc_url( $feature['link'] ) ?>" class="small see_feature">
-																						<?php echo esc_html__( "see feature", 'hide-my-wp' ) ?> >>
-                                                                                    </a>
-																				<?php } ?>
+																			<?php if ( $feature['optional'] ) { ?>
+                                                                                <a href="<?php echo esc_url( $feature['link'] ) ?>" class="small see_feature" <?php echo( $feature['active'] ? '' : 'style="display:none;"' ) ?>>
+																					<?php echo esc_html__( "start feature setup", 'hide-my-wp' ) ?> >>
+                                                                                </a>
+																			<?php } else { ?>
+                                                                                <a href="<?php echo esc_url( $feature['link'] ) ?>" class="small see_feature">
+																					<?php echo esc_html__( "see feature", 'hide-my-wp' ) ?> >>
+                                                                                </a>
 																			<?php } ?>
-
                                                                         </div>
 																	<?php } ?>
 
@@ -125,43 +216,43 @@ if ( ! $sorted ) {
                                                         </div>
                                                         <div class="card-footer p-0 m-0">
                                                             <div class="row m-0 p-0">
-                                                                <div class="col-7 px-2 py-1 m-0 align-middle text-left" style="line-height: 30px">
-																	<?php if ( $feature['free'] ) { ?>
-																		<?php if ( $feature['optional'] ) { ?>
-                                                                            <form class="ajax_submit" method="POST">
-																				<?php wp_nonce_field( 'hmwp_feature_save', 'hmwp_nonce' ) ?>
-                                                                                <input type="hidden" name="action" value="hmwp_feature_save"/>
-                                                                                <input type="hidden" name="<?php echo esc_attr( $feature['option'] ) ?>" value="0"/>
-                                                                                <div class="checker col-sm-3 row m-0 p-0 ">
-                                                                                    <div class="p-0 switch switch-sm text-right">
-                                                                                        <input type="checkbox" id="activate_<?php echo esc_attr( $index ) ?>" name="<?php echo esc_attr( $feature['option'] ) ?>" <?php echo( $feature['active'] ? 'checked="checked"' : '' ) ?> class="switch" value="1"/>
-                                                                                        <label for="activate_<?php echo esc_attr( $index ) ?>" class="m-0"></label>
-                                                                                    </div>
+                                                                <div class="col-7 px-2 py-1 m-0 align-middle text-left"
+                                                                     style="line-height: 30px">
+																	<?php if ( $feature['optional'] && $feature['free'] ) { ?>
+                                                                        <form class="ajax_submit" method="POST">
+																			<?php wp_nonce_field( 'hmwp_feature_save', 'hmwp_nonce' ) ?>
+                                                                            <input type="hidden" name="action" value="hmwp_feature_save"/>
+                                                                            <input type="hidden" name="<?php echo esc_attr( $feature['option'] ) ?>" value="0"/>
+                                                                            <div class="checker col-sm-3 row m-0 p-0 ">
+                                                                                <div class="p-0 switch switch-sm text-right">
+                                                                                    <input type="checkbox" id="activate_<?php echo esc_attr( $index ) ?>" name="<?php echo esc_attr( $feature['option'] ) ?>" <?php echo( $feature['active'] ? 'checked="checked"' : '' ) ?> class="switch" value="1"/>
+                                                                                    <label for="activate_<?php echo esc_attr( $index ) ?>" class="m-0"></label>
                                                                                 </div>
-                                                                            </form>
+                                                                            </div>
+                                                                        </form>
 
-																		<?php } else { ?>
-
-																			<?php if ( $feature['active'] ) { ?>
-                                                                                <div class="p-0 m-0 small align-middle text-left text-success">
-																					<?php echo esc_html__( "already active", 'hide-my-wp' ) ?>
-                                                                                </div>
-																			<?php } else { ?>
-                                                                                <div class="p-0 m-0 align-middle text-left">
-                                                                                    <a href="<?php echo esc_url( $feature['link'] ) ?>" class="btn btn-sm btn-default small"><?php echo esc_html__( "activate feature", 'hide-my-wp' ) ?></a>
-                                                                                </div>
-																			<?php } ?>
-
-																		<?php } ?>
 																	<?php } else { ?>
-                                                                        <div class="p-0 m-0 small align-middle text-left text-warning" onclick="jQuery('#hmwp_ghost_mode_modal').modal('show')">
-																			<?php echo esc_html__( "PRO", 'hide-my-wp' ) ?>
-                                                                        </div>
+
+                                                                        <?php if ( !$feature['free'] ) { ?>
+                                                                            <div class="p-0 m-0 small align-middle text-left text-warning">
+                                                                                <?php echo esc_html__( "PRO", 'hide-my-wp' ) ?>
+                                                                            </div>
+                                                                        <?php }elseif ( $feature['active'] ) { ?>
+                                                                            <div class="p-0 m-0 small align-middle text-left text-success">
+																				<?php echo esc_html__( "already active", 'hide-my-wp' ) ?>
+                                                                            </div>
+																		<?php } else { ?>
+                                                                            <div class="p-0 m-0 align-middle text-left">
+                                                                                <a href="<?php echo esc_url( $feature['link'] ) ?>" class="btn btn-sm btn-default small"><?php echo esc_html__( "activate feature", 'hide-my-wp' ) ?></a>
+                                                                            </div>
+																		<?php } ?>
+
 																	<?php } ?>
+
                                                                 </div>
                                                                 <div class="col-5 p-2 m-0 align-middle text-right">
 																	<?php if ( $feature['details'] ) { ?>
-                                                                        <a href="<?php echo esc_url( $feature['details'] ) ?>" target="_blank">
+                                                                        <a href="<?php echo esc_url( $feature['details'] ) ?>"  class="hmwp_help" target="_blank">
 																			<?php echo esc_html__( "help", 'hide-my-wp' ) ?>
                                                                             <i class="dashicons dashicons-editor-help m-0 px-2" style="display: inline; font-size: 1.1rem !important;"></i>
                                                                         </a>
@@ -187,11 +278,11 @@ if ( ! $sorted ) {
         </div>
 
         <div class="hmwp_col hmwp_col_side mr-2">
-	        <?php
-	        if ( ! HMWP_Classes_Tools::getOption( 'api_token' ) ) {
-		        $view->show( 'blocks/Connect' );
-	        }
-	        ?>
+            <?php
+            if ( ! HMWP_Classes_Tools::getOption( 'api_token' ) ) {
+                $view->show( 'blocks/Connect' );
+            }
+            ?>
 			<?php $view->show( 'blocks/ChangeCacheFiles' ); ?>
 			<?php $view->show( 'blocks/SecurityCheck' ); ?>
 			<?php $view->show( 'blocks/FrontendCheck' ); ?>

@@ -1,4 +1,4 @@
-<?php defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' ); ?>
+<?php defined( 'ABSPATH' ) || die( 'Cheating uh?' ); ?>
 <?php if ( ! isset( $view ) ) {
 	return;
 } ?>

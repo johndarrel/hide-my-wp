@@ -8,7 +8,7 @@
  *
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Classes_Error {
 
@@ -22,6 +22,7 @@ class HMWP_Classes_Error {
 
 	public function __construct() {
 		add_action( 'admin_notices', array( $this, 'hookNotices' ) );
+		add_action( 'network_admin_notices', array( $this, 'hookNotices' ) );
 	}
 
 	/**
@@ -39,16 +40,29 @@ class HMWP_Classes_Error {
 	}
 
 	/**
+	 * Return the list of errors
+	 *
+	 * @return array
+	 */
+	public static function getErrors() {
+		return self::$errors;
+	}
+
+	/**
 	 * Set the notification in WordPress
 	 *
 	 * @param  string  $error  Error message to show in plugin
-	 * @param  string  $type  Define the notification class 'notice', 'warning', 'dander'. Default 'notice'
+	 * @param  string  $type  Define the notification class 'notice', 'warning', 'danger'. Default 'notice'
 	 * @param  bool  $ignore  Let user ignore this notification
 	 *
 	 * @return void
 	 */
 	public static function setNotification( $error = '', $type = 'notice', $ignore = true ) {
-		if ( $type == 'notice' && $ignore && $ignore_errors = (array) HMWP_Classes_Tools::getOption( 'ignore_errors' ) ) {
+		if ( ! $error ) {
+			return;
+		}
+
+		if ( $ignore && $ignore_errors = (array) HMWP_Classes_Tools::getOption( 'ignore_errors' ) ) {
 			if ( ! empty( $ignore_errors ) && in_array( strlen( $error ), $ignore_errors ) ) {
 				return;
 			}
@@ -59,6 +73,7 @@ class HMWP_Classes_Error {
 			'ignore' => $ignore,
 			'text'   => $error
 		);
+
 	}
 
 	/**
@@ -67,7 +82,24 @@ class HMWP_Classes_Error {
 	 * @return bool
 	 */
 	public static function isError() {
-		return ! empty( self::$errors );
+		if ( ! empty( self::$errors ) ) {
+			foreach ( self::$errors as $error ) {
+				if ( $error['type'] <> 'success' ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Clear the errors
+	 *
+	 * @return void
+	 */
+	public static function clearErrors() {
+		self::$errors = array();
 	}
 
 	/**
@@ -97,7 +129,7 @@ class HMWP_Classes_Error {
 		if ( $wp_filesystem->exists( _HMWP_THEME_DIR_ . 'Notices.php' ) ) {
 			include _HMWP_THEME_DIR_ . 'Notices.php';
 		} else {
-			echo wp_kses_post( $message );
+			echo wp_kses_post( $message ); //returns the
 		}
 	}
 
@@ -108,25 +140,25 @@ class HMWP_Classes_Error {
 	 */
 	public function action() {
 
+		// Check if the current user has the 'hmwp_manage_settings' capability
 		if ( ! HMWP_Classes_Tools::userCan( HMWP_CAPABILITY ) ) {
 			return;
 		}
 
-		switch ( HMWP_Classes_Tools::getValue( 'action' ) ) {
-			case 'hmwp_ignoreerror':
-				$hash = HMWP_Classes_Tools::getValue( 'hash' );
+		if ( HMWP_Classes_Tools::getValue( 'action' ) == 'hmwp_ignoreerror' ) {
+			$hash = HMWP_Classes_Tools::getValue( 'hash' );
 
-				$ignore_errors = (array) HMWP_Classes_Tools::getOption( 'ignore_errors' );
+			$ignore_errors = (array) HMWP_Classes_Tools::getOption( 'ignore_errors' );
 
-				array_push( $ignore_errors, $hash );
-				$ignore_errors = array_unique( $ignore_errors );
-				$ignore_errors = array_filter( $ignore_errors );
+			$ignore_errors[] = $hash;
+			$ignore_errors   = array_unique( $ignore_errors );
+			$ignore_errors   = array_filter( $ignore_errors );
 
-				HMWP_Classes_Tools::saveOptions( 'ignore_errors', $ignore_errors );
+			HMWP_Classes_Tools::saveOptions( 'ignore_errors', $ignore_errors );
 
-				wp_redirect( remove_query_arg( array( 'hmwp_nonce', 'action', 'hash' ) ) );
-
-				break;
+			if ( wp_safe_redirect( esc_url_raw( remove_query_arg( array( 'hmwp_nonce', 'action', 'hash' ) ) ) ) ) {
+				exit;
+			}
 		}
 	}
 

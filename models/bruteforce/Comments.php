@@ -8,7 +8,7 @@
  * @since 8.1
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_Bruteforce_Comments {
 
@@ -31,7 +31,7 @@ class HMWP_Models_Bruteforce_Comments {
 	public function call( $commentdata ) {
 
 		// Don't verify logged users
-		if ( ! function_exists( 'is_user_logged_in' ) || is_user_logged_in() ) {
+		if ( HMWP_Classes_Tools::isLoggedInUser() ) {
 			return $commentdata;
 		}
 
@@ -55,9 +55,7 @@ class HMWP_Models_Bruteforce_Comments {
 
 			// Show the brute force error in the comment form
 			if ( is_wp_error( $error ) ) {
-				$have_gettext = function_exists( '__' );
-				$back_text    = $have_gettext ? __( '&laquo; Back' ) : '&laquo; Back';
-				wp_die( $error->get_error_message() . "\n<p><a href='javascript:history.back()'>$back_text</a></p>" );
+				wp_die( $error->get_error_message() . "\n<p><a href='javascript:history.back()'>&laquo; ".esc_html( 'Back' )."</a></p>" ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 		}
 

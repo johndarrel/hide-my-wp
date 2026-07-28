@@ -7,9 +7,10 @@
  * @since 8.0
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_Compatibility_UsersWP extends HMWP_Models_Compatibility_Abstract {
+
 
 	public function hookFrontend() {
 		// Get the active brute force class

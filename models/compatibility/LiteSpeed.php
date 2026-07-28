@@ -4,12 +4,30 @@
  *
  * @file The LiteSpeed Model file
  * @package HMWP/Compatibility/LiteSpeed
+ * @since 7.0.0
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_Compatibility_LiteSpeed extends HMWP_Models_Compatibility_Abstract {
 
+	/**
+	 * Class constructor.
+	 *
+	 * Initializes the class by setting up LiteSpeed-specific configurations,
+	 * handling optimization scans, and managing IP whitelists.
+	 *
+	 * The constructor performs the following:
+	 * - Defines a custom cache path for LiteSpeed.
+	 * - Adds filters to handle LiteSpeed media optimization scans during various processes.
+	 * - Adds local IP addresses to the whitelist using a custom filter.
+	 * - Retrieves LiteSpeed's Quic Cloud IPs and saves them as a transient after the settings are saved.
+	 * - Includes the transient LiteSpeed IPs in the whitelist and validates them.
+	 * - Checks and updates the whitelist for firewall IP rules.
+	 *
+	 * @return void
+	 * @throws Exception
+	 */
 	public function __construct() {
 
 		parent::__construct();
@@ -23,10 +41,17 @@ class HMWP_Models_Compatibility_LiteSpeed extends HMWP_Models_Compatibility_Abst
 		add_filter( 'hmwp_process_hide_urls', array( $this, 'checkLiteSpeedScan' ) );
 		add_filter( 'hmwp_process_find_replace', array( $this, 'checkLiteSpeedScan' ) );
 
+		//Add local IPs in whitelist
+		add_filter( 'hmwp_rules_whitelisted_ips', function ( $ips ) {
+			/** @var HMWP_Models_Firewall_Rules $firewallRules */
+			$firewallRules = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Firewall_Rules' );
+			return array_merge( $firewallRules->getLocalIPs(), $ips );
+		});
+
 		// Whitelist Litespeed quic cloud Ips after settings save
 		add_action( 'hmwp_settings_saved', function (){
 			$quic_ips = HMWP_Classes_Tools::hmwp_remote_get( 'https://www.quic.cloud/ips-all?json' );
-			set_transient( 'hmwp_lispeed_ips', $quic_ips, WEEK_IN_SECONDS );
+			set_transient( 'hmwp_lispeed_ips', $quic_ips );
 		} );
 
 		// Add Litespeed IPs in whitelist
@@ -51,9 +76,11 @@ class HMWP_Models_Compatibility_LiteSpeed extends HMWP_Models_Compatibility_Abst
 
 			});
 
-			/** @var HMWP_Controllers_Firewall $firewall */
-			HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Firewall' )->checkWhitelistIPs();
+			/** @var HMWP_Models_Firewall_Rules $firewallRules */
+			$firewallRules = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Firewall_Rules' );
+			$firewallRules->checkWhitelistIPs();
 		}
+
 	}
 
 	/**
@@ -101,6 +128,7 @@ class HMWP_Models_Compatibility_LiteSpeed extends HMWP_Models_Compatibility_Abst
 
 			if ( ! HMWP_Classes_Tools::isWpengine() ) {
 				add_action( 'hmwp_settings_saved', array( $this, 'doExclude' ) );
+				add_action( 'hmwp_temploginsettings_saved', array( $this, 'doExclude' ) );
 			}
 		}
 
@@ -168,6 +196,26 @@ class HMWP_Models_Compatibility_LiteSpeed extends HMWP_Models_Compatibility_Abst
 
 			update_option( 'litespeed.conf.cache-exc', wp_json_encode( $exlude ) );
 		}
+
+		if (  HMWP_Classes_Tools::getOption( 'hmwp_templogin' ) ) {
+
+			$exlude = get_option( 'litespeed.conf.cache-exc_qs' );
+
+			// If there are already URLs in the exclude list
+			if ( $exlude = json_decode( $exlude, true ) ) {
+				// Add REST API in caching exclude list
+				if ( ! in_array( 'hmwp_token', $exlude ) ) {
+					$exlude[] = 'hmwp_token';
+				}
+
+			} else {
+				$exlude   = array();
+				$exlude[] = 'hmwp_token';
+			}
+
+			update_option( 'litespeed.conf.cache-exc_qs', wp_json_encode( $exlude ) );
+		}
+
 
 	}
 }

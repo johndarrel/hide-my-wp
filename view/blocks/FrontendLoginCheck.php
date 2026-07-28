@@ -1,126 +1,96 @@
-<?php defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' ); ?>
-<?php if ( ! isset( $view ) ) { return; } ?>
-<?php if ( HMWP_Classes_Tools::getOption( 'test_frontend' ) && HMWP_Classes_Tools::getOption( 'hmwp_mode' ) <> 'default' ) {
-	add_action( 'home_url', array(
-		HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' ),
-		'home_url'
-	), PHP_INT_MAX, 1 );
-	?>
-    <div class="col-sm-12 border-bottom border-light p-0 mx-0 mt-0 mb-3">
+<?php defined( 'ABSPATH' ) || die( 'Cheating uh?' ); ?>
+<?php if ( ! isset( $view ) ) {
+    return;
+} ?>
+<?php
+/**
+ * Confirmation gate shown right after the paths change.
+ *
+ * This used to be a separate card with its own Frontend Test and Login Test
+ * buttons and its own list of server setup links. Ghost Doctor, which renders
+ * directly under this block inside the same card, now runs those checks and can
+ * also repair what it finds, so all that is left here is the part Ghost Doctor
+ * cannot do for you: showing the new login URL, showing the safe URL that gets
+ * you back in if the new one fails, and letting you keep or abort the change.
+ */
+if ( HMWP_Classes_Tools::getOption( 'test_frontend' ) && HMWP_Classes_Tools::getOption( 'hmwp_mode' ) <> 'default' ) {
+    add_action(
+            'home_url',
+            array(
+                    HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' ),
+                    'home_url',
+            ),
+            PHP_INT_MAX,
+            1
+    );
 
-        <div class="col-sm-12 border-danger bg-white border py-3 mx-0 my-0">
+    if ( defined( 'HMWP_DEFAULT_LOGIN' ) && HMWP_DEFAULT_LOGIN ) {
+        $login_url = ( stripos( HMWP_DEFAULT_LOGIN, home_url() ) !== false ) ? HMWP_DEFAULT_LOGIN : home_url( HMWP_DEFAULT_LOGIN );
+        $safe_url  = '';
+    } else {
+        $login_url = site_url() . '/' . HMWP_Classes_Tools::getOption( 'hmwp_login_url' );
+        $safe_url  = site_url() . '/wp-login.php?' . HMWP_Classes_Tools::getOption( 'hmwp_disable_name' );
+    }
+    ?>
+	<?php // No red accent. Nothing has gone wrong here, the paths were changed on
+	      // purpose and this block asks you to confirm they work. A danger colour
+	      // reads as a failure the moment the page loads. ?>
+    <div class="col-sm-12 p-0 m-0 border-bottom">
 
-            <div class="text-center my-4">
-                <div class="hmwp_confirm" style="display: inline-block; margin-right: 5px;">
-                    <form class="hmwp_frontendcheck_form" method="POST">
-						<?php wp_nonce_field( 'hmwp_frontendcheck', 'hmwp_nonce' ) ?>
-                        <input type="hidden" name="action" value="hmwp_frontendcheck"/>
-                        <button type="button" class="btn rounded-0 btn-default btn-lg text-white px-4 frontend_test"><?php echo esc_html__( 'Frontend Test', 'hide-my-wp' ); ?></button>
-                    </form>
-                </div>
-                <div class="text-center" style="display: inline-block; margin-right: 5px;">
-                    <button type="button" class="btn rounded-0 btn-default btn-lg text-white px-4 login_test hmwp_modal" data-remote="<?php echo esc_url( site_url() . '/' . HMWP_Classes_Tools::getOption( 'hmwp_login_url' ) . '?nordt=1' ) ?>" data-target="#frontend_test_modal"><?php echo esc_html__( 'Login Test', 'hide-my-wp' ); ?></button>
-                </div>
-            </div>
-            <div id="hmwp_frontendcheck_content" class="my-3"></div>
-            <div id="hmwp_solutions" style="display: none">
-                <div class="my-3 pt-3 border-top border-white text-center">
-	                <?php if ( HMWP_Classes_Tools::isLitespeed() ) { ?>
-                        <div class="mb-2">
-                            <a href="<?php echo esc_url( HMWP_Classes_Tools::getSettingsUrl( 'litespeed-toolbox' ) ) ?>" target="_blank">Make sure you purge
-                                <strong>LiteSpeed cache</strong></a></div>
-	                <?php } ?>
-					<?php if ( HMWP_Classes_Tools::isApache() && ! HMWP_Classes_Tools::isWpengine() ) { ?>
-                        <div class="mb-2">
-                            <a href="<?php echo esc_url( HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/how-to-set-allowoverride-all/' ) ?>" target="_blank">Make sure to activate
-                                <strong>AllowOverride All</strong> for your website directory</a></div>
-					<?php } ?>
-					<?php if ( HMWP_Classes_Tools::isNginx() ) { ?>
-                        <div class="mb-2">
-                            <a href="<?php echo esc_url( HMWP_Classes_Tools::getSettingsUrl( 'hmwp_advanced#tab=compatibility', true ) ) ?>" target="_blank">Select Server Type</a>
-                        </div>
-                        <div class="mb-2">
-                            <a href="<?php echo esc_url( HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/how-to-setup-hide-my-wp-on-nginx-server/' ) ?>" target="_blank">Setup The Plugin On Nginx Server</a>
-                        </div>
-                        <div class="mb-2">
-                            <a href="<?php echo esc_url( HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/how-to-configure-hide-my-wp-on-nginx-web-server-with-virtual-private-server/' ) ?>" target="_blank">Setup The Plugin On Nginx Server with Virtual Private Server</a>
-                        </div>
-					<?php } ?>
-					<?php if ( HMWP_Classes_Tools::isWpengine() ) { ?>
-                        <div class="mb-2">
-                            <a href="<?php echo esc_url( HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/hide-my-wp-pro-compatible-with-wp-engine/' ) ?>" target="_blank">Setup The Plugin On WP Engine</a>
-                        </div>
-					<?php } ?>
-					<?php if ( HMWP_Classes_Tools::isGodaddy() ) { ?>
-                        <div class="mb-2">
-                            <a href="<?php echo esc_url( HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/how-to-use-hide-my-wp-with-godaddy/' ) ?>" target="_blank">Setup The Plugin On Godaddy</a>
-                        </div>
-					<?php } ?>
-					<?php if ( HMWP_Classes_Tools::isIIS() ) { ?>
-                        <div class="mb-2">
-                            <a href="<?php echo esc_url( HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/setup-hide-my-wp-on-windows-iis-server/' ) ?>" target="_blank">Setup The Plugin On Windows IIS Server</a>
-                        </div>
-					<?php } ?>
-					<?php if ( HMWP_Classes_Tools::isInmotion() ) { ?>
-                        <div class="mb-2">
-                            <a href="<?php echo esc_url( HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/hide-my-wp-pro-compatible-with-inmotion-wordpress-hosting/' ) ?>" target="_blank">Setup The Plugin On Inmotion Server</a>
-                        </div>
-					<?php } ?>
-                </div>
-            </div>
-
-            <ol>
-                <li><?php echo sprintf( esc_html__( "Run %s Frontend Test %s to check if the new paths are working.", 'hide-my-wp' ), '<strong>', '</strong>' ); ?></li>
-                <li><?php echo sprintf( esc_html__( "Run %s Login Test %s and log in inside the popup.", 'hide-my-wp' ), '<strong>', '</strong>' ); ?></li>
-                <li><?php echo esc_html__( "If you're able to log in, you've set the new paths correctly.", 'hide-my-wp' ); ?></li>
-                <li><?php echo esc_html__( 'Do not log out from this browser until you are confident that the Log in Page is working and you will be able to login again.', 'hide-my-wp' ); ?></li>
-                <li><?php echo sprintf( esc_html__( "If you can't configure %s, switch to Deactivated Mode and %scontact us%s.", 'hide-my-wp' ), HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ), '<a href="' . esc_url( HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/contact/' ) . '" target="_blank" >', '</a>' ); ?></li>
-            </ol>
-
-			<?php if ( defined( 'HMWP_DEFAULT_LOGIN' ) && HMWP_DEFAULT_LOGIN ) {
-				if ( stripos( HMWP_DEFAULT_LOGIN, home_url() ) !== false ) {
-					$custom_login = HMWP_DEFAULT_LOGIN;
-				} else {
-					$custom_login = home_url( HMWP_DEFAULT_LOGIN );
-				}
-				?>
-                <div class="wp-admin_warning col-sm-12 my-4 text-danger p-0 text-center">
-                    <div class="mb-3"><?php echo sprintf( esc_html__( "Your login URL is: %s", 'hide-my-wp' ), '<br /><a href="' . esc_url( $custom_login ) . '" target="_blank">' . esc_url( $custom_login ) . '</a>' ); ?></div>
-                </div>
-			<?php } else { ?>
-                <div class="wp-admin_warning col-sm-12 my-4 text-danger p-0 text-center">
-                    <div class="mb-3"><?php echo sprintf( esc_html__( "Your login URL will be: %s In case you can't login, use the safe URL: %s", 'hide-my-wp' ), '<br /><a href="' . esc_url( site_url() . '/' . HMWP_Classes_Tools::getOption( 'hmwp_login_url' ) ) . '" target="_blank">' . esc_url( site_url() . '/' . HMWP_Classes_Tools::getOption( 'hmwp_login_url' ) ) . '</a><br /><br />', "<br /><a href='" . site_url() . "/wp-login.php?" . HMWP_Classes_Tools::getOption( 'hmwp_disable_name' ) . "=" . HMWP_Classes_Tools::getOption( 'hmwp_disable' ) . "' target='_blank'>" . site_url() . "/wp-login.php?" . HMWP_Classes_Tools::getOption( 'hmwp_disable_name' ) . "=" . HMWP_Classes_Tools::getOption( 'hmwp_disable' ) . "</a>" ); ?></div>
-                </div>
-			<?php } ?>
-
-            <div class="p-0 text-center">
-                <div class="hmwp_confirm">
-                    <form method="POST">
-						<?php wp_nonce_field( 'hmwp_confirm', 'hmwp_nonce' ); ?>
-                        <input type="hidden" name="action" value="hmwp_confirm"/>
-                        <input type="submit" class="btn btn-success" value="<?php echo esc_html__( "Yes, it's working", 'hide-my-wp' ) ?>"/>
-                    </form>
-                </div>
-                <div class="hmwp_abort" style="display: inline-block; margin-left: 5px;">
-                    <form method="POST">
-						<?php wp_nonce_field( 'hmwp_abort', 'hmwp_nonce' ); ?>
-                        <input type="hidden" name="action" value="hmwp_abort"/>
-                        <input type="submit" class="btn btn-secondary" value="<?php echo esc_html__( "No, abort", 'hide-my-wp' ) ?>"/>
-                    </form>
-                </div>
+        <div class="col-sm-12 px-4 py-3">
+            <div style="font-weight: 700; font-size: 1.05rem;"><?php echo esc_html__( 'Your paths have changed. Confirm you can still log in.', 'hide-my-wp' ); ?></div>
+            <div class="text-muted small mt-1" style="max-width: 62em;">
+				<?php echo esc_html__( 'Keep this tab open and do not log out. Open your new login URL in a second tab and check that the login page loads and accepts your password. Run Ghost Doctor below if anything looks wrong, then come back here and keep or undo the change.', 'hide-my-wp' ); ?>
             </div>
         </div>
-        <div class="modal" id="frontend_test_modal" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel"><?php echo esc_html__( 'Frontend Login Test', 'hide-my-wp' ); ?></h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <iframe class="modal-body" style="min-height: 500px;"></iframe>
-                </div>
+
+        <div class="col-sm-12 px-4 pb-3">
+            <table class="table table-sm m-0" style="table-layout: fixed;">
+                <tr>
+                    <td class="border-0 pl-0 align-top text-muted small" style="width: 130px;"><?php echo esc_html__( 'New login URL', 'hide-my-wp' ); ?></td>
+                    <td class="border-0 align-top" style="word-break: break-all;">
+                        <a href="<?php echo esc_url( $login_url ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $login_url ); ?></a>
+                    </td>
+                </tr>
+				<?php if ( $safe_url ) { ?>
+                    <tr>
+                        <td class="border-0 pl-0 align-top text-muted small"><?php echo esc_html__( 'Safe URL', 'hide-my-wp' ); ?></td>
+                        <td class="border-0 align-top" style="word-break: break-all;">
+                            <a href="<?php echo esc_url( $safe_url ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $safe_url ); ?></a>
+                            <div class="text-muted small"><?php echo esc_html__( 'Use this one if the new login URL does not work. It bypasses the hidden paths and lets you back into the dashboard.', 'hide-my-wp' ); ?></div>
+                        </td>
+                    </tr>
+				<?php } ?>
+            </table>
+        </div>
+
+        <div class="col-sm-12 px-4 py-3 border-top d-flex flex-row align-items-center">
+            <div class="hmwp_confirm">
+                <form method="POST" class="m-0">
+					<?php wp_nonce_field( 'hmwp_confirm', 'hmwp_nonce' ); ?>
+                    <input type="hidden" name="action" value="hmwp_confirm"/>
+                    <input type="submit" class="btn rounded-0 btn-success px-4" value="<?php echo esc_attr__( 'Yes, it\'s working', 'hide-my-wp' ); ?>"/>
+                </form>
+            </div>
+            <div class="hmwp_abort ml-2">
+                <form method="POST" class="m-0">
+					<?php wp_nonce_field( 'hmwp_abort', 'hmwp_nonce' ); ?>
+                    <input type="hidden" name="action" value="hmwp_abort"/>
+                    <input type="submit" class="btn rounded-0 btn-secondary px-4" value="<?php echo esc_attr__( 'No, abort', 'hide-my-wp' ); ?>"/>
+                </form>
+            </div>
+            <div class="text-muted small ml-3">
+				<?php
+				echo wp_kses_post(
+						sprintf(
+						/* translators: 1: Plugin name. 2: Opening anchor tag. 3: Closing anchor tag. */
+								__( 'Still stuck? Switch to Deactivated Mode and %2$scontact us%3$s about %1$s.', 'hide-my-wp' ),
+								esc_html( HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ) ),
+								'<a href="' . esc_url( HMWP_Classes_Tools::getOption( 'hmwp_plugin_website' ) . '/contact/' ) . '" target="_blank" rel="noopener">',
+								'</a>'
+						)
+				);
+				?>
             </div>
         </div>
 

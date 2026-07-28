@@ -7,6 +7,7 @@
  * @package HMWP/RoleManagerModel
  * @since 5.0.0
  */
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_RoleManager {
 

@@ -7,7 +7,7 @@
  * @since 4.0.0
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_Cookies {
 
@@ -34,10 +34,10 @@ class HMWP_Models_Cookies {
 			global $blog_id;
 			ms_cookie_constants();
 
-			// Set current site path
+			//Set current site path
 			$site_path = wp_parse_url( get_site_url( $blog_id ), PHP_URL_PATH );
 
-			// Is path based and path exists
+			//is path based and path exists
 			if ( ! is_subdomain_install() || is_string( $site_path ) && trim( $site_path, '/' ) ) {
 				$this->_admin_cookie_path = SITECOOKIEPATH;
 			} else {
@@ -60,8 +60,8 @@ class HMWP_Models_Cookies {
 	/**
 	 * Set the cookies for saving posts process
 	 *
-	 * @param  string  $location
-	 * @param  int  $post_id
+	 * @param string $location
+	 * @param int $post_id
 	 *
 	 * @return string
 	 */
@@ -78,9 +78,9 @@ class HMWP_Models_Cookies {
 	}
 
 	/**
-	 * Check if the authentication cookie is set and return its value.
+	 * Get the test cookie
 	 *
-	 * @return bool|string The value of the authentication cookie if set, otherwise false.
+	 * @return bool
 	 */
 	public function testCookies() {
 		$secure = is_ssl();
@@ -90,13 +90,13 @@ class HMWP_Models_Cookies {
 			$auth_cookie_name = AUTH_COOKIE;
 		}
 
-		return ( isset( $_COOKIE[ $auth_cookie_name ] ) && $_COOKIE[ $auth_cookie_name ] );
+		return ( isset( $_COOKIE[ $auth_cookie_name ] ) && $_COOKIE[ $auth_cookie_name ] ); //phpcs:ignore
 	}
 
 	/**
-	 * Sets authentication cookies for the current path based on the current user's ID.
+	 * Set the secured current path for the plugin cookies
 	 *
-	 * @return bool True if the cookies are set and verified, false otherwise.
+	 * @return bool
 	 */
 	public function setCookiesCurrentPath() {
 		global $current_user;
@@ -105,6 +105,10 @@ class HMWP_Models_Cookies {
 			wp_set_auth_cookie( $current_user->ID );
 
 			if ( $this->testCookies() ) {
+
+				//trigger action after apply the cookies
+				do_action( 'hmwp_cookies_changes' );
+
 				return true;
 			}
 		}
@@ -113,7 +117,7 @@ class HMWP_Models_Cookies {
 	}
 
 	/**
-	 * Sets a test cookie to check if cookies are supported in the user's browser.
+	 * Add the test cookie in the login form
 	 *
 	 * @return void
 	 */
@@ -137,8 +141,8 @@ class HMWP_Models_Cookies {
 	/**
 	 * Set the plugin cookies for the custom admin path
 	 *
-	 * @param  string  $auth_cookie
-	 * @param  int  $expire
+	 * @param string $auth_cookie
+	 * @param int $expire
 	 *
 	 * @return void
 	 */
@@ -173,8 +177,8 @@ class HMWP_Models_Cookies {
 	/**
 	 * Set the login cookie for the custom path
 	 *
-	 * @param  string  $logged_in_cookie
-	 * @param  int  $expire
+	 * @param string $logged_in_cookie
+	 * @param int $expire
 	 *
 	 * @return void
 	 */
@@ -209,13 +213,13 @@ class HMWP_Models_Cookies {
 	 * Check if the current user IP is always the same
 	 * If not, request a relogin
 	 *
-	 * @param  array  $response
+	 * @param array $response
 	 *
 	 * @return array
 	 */
 	public function checkLoggedIP( $response ) {
 		if ( isset( $_SERVER['REMOTE_ADDR'] ) && isset( $_COOKIE['wordpress_logged_address'] ) ) {
-			if ( md5( $_SERVER['REMOTE_ADDR'] ) <> $_COOKIE['wordpress_logged_address'] ) {
+			if ( md5( $_SERVER['REMOTE_ADDR'] ) <> $_COOKIE['wordpress_logged_address'] ) { //phpcs:ignore
 				global $current_user;
 				$current_user->ID          = null;
 				$response['wp-auth-check'] = false;
@@ -226,9 +230,7 @@ class HMWP_Models_Cookies {
 	}
 
 	/**
-	 * Clears the plugin cookies for both the custom admin path and plugin path.
-	 *
-	 * @return void
+	 * Clean the user cookies on logout
 	 */
 	public function setCleanCookie() {
 
@@ -302,5 +304,48 @@ class HMWP_Models_Cookies {
 
 		return COOKIE_DOMAIN;
 	}
+
+	/**
+	 * Checks if the logged-in cookie is valid and determines the user's logged-in status.
+	 *
+	 * @return bool|false|string Returns the cookie validation result or false if the user is not logged in or ineligible contexts.
+	 */
+	public function isLoggedInCookie() {
+
+		// If pluggable is already available, use the canonical check.
+		if ( function_exists( 'is_user_logged_in' ) ) {
+			return is_user_logged_in();
+		}
+
+		// Ensure cookie constants if possible (default-constants.php).
+		if ( ! defined( 'LOGGED_IN_COOKIE' ) && function_exists( 'wp_cookie_constants' ) ) {
+			wp_cookie_constants();
+		}
+
+		// Most reliable if constant exists.
+		if ( defined( 'LOGGED_IN_COOKIE' ) && ! empty( $_COOKIE[ LOGGED_IN_COOKIE ] ) ) {
+			return true;
+		}
+
+		// Your custom cookie (if you use it).
+		if ( defined( 'HMWP_LOGGED_IN_COOKIE' ) && ! empty( $_COOKIE[ HMWP_LOGGED_IN_COOKIE . 'login' ] ) ) {
+			return true;
+		}
+
+		// Fallback for very early bootstrap / edge cases:
+		// Multisite + normal installs use wordpress_logged_in_{hash}.
+		foreach ( $_COOKIE as $name => $val ) {
+			if ( $val === '' ) {
+				continue;
+			}
+
+			if ( strpos( $name, 'wordpress_logged_in_' ) === 0 ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 
 }

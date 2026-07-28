@@ -4,18 +4,17 @@
  *
  * @file The SuperCache Model file
  * @package HMWP/Compatibility/SuperCache
+ * @since 7.0.0
  */
 
-defined('ABSPATH') || die('Cheatin\' uh?');
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
-class HMWP_Models_Compatibility_SuperCache extends HMWP_Models_Compatibility_Abstract
-{
+class HMWP_Models_Compatibility_SuperCache extends HMWP_Models_Compatibility_Abstract {
 
-    public function hookFrontend()
-    {
+	public function hookFrontend() {
 
-	    //Hook the cached buffer
-	    add_filter('wpsupercache_buffer', array($this, 'findReplaceCache'), PHP_INT_MAX);
+		//Hook the cached buffer
+		add_filter( 'wpsupercache_buffer', array( $this, 'findReplaceCache' ), PHP_INT_MAX );
 
 	}
 

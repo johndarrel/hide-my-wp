@@ -7,7 +7,7 @@
  * @since 7.0.0
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 abstract class HMWP_Models_Bruteforce_Abstract {
 
@@ -66,17 +66,25 @@ abstract class HMWP_Models_Bruteforce_Abstract {
 
 						// Check if the brute force username option is enabled
 						if ( HMWP_Classes_Tools::getOption( 'hmwp_bruteforce_username' ) ) {
-							if ( $error == 'invalid_username' ) {
+							if ( $error == 'invalid_username' || $error == 'invalid_email' ) {
 
-								// Get current IP
-								/** @var HMWP_Models_Bruteforce_IpAddress $bruteForceIp */
-								$bruteForceIp = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_IpAddress' );
+								/** @var HMWP_Models_Firewall_Rules $firewallRules */
+								$firewallRules = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Firewall_Rules' );
+								if ( ! $firewallRules->checkWhitelistRule( 'BF_LOGIN_INVALID_USERNAME' ) ) {
 
-								// Block current IP on invalid username
-								$bruteForceModel->blockIp( $bruteForceIp->getIp() );
+									// Block current IP on an invalid username
+									/** @var HMWP_Models_Bruteforce_IpAddress $bruteForceIp */
+									$bruteForceIp = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_IpAddress' );
+									$bruteForceModel->blockIp( $bruteForceIp->getIp() );
 
-								// Stop the process here
-								$bruteForceModel->bruteForceBlock();
+									do_action( 'hmwp_threat_detected', array(
+										'code'    => 'BF_LOGIN_INVALID_USERNAME',
+										'area'    => 'login',
+									) );
+
+									// Stop the process here
+									$bruteForceModel->bruteForceBlock();
+								}
 							}
 						}
 					}
@@ -96,7 +104,8 @@ abstract class HMWP_Models_Bruteforce_Abstract {
 				//show how many attempts remained
 				$attempts_left = max(((int)HMWP_Classes_Tools::getOption('brute_max_attempts') - $response['attempts']), 1);
 
-				$user = new WP_Error( 'authentication_failed', $user->get_error_message() . '<br />' . sprintf( esc_html__( 'You got %d attempts left before lockout.', 'hide-my-wp' ), $attempts_left ) );
+				/* translators: 1: Number of attempts left before lockout. */
+				$user = new WP_Error( 'authentication_failed', wp_kses_post( $user->get_error_message() . '<br />' . sprintf( esc_html__( 'You got %1$d attempts left before lockout.', 'hide-my-wp' ), (int) $attempts_left ) ) );
 			}
 
 		}

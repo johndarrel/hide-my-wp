@@ -6,13 +6,15 @@
  * @package HMWP/CacheModel
  * @since 5.0.0
  */
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_Cache {
 
 	protected $_replace = array();
 	protected $_cachepath = '';
 	protected $chmod = 644;
+	protected $fs = null;
+	protected $resolved_cachepath = null;
 
 	public function __construct() {
 		$this->setCachePath( WP_CONTENT_DIR . '/cache/' );
@@ -20,58 +22,64 @@ class HMWP_Models_Cache {
 	}
 
 	/**
-	 * Set the cache storage path
+	 * Initializes and retrieves the filesystem object.
 	 *
-	 * @param  string  $path  The path where cache files are stored
+	 * If the filesystem object has not been initialized, this method initializes
+	 * it using the HMWP_Classes_ObjController::initFilesystem() method.
 	 *
-	 * @return void
+	 * @return object The initialized filesystem object.
+	 */
+	protected function fs() {
+		if ($this->fs === null) {
+			$this->fs = HMWP_Classes_ObjController::initFilesystem();
+		}
+		return $this->fs;
+	}
+
+	/**
+	 * Set the Cache Path
+	 *
+	 * @param $path
 	 */
 	public function setCachePath( $path ) {
 		$this->_cachepath = $path;
+		$this->resolved_cachepath = null;
 	}
 
 	/**
-	 * Retrieve the current cache path.
+	 * Get the cache path
 	 *
-	 * Initialize the WordPress filesystem and determine the appropriate cache
-	 * path, considering multisite configurations.
-	 *
-	 * @return string|bool The cache path if it exists, otherwise false.
+	 * @return string
 	 */
 	public function getCachePath() {
 
-		// Initialize WordPress Filesystem
-		$wp_filesystem = HMWP_Classes_ObjController::initFilesystem();
+		if ($this->resolved_cachepath !== null) {
+			return $this->resolved_cachepath;
+		}
 
-		// Get the website cache path
+		//Initialize WordPress Filesystem
+		$wp_filesystem = $this->fs();
 		$path = $this->_cachepath;
 
-		if ( HMWP_Classes_Tools::isMultisites() ) {
-			if ( $wp_filesystem->is_dir( $path . get_current_blog_id() . '/' ) ) {
-				$path .= get_current_blog_id() . '/';
+		if (HMWP_Classes_Tools::isMultisites()) {
+			$blog_path = $path . get_current_blog_id() . '/';
+			if ($wp_filesystem->is_dir($blog_path)) {
+				$path = $blog_path;
 			}
 		}
 
-		if ( ! $wp_filesystem->is_dir( $path ) ) {
-			return false;
-		}
-
-		return $path;
+		$this->resolved_cachepath = $wp_filesystem->is_dir($path) ? $path : false;
+		return $this->resolved_cachepath;
 	}
 
 	/**
-	 * Build the redirection rules for the application.
+	 * Build the redirects array
 	 *
-	 * This method constructs the necessary redirection paths and patterns
-	 * for URL rewriting in the application. It ensures the replacement paths
-	 * are set properly, adds the domain to the rewrites if necessary, and
-	 * verifies only the intended paths are modified.
-	 *
-	 * @return void
+	 * @throws Exception
 	 */
 	public function buildRedirect() {
 
-		// If the replacement was not already set
+		//If the replacement was not already set
 		if ( empty( $this->_replace ) ) {
 
 			/**
@@ -81,53 +89,39 @@ class HMWP_Models_Cache {
 			 */
 			$rewriteModel = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' );
 
-			// Build the rules paths to change back the hidden paths
+			//build the rules paths to change back the hidden paths
 			if ( ! isset( $rewriteModel->_replace['from'] ) && ! isset( $rewriteModel->_replace['to'] ) ) {
 				$rewriteModel->buildRedirect();
 
-				// Add the domain to rewrites if not multisite
+				//add the domain to rewrites if not multisite
 				if ( HMWP_Classes_Tools::getOption( 'hmwp_fix_relative' ) && ! HMWP_Classes_Tools::isMultisites() ) {
 					$rewriteModel->prepareFindReplace();
 				}
 			}
 
-			// Verify only the rewrites
-			if ( isset( $rewriteModel->_replace['from'] ) && isset( $rewriteModel->_replace['to'] ) && ! empty( $rewriteModel->_replace['from'] ) && ! empty( $rewriteModel->_replace['to'] ) ) {
-				if ( ! empty( $rewriteModel->_replace['rewrite'] ) ) {
-					foreach ( $rewriteModel->_replace['rewrite'] as $index => $value ) {
+			//Verify only the rewrites
+			if ( isset( $rewriteModel->_replace['from'] ) && ! empty( $rewriteModel->_replace['from'] ) && isset( $rewriteModel->_replace['to'] ) && ! empty( $rewriteModel->_replace['to'] ) ) {
+				if ( ! empty( $rewriteModel->_replace['from'] ) ) {
+					foreach ( $rewriteModel->_replace['from'] as $index => $value ) {
 						//add only the paths or the design path
-						if ( ( isset( $rewriteModel->_replace['to'][ $index ] ) && substr( $rewriteModel->_replace['to'][ $index ], - 1 ) == '/' ) || strpos( $rewriteModel->_replace['to'][ $index ], '/' . HMWP_Classes_Tools::getOption( 'hmwp_themes_style' ) ) ) {
-							$this->_replace['from'][] = $rewriteModel->_replace['from'][ $index ];
-							$this->_replace['to'][]   = $rewriteModel->_replace['to'][ $index ];
+						if ( isset( $rewriteModel->_replace['to'][ $index ] ) ) {
+							if ( substr( $rewriteModel->_replace['to'][ $index ], - 1 ) == '/' || strpos( $rewriteModel->_replace['to'][ $index ], '/' . HMWP_Classes_Tools::getOption( 'hmwp_themes_style' ) ) ) {
+								$this->_replace['from'][] = $rewriteModel->_replace['from'][ $index ];
+								$this->_replace['to'][]   = $rewriteModel->_replace['to'][ $index ];
+							}
 						}
 					}
 				}
 
-				// Add the domain to rewrites
-				if ( HMWP_Classes_Tools::getOption( 'hmwp_fix_relative' ) ) {
-					$this->_replace['from'] = array_map( array(
-						$rewriteModel,
-						'addDomainUrl'
-					), (array) $this->_replace['from'] );
-					$this->_replace['to']   = array_map( array(
-						$rewriteModel,
-						'addDomainUrl'
-					), (array) $this->_replace['to'] );
-				}
 			}
 		}
 
 	}
 
 	/**
-	 * Change paths in CSS files in the cache directory
+	 * Replace the paths in CSS files
 	 *
-	 * This method scans the cache directory for CSS files, reads their contents,
-	 * and performs find-and-replace operations based on predefined redirects.
-	 * If changes are made to the contents, the modified file is written back
-	 * to the disk.
-	 *
-	 * @return void
+	 * @throws Exception
 	 */
 	public function changePathsInCss() {
 		if ( HMWP_Classes_Tools::getOption( 'error' ) ) {
@@ -141,21 +135,22 @@ class HMWP_Models_Cache {
 
 				if ( ! empty( $cssfiles ) ) {
 
-					// Load the redirects into array
+					//load the redirects into array
 					$this->buildRedirect();
 
 					foreach ( $cssfiles as $file ) {
-						// Only if the file is writable
+						//only if the file is writable
 						if ( ! $content = $this->readFile( $file ) ) {
 							continue;
 						}
 
-						// Find replace the content
+						//find replace the content
 						$newcontent = $this->findReplace( $content );
 						if ( $newcontent <> $content ) {
 							//write into file
 							$this->writeFile( $file, $newcontent );
 						}
+
 
 					}
 				}
@@ -166,12 +161,7 @@ class HMWP_Models_Cache {
 	}
 
 	/**
-	 * Modifies paths in JavaScript files by searching and replacing content.
-	 *
-	 * This method scans for JavaScript files within a specified cache directory,
-	 * reads their content, and performs find-and-replace operations based on
-	 * predefined rules. If modifications are made, the updated content is written
-	 * back to the respective files.
+	 * Replace the paths inHTML files
 	 *
 	 * @return void
 	 */
@@ -187,23 +177,23 @@ class HMWP_Models_Cache {
 
 				if ( ! empty( $jsfiles ) ) {
 
-					// Load the redirects into array
+					//load the redirects into array
 					$this->buildRedirect();
 
 					foreach ( $jsfiles as $file ) {
 
-						// Only if the file is writable
+						//only if the file is writable
 						if ( ! $content = $this->readFile( $file ) ) {
 							continue;
 						}
 
-						// Find replace the content
+						//find replace the content
 						$newcontent = $this->findReplace( $content );
 						if ( $newcontent <> $content ) {
-							//echo $newcontent;exit();
 							//write into file
 							$this->writeFile( $file, $newcontent );
 						}
+
 					}
 				}
 			}
@@ -212,18 +202,14 @@ class HMWP_Models_Cache {
 	}
 
 	/**
-	 * Changes paths in the HTML files located in the cache directory.
-	 *
-	 * This method initializes the WordPress filesystem, searches for HTML files
-	 * in the cache directory, and performs find-and-replace operations on their content.
-	 * Modified content is then written back to the files if changes were made and if they are writable.
+	 * Replace the paths inHTML files
 	 *
 	 * @return void
 	 */
 	public function changePathsInHTML() {
 
 		//Initialize WordPress Filesystem
-		$wp_filesystem = HMWP_Classes_ObjController::initFilesystem();
+		$wp_filesystem = $this->fs();
 
 		if ( HMWP_Classes_Tools::getOption( 'error' ) ) {
 			return;
@@ -235,23 +221,22 @@ class HMWP_Models_Cache {
 
 				if ( ! empty( $htmlfiles ) ) {
 
-					// Load the redirects into array
+					//load the redirects into array
 					$this->buildRedirect();
 
 					foreach ( $htmlfiles as $file ) {
-						// Only if the file is writable
+						//only if the file is writable
 						if ( ! $wp_filesystem->is_writable( $file ) ) {
 							continue;
 						}
 
-						// Get the file content
+						//get the file content
 						$content = $wp_filesystem->get_contents( $file );
 
-						// Find & replace the content
+						//find replace the content
 						$newcontent = $this->findReplace( $content );
-
 						if ( $newcontent <> $content ) {
-							// Write into file
+							//write into file
 							$this->writeFile( $file, $newcontent );
 						}
 					}
@@ -262,24 +247,24 @@ class HMWP_Models_Cache {
 	}
 
 	/**
-	 * Replaces specified paths within the content based on predefined mappings.
+	 * Find and replace the old paths into files
 	 *
-	 * @param  string  $content  The content in which the paths are to be replaced.
+	 * @param string $content
 	 *
-	 * @return string The modified content with the specified paths replaced.
+	 * @return string|string[]|null
 	 * @throws Exception
 	 */
 	public function findReplace( $content ) {
 
-		// If there are replaced paths
+		//If there are replaced paths
 		if ( ! empty( $this->_replace ) && isset( $this->_replace['from'] ) && isset( $this->_replace['to'] ) ) {
 
-			// If there is content in the file
+			//if there is content in the file
 			if ( $content <> '' ) {
-				// If the file has unchanged paths
-				if ( strpos( $content, HMWP_Classes_Tools::$default['hmwp_admin_url'] ) !== false || strpos( $content, HMWP_Classes_Tools::$default['hmwp_wp-content_url'] ) !== false || strpos( $content, HMWP_Classes_Tools::$default['hmwp_wp-includes_url'] ) !== false ) {
+				//if the file has unchanged paths
+				if ( strpos( $content, HMWP_Classes_Tools::getDefault( 'hmwp_admin_url' ) ) !== false || strpos( $content, HMWP_Classes_Tools::getDefault( 'hmwp_wp-content_url' ) ) !== false || strpos( $content, HMWP_Classes_Tools::getDefault( 'hmwp_wp-includes_url' ) ) !== false ) {
 
-					// Fix the relative links before
+					//fix the relative links before
 					if ( HMWP_Classes_Tools::getOption( 'hmwp_fix_relative' ) ) {
 						$content = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' )->fixRelativeLinks( $content );
 					}
@@ -288,12 +273,13 @@ class HMWP_Models_Cache {
 
 				}
 
-				// Text Mapping for all css files - Experimental
+				//Text Mapping for all css files - Experimental
 				if ( HMWP_Classes_Tools::getOption( 'hmwp_mapping_text_show' ) && HMWP_Classes_Tools::getOption( 'hmwp_mapping_file' ) ) {
+
 					$hmwp_text_mapping = json_decode( HMWP_Classes_Tools::getOption( 'hmwp_text_mapping' ), true );
 					if ( isset( $hmwp_text_mapping['from'] ) && ! empty( $hmwp_text_mapping['from'] ) && isset( $hmwp_text_mapping['to'] ) && ! empty( $hmwp_text_mapping['to'] ) ) {
 
-						// Only classes & ids
+						//only classes & ids
 						if ( HMWP_Classes_Tools::getOption( 'hmwp_mapping_classes' ) ) {
 
 							foreach ( $hmwp_text_mapping['from'] as $index => $from ) {
@@ -315,12 +301,12 @@ class HMWP_Models_Cache {
 	}
 
 	/**
-	 * Recursively searches for files matching a pattern.
+	 * Get the files paths by extension
 	 *
-	 * @param  string  $pattern  The pattern to search for.
-	 * @param  int  $flags  Optional flags to control the search behavior.
+	 * @param string $pattern
+	 * @param int $flags
 	 *
-	 * @return array An array of files matching the pattern.
+	 * @return array
 	 */
 	public function rsearch( $pattern, $flags = 0 ) {
 		$files = array();
@@ -336,16 +322,16 @@ class HMWP_Models_Cache {
 	}
 
 	/**
-	 * Read the contents of a file.
+	 * Read the file content
 	 *
-	 * @param  string  $file  The path to the file to be read.
+	 * @param string $file
 	 *
-	 * @return string|false The contents of the file if it is writable; otherwise, false.
+	 * @return bool
 	 */
 	public function readFile( $file ) {
 
-		// Initialize WordPress Filesystem
-		$wp_filesystem = HMWP_Classes_ObjController::initFilesystem();
+		//Initialize WordPress Filesystem
+		$wp_filesystem = $this->fs();
 
 		if ( $wp_filesystem->is_writable( $file ) ) {
 			return $wp_filesystem->get_contents( $file );
@@ -355,19 +341,20 @@ class HMWP_Models_Cache {
 	}
 
 	/**
-	 * Writes content to a file if the file is writable.
+	 * Write the file content
 	 *
-	 * @param  string  $file  The path to the file to be written.
-	 * @param  string  $content  The content to be written to the file.
+	 * @param string $file
+	 * @param string $content
 	 *
 	 * @return void
 	 */
 	public function writeFile( $file, $content ) {
 
-		// Initialize WordPress Filesystem
-		$wp_filesystem = HMWP_Classes_ObjController::initFilesystem();
+		//Initialize WordPress Filesystem
+		$wp_filesystem = $this->fs();
 
 		if ( $wp_filesystem->is_writable( $file ) ) {
+			do_action( 'hmwp_debug_cache', $file );
 			$wp_filesystem->put_contents( $file, $content );
 		}
 

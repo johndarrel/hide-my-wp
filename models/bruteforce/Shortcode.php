@@ -8,7 +8,7 @@
  * @since 8.1
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_Bruteforce_Shortcode {
 
@@ -31,7 +31,7 @@ class HMWP_Models_Bruteforce_Shortcode {
 		// Set brute force globally
 		global $hmwp_bruteforce;
 
-		if ( ! function_exists( 'is_user_logged_in' ) || is_user_logged_in() ) {
+		if ( HMWP_Classes_Tools::isLoggedInUser() ) {
 			return;
 		}
 
@@ -47,40 +47,45 @@ class HMWP_Models_Bruteforce_Shortcode {
 		// If extra script is needed for the shortcode
 		$script = '';
 		if ( $name == 'Math' ) {
-			$script = '
-                    <script>
-                    function reCaptchaSubmit(e) {
-                        var form = this;
-                        e.preventDefault();
-        
-                        var brute_num = document.getElementsByName("brute_num")[0];
-                        if(typeof brute_num !== "undefined"){
-                            var input = document.createElement("input");
-                            input.type = "hidden";
-                            input.name = "brute_num" ;
-                            input.value = brute_num.value ;
-                            form.appendChild(input);
-                        }
-                        
-                        var brute_ck = document.getElementsByName("brute_ck")[0];
-                        if(typeof brute_ck !== "undefined"){
-                            var input = document.createElement("input");
-                            input.type = "hidden";
-                            input.name = "brute_ck" ;
-                            input.value = brute_ck.value ;
-                            form.appendChild(input);
-                        }
-                        
-                        HTMLFormElement.prototype.submit.call(form);
-                    }
-        
-                    if(document.getElementsByTagName("form").length > 0) {
-                        var x = document.getElementsByTagName("form");
-                        for (var i = 0; i < x.length; i++) {
-                            x[i].addEventListener("submit", reCaptchaSubmit);
-                        }
-                    }
-                </script>';
+			$script = '<script>
+					(function () {
+					  function upsertHidden(form, name, value) {
+					    if (value == null) return;
+					
+					    // Avoid creating duplicates on repeated submits
+					    var selector = \'input[type="hidden"][name="\' + name + \'"][data-hmwp="1"]\';
+					    var input = form.querySelector(selector);
+					
+					    if (!input) {
+					      input = document.createElement("input");
+					      input.type = "hidden";
+					      input.name = name;
+					      input.setAttribute("data-hmwp", "1");
+					      form.appendChild(input);
+					    }
+					
+					    input.value = value;
+					  }
+					
+					  function reCaptchaSubmit(e) {
+					    var form = e.target;
+					
+					    // Prefer fields inside the form; fallback if your fields are outside the form
+					    var bruteNumEl = form.querySelector(\'[name="brute_num"]\') || document.querySelector(\'[name="brute_num"]\');
+					    var bruteCkEl  = form.querySelector(\'[name="brute_ck"]\')  || document.querySelector(\'[name="brute_ck"]\');
+					
+					    if (bruteNumEl && bruteCkEl) {
+					      upsertHidden(form, "brute_num", bruteNumEl.value);
+					      upsertHidden(form, "brute_ck", bruteCkEl.value);
+					    }
+					
+					  }
+					
+					  // Capture phase so we run before most libraries’ submit handlers
+					  document.addEventListener("submit", reCaptchaSubmit, true);
+					})();
+			</script>';
+
 		}
 
 		// Get the active Brute Force class

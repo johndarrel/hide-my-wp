@@ -8,7 +8,7 @@
  * @since 4.0.0
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 	/**
@@ -24,41 +24,34 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 			return;
 		}
 
-		// If doing cron, return
+		// If doing cron, don't load buffer or change paths
 		if ( HMWP_Classes_Tools::isCron() ) {
-			return;
+			add_filter( 'hmwp_process_init', '__return_false' );
 		}
 
-		// If plugin paused from plugins
+        // If plugin paused from plugins
 		if ( get_transient( 'hmwp_disable' ) ) {
-			return;
-		}
+            return;
+        }
 
 		// Init the main hooks
 		// Start HMWP path process
 		$this->initHooks();
 
+		// Start Tweaks Hooks
+		$this->initTweaks();
 	}
 
 	/**
-	 * Initializes the main hooks and processes for the application, including URL modifications,
-	 * access control, and compatibility checks.
+	 * Initializes the main hooks for the plugin.
 	 *
-	 * This method sets up a series of filters and actions to control the URL paths, login redirects, and
-	 * firewall checks. It also ensures proper handling of URL rewriting and redirections, depending on
-	 * specific settings and configurations.
+	 * This method sets up various filters and actions to handle plugin functionality,
+	 * including URL management, compatibility checks, security filters, and buffer initialization.
 	 *
 	 * @return void
-	 *
-	 * @throws Exception If an unexpected condition is encountered during initialization.
+	 * @throws Exception
 	 */
 	public function initHooks() {
-
-		// Stop here is the option is default.
-		// The previous code is needed for settings change and validation
-		if ( HMWP_Classes_Tools::getOption( 'hmwp_mode' ) == 'default' ) {
-			return;
-		}
 
 		// If the mod_rewrite is not set in Apache, return
 		if ( HMWP_Classes_Tools::isApache() && ! HMWP_Classes_Tools::isModeRewrite() ) {
@@ -68,7 +61,9 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 		// If safe parameter is set, clear the banned IPs and let the default paths
 		if ( HMWP_Classes_Tools::calledSafeUrl( ) ) {
 			HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_Database' )->clearBlockedIPs();
-			HMWP_Classes_Tools::saveOptions( 'banlist_ip', json_encode( array() ) );
+
+			// Check and set the cookies for the modified urls even is safe URL is called
+			HMWP_Classes_ObjController::getClass( 'HMWP_Models_Cookies' );
 
 			add_filter( 'site_url', array( $this->model, 'site_url' ), PHP_INT_MAX, 2 );
 			add_filter( 'hmwp_process_init', '__return_false' );
@@ -78,24 +73,32 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 
 		// Prevent slow websites due to misconfiguration in the config file
 		if ( count( (array) HMWP_Classes_Tools::getOption( 'file_mappings' ) ) > 0 ) {
-
+			// If the process to prevent broken frontend is set to true, disable the path change
 			if ( HMWP_Classes_Tools::getOption( 'prevent_slow_loading' ) ) {
-				return;
+				// Disable the path change and hiding the path
+				// Load default paths but let login page to be processed
+				add_filter( 'hmwp_process_hide_urls', '__return_false' );
+				add_filter( 'hmwp_process_buffer', '__return_false' );
+				add_filter( 'hmwp_process_find_replace', '__return_false' );
 			}
 
-			add_filter( 'hmwp_process_hide_urls', '__return_false' );
 		}
 
 		// Check the whitelist IPs & Paths for accessing the hide paths
-		/** @var HMWP_Controllers_Firewall $firewall */
-		$firewall = HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Firewall' );
-		$firewall->checkWhitelistIPs();
-		$firewall->checkWhitelistPaths();
+		/** @var HMWP_Models_Firewall_Rules $firewallRules */
+		$firewallRules = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Firewall_Rules' );
+		$firewallRules->checkWhitelistIPs();
+		$firewallRules->checkWhitelistPaths();
 
 		// Load the compatibility class when the plugin loads
 		// Check boot compatibility for some plugins and functionalities
 		HMWP_Classes_ObjController::getClass( 'HMWP_Models_Compatibility' )->checkCompatibility();
 
+		// Stop here if the option is default.
+		// The previous code is needed for settings change and validation
+		if ( HMWP_Classes_Tools::getOption( 'hmwp_mode' ) == 'default' ) {
+			return;
+		}
 
 		// Don't let to rename and hide the current paths if logout is required
 		if ( HMWP_Classes_Tools::getOption( 'error' ) || HMWP_Classes_Tools::getOption( 'logout' ) ) {
@@ -116,7 +119,7 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 		add_filter( 'wp_redirect', array( $this->model, 'sanitize_redirect' ), PHP_INT_MAX, 2 );
 		add_filter( 'x_redirect_by', '__return_false', PHP_INT_MAX, 1 );
 
-		// Plugin redirect based on current user role
+		// Redirect based on the current user role
 		if ( HMWP_Classes_Tools::getOption( 'hmwp_do_redirects' ) ) {
 			add_action( 'wp_login', array( $this->model, 'wp_login' ), PHP_INT_MAX, 2 );
 			add_action( 'set_current_user', array( 'HMWP_Classes_Tools', 'setCurrentUserRole' ), PHP_INT_MAX );
@@ -135,17 +138,20 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 		add_action( 'login_head', array( $this->model, 'login_head' ), PHP_INT_MAX );
 		add_action( 'wp_logout', array( $this->model, 'wp_logout' ), PHP_INT_MAX );
 		add_action( 'check_admin_referer', array( $this->model, 'check_admin_referer' ), PHP_INT_MAX, 2 );
-		// Change the admin url and login url
+
+		// Change the admin url hmwp_login_init
+		// Change wp-admin path only when the rules are working through the config file
 		if( empty( (array) HMWP_Classes_Tools::getOption( 'file_mappings' ) ) ) {
 			add_filter( 'admin_url', array( $this->model, 'admin_url' ), PHP_INT_MAX, 3 );
 		}
-		add_filter( 'lostpassword_url', array( $this->model, 'lostpassword_url' ), PHP_INT_MAX, 1 );
 		add_filter( 'login_title', array( $this->model, 'login_title' ), PHP_INT_MAX, 1 );
+		add_filter( 'lostpassword_url', array( $this->model, 'lostpassword_url' ), PHP_INT_MAX, 1 );
 		add_filter( 'register', array( $this->model, 'register_url' ), PHP_INT_MAX, 1 );
 		add_filter( 'login_url', array( $this->model, 'login_url' ), PHP_INT_MAX, 1 );
 		add_filter( 'logout_url', array( $this->model, 'logout_url' ), PHP_INT_MAX, 2 );
 		add_filter( 'network_admin_url', array( $this->model, 'network_admin_url' ), PHP_INT_MAX, 3 );
-		add_filter( 'site_url', array( $this->model, 'site_url' ), PHP_INT_MAX, 2 );
+		add_filter( 'home_url', array( $this->model, 'home_url' ), PHP_INT_MAX, 3 );
+		add_filter( 'site_url', array( $this->model, 'site_url' ), PHP_INT_MAX, 3 );
 		add_filter( 'network_site_url', array( $this->model, 'site_url' ), PHP_INT_MAX, 3 );
 		add_filter( 'plugins_url', array( $this->model, 'plugin_url' ), PHP_INT_MAX, 3 );
 
@@ -153,15 +159,15 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 		// Change the rest api if needed
 		add_filter( 'rest_url_prefix', array( $this->model, 'replace_rest_api' ), 1 );
 
-		// Check and set the cookied for the modified urls
+		// Check and set the cookies for the modified urls
 		HMWP_Classes_ObjController::getClass( 'HMWP_Models_Cookies' );
 
 		// Start the buffer sooner if one of these conditions
-		// If is ajax call... start the buffer right away
-		// Is always change the paths
+		// If is an ajax call... start the buffer right away
+		// Ts always change the paths
 		if ( HMWP_Classes_Tools::isAjax() || HMW_ALWAYS_CHANGE_PATHS ) {
 
-			// Starts the buffer
+			// Start the buffer
 			$this->model->startBuffer();
 
 		}
@@ -215,7 +221,7 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 			}
 
 			// Hide authors and users identification from website
-			if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_authors' ) ) {
+			if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_author_enumeration' ) ) {
 
 				// Remove users from oembed
 				add_filter('oembed_response_data', function ($data, $post, $width, $height) {
@@ -232,22 +238,26 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 			}
 
 			// Robots.txt compatibility with other plugins
-			if ( HMWP_Classes_Tools::getOption( 'hmwp_robots' ) && isset( $_SERVER['REQUEST_URI'] ) ) {
-				if ( strpos( $_SERVER['REQUEST_URI'], '/robots.txt' ) !== false ) {
-					add_action( 'shutdown', array( $this->model, 'replaceRobots' ), 0 ); //priority 0 is important
+			if ( isset($_SERVER['REQUEST_URI']) ){
+				$banlist = HMWP_Classes_Tools::getOption('banlist_user_agent');
+
+				if ( ! is_array( $banlist ) ) {
+					$banlist = json_decode( $banlist, true );
+					$banlist = is_array($banlist) ? $banlist : array();
+				}
+
+				if ( HMWP_Classes_Tools::getOption('hmwp_robots') || ! empty($banlist) )  {
+					// Compatibility with
+					if ( strpos( $_SERVER['REQUEST_URI'], '/robots.txt' ) !== false ) { //phpcs:ignore
+						add_action( 'shutdown', array( $this->model, 'replaceRobots' ), 0 ); //priority 0 is important
+					}
 				}
 			}
 
 			// Hook the change paths on init
 			add_action( 'init', array( $this, 'hookChangePaths' ) );
 
-			// Load the PluginLoaded Hook to hide URLs and Disable stuff
-			add_action( 'init', array( $this, 'hookHideDisable' ) );
-
 		}
-
-		// Load firewall on request for all server types
-		add_action( 'plugins_loaded', array( $firewall, 'run' ) );
 
 		// Hide the URLs from admin and login
 		// Load the hook on plugins_loaded to prevent any wp redirect
@@ -256,106 +266,136 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 	}
 
 	/**
-	 * Hook method to hide and disable specific options based on provided criteria.
-	 *
-	 * This method performs various actions to enhance the security and privacy of the WordPress site
-	 * by hiding or disabling certain functionalities such as headers, REST API, comments, emojis, etc.
-	 * depending on the options set in the system tools. It also handles disabling clicks and key interactions
-	 * for visitors and logged-in users based on their roles.
+	 * Initializes tweak hooks for modifying behavior based on specific conditions.
 	 *
 	 * @return void
-	 * @throws Exception If any of the operations within this method encounter an error.
+	 */
+	public function initTweaks() {
+
+		// If not dashboard
+		if ( ! is_admin() && ! is_network_admin() ) {
+			// Load the PluginLoaded Hook to hide URLs and Disable stuff
+			add_action( 'init', array( $this, 'hookHideDisable' ) );
+
+
+			// Apply login page customization styles
+			if ( HMWP_Classes_Tools::getOption('hmwp_login_page') ) {
+
+				// Remove the third hooks and load the styles from the login page
+				add_filter( 'hmwp_option_hmwp_remove_third_hooks', '__return_true' );
+
+				/** HMWP_Models_Login $login  */
+				$login = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Login' );
+				add_action( 'login_enqueue_scripts', array( $login, 'hookLoginPageStyles' ) );
+				add_action( 'login_footer', array( $login, 'hookLoginSpinner' ) );
+
+				// Remove WordPress link + text
+				add_filter('login_headerurl', function () {
+					return home_url();
+				});
+
+				add_filter('login_headertext', function () {
+					return get_bloginfo('name');
+				});
+
+				// Apply login page logo url
+				if ( HMWP_Classes_Tools::getOption( 'hmwp_login_page_logo_url' ) ) {
+					/** HMWP_Models_Login $login  */
+					$login = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Login' );
+					add_filter( 'login_headerurl', array( $login, 'hookLoginLogoUrl' ) );
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * Hook the Hide & Disable options
+	 *
+	 * @throws Exception
 	 */
 	public function hookHideDisable() {
 
-		//Check if is valid for moving on
+		// Check if is valid for moving on
 		if ( HMWP_Classes_Tools::doHideDisable() ) {
 			//////////////////////////////////Hide Options
 
-			// add the security header if needed
+			// Add the security header if needed
 			if ( ! HMWP_Classes_Tools::isApache() && ! HMWP_Classes_Tools::isLitespeed() ) {
-				//avoid duplicates
+				// Avoid duplicates
 				add_action( 'template_redirect', array( $this->model, 'addSecurityHeader' ), PHP_INT_MAX );
 			}
 
-			//remove PHP version, Server info, Server Signature from header.
+			// Remove PHP version, Server info, Server Signature from header.
 			add_action( 'template_redirect', array( $this->model, 'hideHeaders' ), PHP_INT_MAX );
 
-			//Hide the WordPress Generator tag
+			// Hide the WordPress Generator tag
 			if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_generator' ) ) {
 				remove_action( 'wp_head', 'wp_generator' );
 				add_filter( 'the_generator', '__return_false', PHP_INT_MAX, 1 );
 			}
 
-
-			//Hide the rest_api
+			// Hide the rest_api
 			if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_rest_api' ) || HMWP_Classes_Tools::getOption( 'hmwp_disable_rest_api' ) ) {
 				$this->model->hideRestApi();
 			}
 
-			//Hide Really Simple Discovery
+			// Hide Really Simple Discovery
 			if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_rsd' ) ) {
 				$this->model->disableRsd();
 			}
 
-			//Hide WordPress comments
+			// Hide WordPress comments
 			if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_comments' ) ) {
 				$this->model->disableComments();
 			}
 
-			//Hide Windows Live Write
+			// Hide Windows Live Write
 			if ( HMWP_Classes_Tools::getOption( 'hmwp_disable_manifest' ) ) {
 				$this->model->disableManifest();
 			}
 
 			//////////////////////////////////Disable Options
 
-			//Disable the Emojiicons tag
+			// Disable the Emoji icons tag
 			if ( HMWP_Classes_Tools::getOption( 'hmwp_disable_emojicons' ) ) {
 				$this->model->disableEmojicons();
 			}
 
-			//Disable xml-rpc ony if not Apache server
-			//for apache server add the .htaccess rules
-			if ( HMWP_Classes_Tools::getOption( 'hmwp_disable_xmlrpc' ) && ! HMWP_Classes_Tools::isApache() ) {
-				add_filter( 'xmlrpc_enabled', '__return_false' );
-			}
 
-			//Disable the embeds
+			// Disable the embeds
 			if ( HMWP_Classes_Tools::getOption( 'hmwp_disable_embeds' ) ) {
 				$this->model->disableEmbeds();
 			}
 
-			//Disable the admin bar whe users are hidden in admin
-			if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_admin_toolbar' ) ) {
-				if ( function_exists( 'is_user_logged_in' ) && is_user_logged_in() ) {
+			// Disable the admin bar whe users are hidden in admin
+			// Only if the config file is working correctly
+			if ( empty( (array) HMWP_Classes_Tools::getOption( 'file_mappings' ) ) || HMWP_Classes_Tools::isLoggedInUser() ) {
 
-					HMWP_Classes_Tools::setCurrentUserRole();
-					$role = HMWP_Classes_Tools::getUserRole();
+				HMWP_Classes_Tools::setCurrentUserRole();
+				$role = HMWP_Classes_Tools::getUserRole();
 
-					$selected_roles = (array) HMWP_Classes_Tools::getOption( 'hmwp_hide_admin_toolbar_roles' );
+				$selected_roles = (array) HMWP_Classes_Tools::getOption( 'hmwp_hide_admin_toolbar_roles' );
 
-					if ( in_array( $role, $selected_roles ) ) {
-						add_filter( 'show_admin_bar', '__return_false' );
-					}
-
+				if ( in_array( $role, $selected_roles ) ) {
+					add_filter( 'show_admin_bar', '__return_false' ); //phpcs:ignore
 				}
+
 			}
 
-			//Disable Database Debug
+			// Disable Database Debug
 			if ( HMWP_Classes_Tools::getOption( 'hmwp_disable_debug' ) ) {
 				global $wpdb;
 				$wpdb->hide_errors();
 			}
 
-
 		}
 
-		//Check if Disable keys and mouse action is on
+		// Check if Disable keys and mouse action is on
 		if ( HMWP_Classes_Tools::doDisableClick() ) {
 
-			//only disable the click and keys wfor visitors
-			if ( ! is_user_logged_in() ) {
+			// Only disable the click and keys for visitors
+			if ( ! HMWP_Classes_Tools::isLoggedInUser() ) {
 				HMWP_Classes_ObjController::getClass( 'HMWP_Models_Clicks' );
 			} else {
 
@@ -368,6 +408,7 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 					if ( ! in_array( $role, $selected_roles ) ) {
 						add_filter( 'hmwp_option_hmwp_disable_click', '__return_false' );
 					}
+
 				} else {
 					add_filter( 'hmwp_option_hmwp_disable_click', '__return_false' );
 				}
@@ -412,7 +453,7 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 					add_filter( 'hmwp_option_hmwp_disable_drag_drop', '__return_false' );
 				}
 
-				//check again if the options are active after the filrter are applied
+				//check again if the options are active after the filter are applied
 				if ( HMWP_Classes_Tools::getOption( 'hmwp_disable_click' ) || HMWP_Classes_Tools::getOption( 'hmwp_disable_inspect' ) || HMWP_Classes_Tools::getOption( 'hmwp_disable_source' ) || HMWP_Classes_Tools::getOption( 'hmwp_disable_copy_paste' ) || HMWP_Classes_Tools::getOption( 'hmwp_disable_drag_drop' ) ) {
 
 					HMWP_Classes_ObjController::getClass( 'HMWP_Models_Clicks' );
@@ -422,25 +463,21 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 			}
 
 		}
-
 	}
 
 
 	/**
-	 * Main hook to change paths and handle compatibility with other plugins.
+	 * Hook the Change Paths process
 	 *
-	 * This method checks for mapping files and initiates actions based on current settings and options.
-	 * It ensures proper handling of broken URLs, late loading configurations, and integrations with other plugins.
-	 *
-	 * @return void
 	 * @throws Exception
 	 */
 	public function hookChangePaths() {
 
 		if ( ! HMWP_Classes_Tools::getValue( 'hmwp_preview' ) ) {
-			// If not frontend preview/testing
 
+			// If not frontend preview/testing
 			if ( (HMWP_Classes_Tools::getOption( 'hmwp_mapping_text_show' ) && HMWP_Classes_Tools::getOption( 'hmwp_mapping_file' )) || count( (array) HMWP_Classes_Tools::getOption( 'file_mappings' ) ) > 0 ) {
+
 				// Load MappingFile Check the Mapping Files
 				// Check the mapping file in case of config issues or missing rewrites
 				HMWP_Classes_ObjController::getClass( 'HMWP_Models_Files' )->maybeShowFile();
@@ -453,7 +490,7 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 
 		}
 
-		//Check Compatibilities with other plugins
+		// Check Compatibilities with other plugins
 		HMWP_Classes_ObjController::getClass( 'HMWP_Models_Compatibility' )->checkBuildersCompatibility();
 
 		///////////////////////////////////////////////
@@ -477,9 +514,10 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 	}
 
 	/**
-	 * Initialize hooks for the plugin.
+	 *  On Admin Init
+	 *  Load the Menu
+	 *  If the user changes the Permalink to default ... prevent errors
 	 *
-	 * @return void
 	 * @throws Exception
 	 */
 	public function hookInit() {

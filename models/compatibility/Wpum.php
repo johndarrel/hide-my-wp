@@ -4,36 +4,35 @@
  *
  * @file The WordPress User Manager Model file
  * @package HMWP/Compatibility/WPum
+ * @since 6.0.0
  */
 
-defined('ABSPATH') || die('Cheatin\' uh?');
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
-class HMWP_Models_Compatibility_Wpum extends HMWP_Models_Compatibility_Abstract
-{
+class HMWP_Models_Compatibility_Wpum extends HMWP_Models_Compatibility_Abstract {
 
-    public function __construct()
-    {
+	public function __construct() {
 		parent::__construct();
 
-        $login = $this->getLoginPath();
-        if($login){
-            defined('HMWP_DEFAULT_LOGIN') || define('HMWP_DEFAULT_LOGIN', $login);
+		$login = $this->getLoginPath();
+		if ( $login ) {
+			defined( 'HMWP_DEFAULT_LOGIN' ) || define( 'HMWP_DEFAULT_LOGIN', $login );
 
-	        if(HMWP_DEFAULT_LOGIN == 'login'){
-		        add_filter('hmwp_option_hmwp_hide_login', '__return_false');
-	        }
+			if ( HMWP_DEFAULT_LOGIN == 'login' ) {
+				add_filter( 'hmwp_option_hmwp_hide_login', '__return_false' );
+			}
 
-			add_filter('hmwp_option_hmwp_lostpassword_url', '__return_false');
-            add_filter('hmwp_option_hmwp_register_url', '__return_false');
-            add_filter('hmwp_option_hmwp_logout_url', '__return_false');
-        }
+			add_filter( 'hmwp_option_hmwp_lostpassword_url', '__return_false' );
+			add_filter( 'hmwp_option_hmwp_register_url', '__return_false' );
+			add_filter( 'hmwp_option_hmwp_logout_url', '__return_false' );
+		}
 
-        //load the brute force
-        if (HMWP_Classes_Tools::getOption('hmwp_bruteforce') ) {
+		//load the brute force
+		if ( HMWP_Classes_Tools::getOption( 'hmwp_bruteforce' ) ) {
 
-	        $this->hookBruteForce();
-        }
-    }
+			$this->hookBruteForce();
+		}
+	}
 
 	public function hookBruteForce() {
 
@@ -62,21 +61,22 @@ class HMWP_Models_Compatibility_Wpum extends HMWP_Models_Compatibility_Abstract
 
 	}
 
-    /**
-     * Get the login path
-     * @return false|string
-     */
-    public function getLoginPath(){
-	    $settings = get_option( 'wpum_settings' );
-	    if ( isset( $settings['login_page'][0] ) && (int) $settings['login_page'][0] > 0 ) {
-		    $post = get_post( (int) $settings['login_page'][0] );
-		    if ( ! is_wp_error( $post ) ) {
-			    return $post->post_name;
-		    }
-	    }
+	/**
+	 * Get the login path
+	 *
+	 * @return false|string
+	 */
+	public function getLoginPath() {
+		$settings = get_option( 'wpum_settings' );
+		if ( isset( $settings['login_page'][0] ) && (int) $settings['login_page'][0] > 0 ) {
+			$post = get_post( (int) $settings['login_page'][0] );
+			if ( ! is_wp_error( $post ) ) {
+				return $post->post_name;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
 	/**
 	 * Check the reCaptcha on login
@@ -100,17 +100,15 @@ class HMWP_Models_Compatibility_Wpum extends HMWP_Models_Compatibility_Abstract
 	/**
 	 * Check the reCaptcha on register
 	 *
-	 * @param $validate
-	 * @param $fields
-	 * @param $values
+	 * @param $args
 	 *
 	 * @return void
 	 * @throws Exception
 	 */
-	public function checkRegisterReCaptcha( $validate, $fields, $values ){
+	public function checkRegisterReCaptcha( $validate, $fields, $values ) {
 
 		//check the user
-		if(isset($values['register']['user_password']) && isset($values['register']['user_email'])){
+		if ( isset( $values['register']['user_password'] ) && isset( $values['register']['user_email'] ) ) {
 			$validate = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_Registration' )->call( $validate, $fields, $values );
 		}
 
@@ -129,10 +127,10 @@ class HMWP_Models_Compatibility_Wpum extends HMWP_Models_Compatibility_Abstract
 	 * @return mixed
 	 * @throws Exception
 	 */
-	public function checkLPasswordReCaptcha( $validate, $fields, $values ){
+	public function checkLPasswordReCaptcha( $validate, $fields, $values ) {
 
 		//check the user
-		if(isset($values['user']['username_email'])){
+		if ( isset( $values['user']['username_email'] ) ) {
 			$validate = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_Registration' )->call( $validate, $fields, $values );
 		}
 

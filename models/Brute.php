@@ -8,7 +8,7 @@
  * @since 4.2.0
  */
 
-defined( 'ABSPATH' ) || die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) || die( 'Cheating uh?' );
 
 class HMWP_Models_Brute {
 
@@ -35,9 +35,21 @@ class HMWP_Models_Brute {
 	}
 
 	/**
+	 * Generate a unique Request ID for this request.
+	 *
+	 * @return false|string
+	 */
+	public function getRid() {
+		/** @var HMWP_Models_Firewall_Threats $threats */
+		$threats = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Firewall_Threats' );
+
+		return $threats->getRid();
+	}
+
+	/**
 	 * Get the name of the active Brute Force protection
 	 *
-	 * @return HMWP_Models_Bruteforce_Math|HMWP_Models_Bruteforce_GoogleV2|HMWP_Models_Bruteforce_GoogleV3 of the selected Brute Force protection type
+	 * @return false|object of the selected Brute Force protection type
 	 *
 	 * @throws Exception
 	 */
@@ -45,6 +57,7 @@ class HMWP_Models_Brute {
 
 		// Get the active Brute Force name
 		if ( ! $this->getName() ) {
+
 			return HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_Math' );
 		}
 
@@ -54,7 +67,7 @@ class HMWP_Models_Brute {
 	/**
 	 * Process the brute call
 	 *
-	 * @param  string  $action  'check_ip', 'clear_ip', or 'failed_attempt'
+	 * @param string $action 'check_ip', 'clear_ip', or 'failed_attempt'
 	 *
 	 * @return array|mixed
 	 * @throws Exception
@@ -76,10 +89,10 @@ class HMWP_Models_Brute {
 				$response['status'] = ( $response['status'] ?? 'ok' );
 
 				// Never block login from whitelisted IPs
-				if ( HMWP_Classes_Tools::isWhitelistedIP( $ip ) ) {
+				if ( HMWP_Classes_ObjController::getClass( 'HMWP_Models_Firewall_Rules' )->isWhitelistedIP( $ip ) ) {
 					$response['status'] = 'whitelist';
-				}elseif ( HMWP_Classes_Tools::isBlacklistedIP( $ip ) ) {
-					// Check if the IP address is already banned by the admin
+				} elseif ( HMWP_Classes_ObjController::getClass( 'HMWP_Models_Firewall_Rules' )->isBlacklistedIP( $ip ) ) {
+					// Check if the admin already bans the IP address
 					$response['status'] = 'blocked';
 				}
 
@@ -91,14 +104,23 @@ class HMWP_Models_Brute {
 				$attempts = (int) ( $response['attempts'] ?? 1 );
 
 				// If reached the maximum number of fail attempts
-				if ( ! HMWP_Classes_Tools::isWhitelistedIP( $ip ) &&
-				     $attempts >= HMWP_Classes_Tools::getOption( 'brute_max_attempts' ) ) {
+				if ( ! HMWP_Classes_ObjController::getClass( 'HMWP_Models_Firewall_Rules' )->isWhitelistedIP( $ip ) && $attempts >= HMWP_Classes_Tools::getOption( 'brute_max_attempts' ) ) {
 
-					// Block current IP address
-					$this->blockIp( $ip );
+					/** @var HMWP_Models_Firewall_Rules $firewallRules */
+					$firewallRules = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Firewall_Rules' );
+					if ( ! $firewallRules->checkWhitelistRule( 'BF_LOGIN_EXCEEDED' ) ) {
 
-					// Show blocked message
-					$this->bruteForceBlock();
+						// Block the current IP address
+						$this->blockIp( $ip );
+
+						do_action( 'hmwp_threat_detected', array(
+							'code'    => 'BF_LOGIN_EXCEEDED',
+							'area'    => 'login',
+						) );
+
+						// Show a blocked message
+						$this->bruteForceBlock();
+					}
 
 				} else {
 
@@ -106,7 +128,7 @@ class HMWP_Models_Brute {
 					$attempts = $attempts + 1;
 
 					// Save the attempt in database for this IP address
-					$response['ip'] = $ip;
+					$response['ip']       = $ip;
 					$response['attempts'] = $attempts;
 					$response['status']   = 'ok';
 
@@ -144,15 +166,22 @@ class HMWP_Models_Brute {
 		// Get the attempts
 		$attempts = (int) ( $response['attempts'] ?? 1 );
 
+		/** @var HMWP_Models_Firewall_Server $server */
+		$server = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Firewall_Server' );
+
 		// Add all the info needed for this IP address
 		$response['ip']       = $ip;
-		$response['headers']  = json_encode( HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Firewall' )->getServerVariableIPs() );
+		$response['headers']  = json_encode( $server->getServerVariableIPs() );
 		$response['attempts'] = $attempts;
 		$response['status']   = 'blocked';
 
 		// Save the info into database
 		HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_Database' )->save( $ip, $response );
 
+		// Log the block IP on the server if the Events Log is active
+		if ( HMWP_Classes_Tools::getOption( 'hmwp_activity_log' ) ) {
+			HMWP_Classes_ObjController::getClass( 'HMWP_Models_EventsLog' )->save( 'block_ip', array( 'ip' => $ip ) );
+		}
 	}
 
 	/**
@@ -181,19 +210,57 @@ class HMWP_Models_Brute {
 	 */
 	public function bruteForceBlock() {
 
-		do_action( 'hmwp_kill_login', HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_IpAddress' )->getIp() );
+		// Avoid showing load_textdomain_just_in_time on block page
+		global $wp_actions;
+		$wp_actions['after_setup_theme'] = 1;
 
-		wp_ob_end_flush_all();
-		wp_die( HMWP_Classes_Tools::getOption( 'hmwp_brute_message' ), esc_html__( 'IP Blocked by' . ' ' . HMWP_Classes_Tools::getOption( 'hmwp_plugin_name' ), 'hide-my-wp' ), array( 'response' => 403 ) );
+		// Load the Multilingual support for frontend
+		HMWP_Classes_Tools::loadMultilanguage();
+
+		// Get current IP
+		$ip      = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_IpAddress' )->getIp();
+		$rid     = $this->getRid();
+		$name    = __( 'Brute Force Protection', 'hide-my-wp' );
+		$message = (string) HMWP_Classes_Tools::getOption( 'hmwp_brute_message' );
+
+		$uri  = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; //phpcs:ignore
+		$path = (string) wp_parse_url( $uri, PHP_URL_PATH );
+		if ( $path === '' ) {
+			$path = '/';
+		}
+
+		// Trim and sanitize displayed path
+		$path = wp_strip_all_tags( $path );
+		if ( strlen( $path ) > 120 ) {
+			$path = substr( $path, 0, 120 ) . '...';
+		}
+
+		// Set threat as prevented
+		add_filter( 'hmwp_threat_prevented', '__return_true');
+
+		/** @var HMWP_Controllers_Firewall $firewall */
+		$firewall = HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_Firewall' );
+		$firewall->renderFirewallBlockPage( array(
+			'title'      => esc_html__( 'This IP was blocked for security reasons', 'hide-my-wp' ),
+			'message'     => esc_html( $message ),
+			'name'        => esc_html( $name),
+			'ip'          => esc_attr( $ip ),
+			'path'        => esc_attr( $path ),
+			'rid'         => esc_attr( $rid ),
+			'statusCode'  => 403,
+		) );
+
+		exit;
+
 	}
 
 	/**
 	 * Process the IP and call Brute Force
 	 *
-	 * @deprecated since 8.2
-	 *
 	 * @return void
 	 * @throws Exception
+	 * @deprecated since 8.2
+	 *
 	 */
 	public function brute_call( $action = 'check_ip' ) {
 		$this->processIp( $action );
