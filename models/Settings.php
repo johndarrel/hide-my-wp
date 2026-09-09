@@ -611,6 +611,12 @@ class HMWP_Models_Settings {
 			HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' )->flushChanges();
 		}
 
+		// The REST API rules are stored by WordPress, build them again when the path
+		// changed, also when the config file is not writable and flushChanges was skipped
+		if ( HMWP_Classes_Tools::getDefault( 'hmwp_wp-json' ) <> HMWP_Classes_Tools::getOption( 'hmwp_wp-json' ) ) {
+			HMWP_Classes_ObjController::getClass( 'HMWP_Models_Rewrite' )->flushRestRewrites();
+		}
+
 		//If there are no errors
 		if ( ! HMWP_Classes_Error::isError() ) {
 

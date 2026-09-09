@@ -78,8 +78,6 @@ class HMWP_Controllers_Templogin extends HMWP_Classes_FrontController {
 
 			// Initialize the redirect
 			$redirect_to = add_query_arg( 'hmwp_login', 'success', admin_url() );
-			add_filter( 'hmwp_option_hmwp_hide_wplogin', '__return_false' );
-			add_filter( 'hmwp_option_hmwp_hide_login', '__return_false' );
 
 			// Check if token is set
 			$token = sanitize_key( HMWP_Classes_Tools::getValue( 'hmwp_token' ) );
@@ -89,6 +87,10 @@ class HMWP_Controllers_Templogin extends HMWP_Classes_FrontController {
 				$redirect_to = home_url(); //redirect to home page
 
 			} else {
+
+				// The token is real, so the login page has to be reachable
+				add_filter( 'hmwp_option_hmwp_hide_wplogin', '__return_false' );
+				add_filter( 'hmwp_option_hmwp_hide_login', '__return_false' );
 
 				$do_login = true;
 				if ( HMWP_Classes_Tools::isLoggedInUser() ) {

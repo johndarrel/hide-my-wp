@@ -34,6 +34,12 @@ class HMWP_Controllers_ThreatsLog extends HMWP_Classes_FrontController {
 			return;
 		}
 
+		// One row per request, by design. Each detection overwrites the previous
+		// one and the shutdown callback is identical every time, so WordPress
+		// registers it once: a request that trips several rules is still logged
+		// as the last threat it tripped. This is the only thing limiting how many
+		// threats a day can be recorded, so the daily count can never exceed the
+		// number of requests.
 		add_action( 'hmwp_threat_detected', function ( $threat ) {
 			$this->threat = $threat;
 			add_action( 'shutdown', array( $this, 'run' ) );

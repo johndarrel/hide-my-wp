@@ -25,8 +25,13 @@ class HMWP_Models_Compatibility_MainWP extends HMWP_Models_Compatibility_Abstrac
 
 				if ( HMWP_Classes_Tools::searchInString( $url, $paths ) ) {
 					if ( HMWP_Classes_Tools::searchInString( $agent, $agents ) ) {
-						add_filter( 'hmwp_process_hide_urls', '__return_false' );
-						add_filter( 'hmwp_process_init', '__return_false' );
+
+						//The user agent proves nothing on its own, require the signed request
+						if ( HMWP_Classes_Tools::getValue( 'mainwpsignature' ) <> '' &&
+						     HMWP_Classes_Tools::getValue( 'function' ) <> '' ) {
+							add_filter( 'hmwp_process_hide_urls', '__return_false' );
+							add_filter( 'hmwp_process_init', '__return_false' );
+						}
 					}
 				}
 			}

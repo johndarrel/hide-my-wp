@@ -27,6 +27,20 @@ class HMWP_Controllers_Ghostdoctor extends HMWP_Classes_FrontController {
 	public $pending = false;
 
 	/**
+	 * What the account server says about the AI allowance.
+	 *
+	 * @var array
+	 */
+	public $quota = array();
+
+	/**
+	 * How many AI checks are left this month.
+	 *
+	 * @var int
+	 */
+	public $remaining = 0;
+
+	/**
 	 * Print the panel on the Security Check page.
 	 *
 	 * @return void
@@ -40,7 +54,83 @@ class HMWP_Controllers_Ghostdoctor extends HMWP_Classes_FrontController {
 		$this->report  = $model->getReport();
 		$this->pending = $model->hasSnapshot();
 
+		// Cached, so drawing this page never waits on the network. If the account
+		// server cannot be reached the panel simply says nothing about the AI and
+		// everything else on the page still works.
+		/** @var HMWP_Models_Aiclient $client */
+		$client          = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Aiclient' );
+		$this->quota     = $client->getQuota();
+		$this->remaining = $client->getRemaining( $this->quota );
+
 		$this->show( 'blocks/Ghostdoctor' );
+	}
+
+	/**
+	 * Ask the account server to explain the current findings and store the result.
+	 *
+	 * Shared by the Explain button and by the security scan, which calls this
+	 * itself whenever a scan turns up a different set of findings. Without that,
+	 * running a scan would leave the wording describing the previous scan and the
+	 * only way back would be a second button press, which is not a flow anyone
+	 * should have to work out.
+	 *
+	 * @return bool|string True on success, 'nothing' when there is nothing to
+	 *                     explain, or an error message.
+	 */
+	public function runExplain() {
+
+		/** @var HMWP_Controllers_SecurityCheck $securitycheck */
+		$securitycheck = HMWP_Classes_ObjController::getClass( 'HMWP_Controllers_SecurityCheck' );
+		$securitycheck->initSecurity();
+
+		$findings = $securitycheck->getActionItems();
+
+		if ( empty( $findings ) ) {
+			return 'nothing';
+		}
+
+		// Only what the model needs to judge urgency. No page content, no
+		// user data, no licence details beyond the headers already sent.
+		$send = array();
+		foreach ( $findings as $finding ) {
+			$send[] = array(
+				'id'       => $finding['id'],
+				'severity' => $finding['severity'],
+				'source'   => $finding['source'],
+				'title'    => $finding['title'],
+				'detail'   => wp_strip_all_tags( $finding['why'] ),
+			);
+		}
+
+		/** @var HMWP_Models_Aiclient $client */
+		$client = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Aiclient' );
+
+		/** @var HMWP_Models_Ghostdoctor $model */
+		$model = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Ghostdoctor' );
+
+		$result = $client->explain( $send, $model->readSiteState(), '' );
+
+		if ( empty( $result['ok'] ) ) {
+			return ( $result['message'] <> '' ? $result['message'] : false );
+		}
+
+		// Keyed by finding id so the wording can only ever appear next to
+		// the finding it was written for
+		$byid = array();
+		foreach ( (array) $result['data']['findings'] as $finding ) {
+			if ( ! empty( $finding['id'] ) ) {
+				$byid[ $finding['id'] ] = $finding;
+			}
+		}
+
+		update_option( HMWP_AI_EXPLAIN, array(
+			'time'      => time(),
+			'signature' => $securitycheck->getFindingsSignature( $findings ),
+			'summary'   => isset( $result['data']['summary'] ) ? $result['data']['summary'] : '',
+			'findings'  => $byid,
+		), false );
+
+		return true;
 	}
 
 	/**
@@ -240,6 +330,38 @@ class HMWP_Controllers_Ghostdoctor extends HMWP_Classes_FrontController {
 
 				$model->clearSnapshot();
 				HMWP_Classes_Error::setNotification( esc_html__( 'The changes have been kept.', 'hide-my-wp' ), 'success' );
+
+				break;
+
+			case 'hmwp_ai_explain':
+
+				$explained = $this->runExplain();
+
+				// The page refreshes this by itself after a scan, so it has to be
+				// answerable over ajax as well as by the button.
+				if ( HMWP_Classes_Tools::isAjax() ) {
+					if ( true === $explained ) {
+						wp_send_json_success( esc_html__( 'Done!', 'hide-my-wp' ) );
+					}
+
+					wp_send_json_error(
+						( is_string( $explained ) && $explained <> '' && 'nothing' <> $explained
+							? $explained
+							: esc_html__( 'The explanations could not be fetched right now.', 'hide-my-wp' ) )
+					);
+				}
+
+				if ( 'nothing' === $explained ) {
+					HMWP_Classes_Error::setNotification( esc_html__( 'There is nothing to explain. Every check passed.', 'hide-my-wp' ), 'success' );
+				} elseif ( true === $explained ) {
+					HMWP_Classes_Error::setNotification( esc_html__( 'The findings below have been explained for your website.', 'hide-my-wp' ), 'success' );
+				} else {
+					HMWP_Classes_Error::setNotification(
+						( is_string( $explained ) && $explained <> ''
+							? $explained
+							: esc_html__( 'The explanations could not be fetched right now.', 'hide-my-wp' ) )
+					);
+				}
 
 				break;
 

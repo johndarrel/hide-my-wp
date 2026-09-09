@@ -27,9 +27,11 @@ class HMWP_Models_Compatibility_Woocommerce extends HMWP_Models_Compatibility_Ab
 
 		} else {
 
-			//Check if WooCommerce login support is loaded
-			if ( HMWP_Classes_Tools::getValue( 'woocommerce-login-nonce' ) ) {
-				add_filter( 'hmwp_preauth_check', '__return_false' );
+			//The nonce has to be valid, its presence alone proves nothing
+			if ( function_exists( 'wp_verify_nonce' ) ) {
+				if ( wp_verify_nonce( HMWP_Classes_Tools::getValue( 'woocommerce-login-nonce' ), 'woocommerce-login' ) ) {
+					add_filter( 'hmwp_preauth_check', '__return_false' );
+				}
 			}
 
 		}
@@ -46,39 +48,59 @@ class HMWP_Models_Compatibility_Woocommerce extends HMWP_Models_Compatibility_Ab
             $uri = wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH); //phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
         }
 
-        // WooCommerce AJAX endpoints: skip firewall rules
-        // WooCommerce AJAX actions
-        if (
-             // WooCommerce secure downloads: skip firewall rules
-             ( HMWP_Classes_Tools::getIsset( 'download_file' ) &&
-               HMWP_Classes_Tools::getIsset( 'order' ) &&
-               HMWP_Classes_Tools::getIsset( 'uid' ) &&
-               HMWP_Classes_Tools::getIsset( 'key' ) ) ||
-             // WooCommerce REST API endpoints
-             (
-                     $uri &&
-                     (
-                             strpos( $uri, '/'.HMWP_Classes_Tools::getOption( 'hmwp_wp-json' ).'/wc/' ) !== false ||
-                             strpos( $uri, '/wp-json/wc/' ) !== false ||
-                             strpos( $uri, '/wc-api/' ) !== false ||
-                             strpos( $uri, '/wc-auth/' ) !== false
-                     )
-             ) ||
-             // WooCommerce payment gateways (IPNs, webhooks from payment processors)
-             (
-                     $uri &&
-                     (
-                             strpos( $uri, '/wc-api/v' ) !== false ||
-                             preg_match( '/\/(paypal|stripe|square|authorize_net|braintree)/', $uri )
-                     )
-             )
-        ) {
+        // WooCommerce endpoints where the plugin has to stand aside.
+        // Values are validated and paths anchored, a present parameter proves nothing.
+        $is_download = ( HMWP_Classes_Tools::getValue( 'download_file' ) <> '' &&
+                         HMWP_Classes_Tools::getValue( 'order' ) <> '' &&
+                         HMWP_Classes_Tools::getValue( 'uid' ) <> '' &&
+                         HMWP_Classes_Tools::getValue( 'key' ) <> '' );
+
+        $is_rest = HMWP_Classes_Tools::matchRootPath( $uri, array(
+                HMWP_Classes_Tools::getOption( 'hmwp_wp-json' ) . '/wc',
+                HMWP_Classes_Tools::getDefault( 'hmwp_wp-json' ) . '/wc',
+                'wc-api',
+                'wc-auth',
+        ) );
+
+        // Payment gateway callbacks always arrive on a WooCommerce endpoint
+        $is_gateway = ( $this->isWooEndpoint( 'wc-api' ) ||
+                        $this->isWooEndpoint( 'wc-ajax' ) ||
+                        (
+                                $uri &&
+                                HMWP_Classes_Tools::matchRootPath( $uri, array(
+                                        HMWP_Classes_Tools::getOption( 'hmwp_wp-json' ),
+                                        HMWP_Classes_Tools::getDefault( 'hmwp_wp-json' ),
+                                ) ) &&
+                                preg_match( '#/[^/]*(paypal|stripe|square|authorize[_-]?net|braintree)#i', $uri )
+                        ) );
+
+        if ( $is_download || $is_rest || $is_gateway ) {
 
             add_filter( 'hmwp_process_hide_urls', '__return_false' );
             add_filter( 'hmwp_process_firewall', '__return_false' );
             add_filter( 'hmwp_process_threats', '__return_false' );
         }
 
+	}
+
+	/**
+	 * Check that a WooCommerce endpoint parameter carries a real action name
+	 *
+	 * WooCommerce always sends an action slug, an empty value is not a WooCommerce call.
+	 *
+	 * @param  string  $param  The endpoint parameter to read
+	 *
+	 * @return bool
+	 */
+	private function isWooEndpoint( $param ) {
+
+		$value = HMWP_Classes_Tools::getValue( $param );
+
+		if ( ! is_string( $value ) || $value == '' ) {
+			return false;
+		}
+
+		return (bool) preg_match( '/^[A-Za-z0-9_-]{2,64}$/', $value );
 	}
 
 	public function hookBruteForce() {

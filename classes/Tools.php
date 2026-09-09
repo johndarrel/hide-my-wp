@@ -2536,6 +2536,44 @@ class HMWP_Classes_Tools {
 	 *
 	 * @return bool
 	 */
+	/**
+	 * Check if the request path matches one of the given paths, anchored at the site root
+	 *
+	 * Unlike searchInString(), a path appended to another entry point does not match.
+	 *
+	 * @param  string  $uri  The request path to check
+	 * @param  array  $paths  The paths to match against, relative to the site root
+	 *
+	 * @return bool
+	 */
+	public static function matchRootPath( $uri, $paths ) {
+
+		if ( ! is_string( $uri ) || $uri == '' ) {
+			return false;
+		}
+
+		//Read the root from the option to avoid the plugin URL filters
+		$root = wp_parse_url( get_option( 'home' ), PHP_URL_PATH );
+		$root = ( is_string( $root ) ? untrailingslashit( $root ) : '' );
+
+		$uri = '/' . ltrim( $uri, '/' );
+
+		foreach ( (array) $paths as $path ) {
+
+			if ( ! is_string( $path ) || trim( $path, '/' ) == '' ) {
+				continue;
+			}
+
+			$path = $root . '/' . trim( $path, '/' );
+
+			if ( $uri === $path || strpos( $uri, $path . '/' ) === 0 ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public static function searchInString( $haystack, $needles ) {
 		foreach ( $needles as $needle ) {
 			if ( $haystack && $needle && $haystack <> '' && $needle <> '' ) {

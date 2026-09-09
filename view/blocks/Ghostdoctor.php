@@ -11,6 +11,21 @@ $blockers = isset( $report['blockers'] ) ? $report['blockers'] : array();
 $plan     = isset( $report['plan'] ) ? $report['plan'] : array();
 $has_run  = ! empty( $report['time'] );
 
+$quota     = isset( $view->quota ) ? $view->quota : array();
+$remaining = isset( $view->remaining ) ? (int) $view->remaining : 0;
+$ai_ready  = ( ! empty( $quota['ok'] ) && ! empty( $quota['data']['ai_ready'] ) );
+
+// Using up the month is not an error. The quota call succeeds and reports no
+// allowance left, so it never reaches an error branch and the line would simply
+// vanish with nothing said.
+$ai_used_up = ( ! empty( $quota['ok'] )
+                && ! empty( $quota['data']['allowed'] )
+                && (int) $quota['data']['used'] >= (int) $quota['data']['allowed'] );
+
+$ai_resets = ( $ai_used_up && ! empty( $quota['data']['resets_at'] ) )
+	? mysql2date( get_option( 'date_format' ), $quota['data']['resets_at'] )
+	: '';
+
 ?>
 
 
@@ -71,12 +86,35 @@ $has_run  = ! empty( $report['time'] );
 					          . '</span>';
 				}
 
-				// Free has no allowance to report. The nudge sits in the same quiet
-				// line as the timestamp rather than as a banner, so the diagnosis stays
-				// the subject of the card and the offer is available without interrupting.
-				$meta[] = '<a href="javascript:void(0)" onclick="jQuery(\'#hmwp_ghost_mode_modal\').modal(\'show\')">'
-				          . esc_html__( 'Get these results explained for your website', 'hide-my-wp' )
-				          . '</a>';
+				// The allowance, when the account server reports one. A website that
+				// cannot reach it, or whose account carries no subscription, gets the
+				// offer instead. Either way it sits in the same quiet line as the
+				// timestamp rather than as a banner, so the diagnosis stays the subject
+				// of the card and the offer is available without interrupting.
+				if ( $ai_ready && $remaining > 0 ) {
+					$meta[] = esc_html(
+						sprintf(
+						/* translators: 1: Checks left. 2: Checks allowed each month. */
+							_n( '%1$s of %2$s AI check left this month', '%1$s of %2$s AI checks left this month', $remaining, 'hide-my-wp' ),
+							$remaining,
+							(int) $quota['data']['allowed']
+						)
+					);
+				} elseif ( $ai_used_up ) {
+					$meta[] = $ai_resets
+						? esc_html(
+							sprintf(
+							/* translators: %s: Date the monthly allowance resets. */
+								__( 'No AI checks left this month, they reset on %s. The diagnosis and repairs still work.', 'hide-my-wp' ),
+								$ai_resets
+							)
+						)
+						: esc_html__( 'No AI checks left this month. The diagnosis and repairs still work.', 'hide-my-wp' );
+				} else {
+					$meta[] = '<a href="javascript:void(0)" onclick="jQuery(\'#hmwp_ghost_mode_modal\').modal(\'show\')">'
+					          . esc_html__( 'Get these results explained for your website', 'hide-my-wp' )
+					          . '</a>';
+				}
 
 				if ( ! empty( $meta ) ) { ?>
                     <div class="text-muted small mt-2"><?php echo join( ' &middot; ', $meta ); //phpcs:ignore ?></div>

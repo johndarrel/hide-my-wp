@@ -998,8 +998,11 @@ class HMWP_Models_Rewrite {
 	 */
 	public function flushChanges() {
 
+		// Wait for all the plugins to register their rules, otherwise the flush drops them
 		if ( ! did_action( 'wp_loaded' ) ) {
 			add_action( 'wp_loaded', array( $this, 'flushChanges' ) );
+
+			return;
 		}
 
 		//Build the redirect table
@@ -2707,6 +2710,35 @@ class HMWP_Models_Rewrite {
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Build the REST API rewrite rules again after the REST API path changed
+	 *
+	 * WordPress keeps these rules in the database, so changing the path is not
+	 * enough, the rules have to be generated again with the new prefix.
+	 *
+	 * @return void
+	 */
+	public function flushRestRewrites() {
+
+		// Wait for all the plugins to register their rules, otherwise the flush drops them
+		if ( ! did_action( 'wp_loaded' ) ) {
+			add_action( 'wp_loaded', array( $this, 'flushRestRewrites' ) );
+
+			return;
+		}
+
+		// Make sure the custom REST API path is used while the rules are built
+		add_filter( 'rest_url_prefix', array( $this, 'replace_rest_api' ) );
+
+		// Register the REST API rules with the new prefix
+		rest_api_register_rewrites();
+
+		// Soft flush, the config file rules are handled by the plugin
+		flush_rewrite_rules( false );
+
+		do_action( 'hmwp_flushed_rest_rewrites' );
 	}
 
 	/**

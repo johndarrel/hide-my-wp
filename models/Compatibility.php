@@ -62,6 +62,7 @@ class HMWP_Models_Compatibility {
 			'ultimate-member/ultimate-member.php'                                           => 'HMWP_Models_Compatibility_UltimateMember',
 			'wp-user-manager/wp-user-manager.php'                                           => 'HMWP_Models_Compatibility_Wpum',
 			'wp-defender/wp-defender.php'                                                   => 'HMWP_Models_Compatibility_WpDefender',
+			'defender-security/wp-defender.php'                                                   => 'HMWP_Models_Compatibility_WpDefender',
 			'cmp-coming-soon-maintenance/niteo-cmp.php'                                     => 'HMWP_Models_Compatibility_Cmp',
 			'display-admin-page-on-frontend-premium/index.php'                              => 'HMWP_Models_Compatibility_WPFrontendAdmin',
 			'flying-press/flying-press.php'                                                 => 'HMWP_Models_Compatibility_FlyingPress',
@@ -72,6 +73,8 @@ class HMWP_Models_Compatibility {
 			'userswp/userswp.php'                                                           => 'HMWP_Models_Compatibility_UsersWP',
 			'litespeed-cache/litespeed-cache.php'                                           => 'HMWP_Models_Compatibility_LiteSpeed',
 			'wp-social-pro/wp-social-pro.php'                                               => 'HMWP_Models_Compatibility_WPSocial',
+			'softaculous/softaculous.php'                                                   => 'HMWP_Models_Compatibility_Softaculous',
+			'aapanel-wp-toolkit/aapanel-wp-toolkit.php'                                     => 'HMWP_Models_Compatibility_Aapanel',
 		);
 
 		try {
@@ -105,7 +108,8 @@ class HMWP_Models_Compatibility {
 		//Check the compatibility with builders
 		//Don't load when on builder editor
 		//Compatibility with Oxygen Plugin, Elementor, Thrive and more, Yellow Pencil, Wp Bakery
-		if ( HMWP_Classes_Tools::isLoggedInUser() ) {
+		//A builder preview is only ever opened by a user who can edit content
+		if ( HMWP_Classes_Tools::isLoggedInUser() && HMWP_Classes_Tools::userCan( 'edit_posts' ) ) {
 			$builder_paramas = array(
 				'fl_builder', //Beaver Builder
 				'fb-edit', //Fusion Builder

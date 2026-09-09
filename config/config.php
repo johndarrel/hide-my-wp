@@ -43,6 +43,10 @@ require_once dirname( __FILE__ ) . '/paths.php';
 define( 'HMWP_GHOSTDOCTOR_REPORT', 'hmwp_ghostdoctor_report' );
 define( 'HMWP_GHOSTDOCTOR_SNAPSHOT', 'hmwp_ghostdoctor_snapshot' );
 
+// The AI wording written for this website, kept so the findings keep their
+// explanations across page loads instead of being fetched on every render.
+define( 'HMWP_AI_EXPLAIN', 'hmwp_ai_explain' );
+
 define( 'HMWP_OPTION', 'hmwp_options' );
 define( 'HMWP_OPTION_SAFE', 'hmwp_options_safe' );
 define( 'HMWP_SECURITY_CHECK', 'hmwp_securitycheck' );

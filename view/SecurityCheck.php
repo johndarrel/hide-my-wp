@@ -32,9 +32,86 @@ $failed = max( 0, $overview['total'] - $overview['success'] );
 $actions = $view->getActionItems();
 $counts  = $view->countBySeverity( $actions );
 
+// Identifies this exact set of problems, so the summary below can be dropped the
+// moment the website stops having them, and to key the refresh so a call that
+// keeps failing gives up instead of reloading forever.
+$signature = $view->getFindingsSignature( $actions );
 
+// The AI wording, when it has been asked for. Read up here because the summary
+// renders above the list it describes.
+//
+// The summary describes the whole website at once, so it is tied to the set of
+// findings it was written about. A different set means it no longer applies.
+$explained = get_option( HMWP_AI_EXPLAIN );
+$summary   = '';
 
+if ( is_array( $explained ) && ! empty( $explained['summary'] )
+     && isset( $explained['signature'] )
+     && $explained['signature'] === $signature ) {
+	$summary = $explained['summary'];
+}
+
+// Whether anything on screen is currently carrying AI wording. The rows keep
+// theirs even when the summary goes, because each one is bound to a finding id.
+// The footer needs the difference so it never offers a first explanation for
+// findings that already have one.
+$has_ai = false;
+if ( is_array( $explained ) && ! empty( $explained['findings'] ) ) {
+	foreach ( $actions as $item ) {
+		if ( isset( $item['id'] ) && isset( $explained['findings'][ $item['id'] ] ) ) {
+			$has_ai = true;
+			break;
+		}
+	}
+}
+
+// Only offer the button when the account server says it can answer. On the free
+// version that is the whole gate: nothing here checks the edition, so a website
+// whose account carries an allowance gets the explanations and one that does not
+// is told exactly what is missing instead of being shown a generic upgrade box.
+/** @var HMWP_Models_Aiclient $aiclient */
+$aiclient = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Aiclient' );
+$ai_quota = $aiclient->getQuota();
+$ai_ready = $aiclient->isReady( $ai_quota );
+
+// A scan that turned up different problems leaves the stored summary describing
+// the previous one. Rather than making someone find a second button, the page
+// refreshes it itself once it has rendered.
+//
+// Not folded into the scan request on purpose. The scan already spends around
+// nine seconds probing the website and the explanation another nine, and putting
+// both in one form post ran the request past the time limit and had the worker
+// killed mid-write. Asking for it afterwards keeps the scan as fast as it was.
+$needs_explain = ( $ai_ready && $has_ai && '' === $summary );
+
+// Running out for the month is not an error, so the quota call still succeeds and
+// simply reports no allowance left. Without this the whole footer disappeared and
+// nobody was told why the explanations had stopped.
+$ai_used_up = ( ! $ai_ready
+                && ! empty( $ai_quota['ok'] )
+                && ! empty( $ai_quota['data']['allowed'] )
+                && (int) $ai_quota['data']['used'] >= (int) $ai_quota['data']['allowed'] );
+
+$ai_resets = ( $ai_used_up && ! empty( $ai_quota['data']['resets_at'] ) )
+	? mysql2date( get_option( 'date_format' ), $ai_quota['data']['resets_at'] )
+	: '';
+
+// An account with no active subscription is the ordinary case here, so it gets a
+// line that names the feature rather than the generic upgrade button. Anything
+// else, including an account server that cannot be reached, falls back to that
+// button: losing the offer entirely because a network call failed would be worse
+// than showing it.
+$ai_error    = ( ! empty( $ai_quota ) && empty( $ai_quota['ok'] ) ) ? $ai_quota['error'] : '';
+$ai_inactive = in_array( $ai_error, array( 'subscription_inactive', 'subscription_expired' ), true );
+
+// Ghost Doctor is a separate model, so the tile reads its report only when that
+// model is present. Same guard the action list uses.
 $gdreport = array();
+if ( file_exists( _HMWP_MODEL_DIR_ . 'Ghostdoctor.php' ) ) {
+	/** @var HMWP_Models_Ghostdoctor $gdmodel */
+	$gdmodel  = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Ghostdoctor' );
+	$gdreport = $gdmodel->getReport();
+}
 
 ?>
 
@@ -60,6 +137,25 @@ $gdreport = array();
             $button.prop('disabled', true).text('<?php echo esc_js( __( 'Scanning...', 'hide-my-wp' ) ); ?>');
 
             $.post(ajaxurl, $scan.serialize()).always(function () {
+                window.location.reload();
+            });
+        }
+		<?php } ?>
+
+		<?php
+		// The scan has already run and its results are on screen. What is missing
+		// is the wording, so it is fetched now that nothing is blocking the page.
+		// Keyed by the findings signature so a call that keeps failing gives up
+		// instead of reloading forever.
+		if ( $needs_explain ) { ?>
+        var explainKey = 'hmwp_explain_<?php echo esc_js( $signature ); ?>';
+
+        if (!window.sessionStorage || !sessionStorage.getItem(explainKey)) {
+            if (window.sessionStorage) {
+                sessionStorage.setItem(explainKey, '1');
+            }
+
+            $.post(ajaxurl, $('#hmwp_ai_explain').serialize()).always(function () {
                 window.location.reload();
             });
         }
@@ -160,6 +256,15 @@ $gdreport = array();
 							      // the button ends up touching the text. ?>
 							<?php if ( $summary <> '' ) { ?>
                                 <div class="card-text mx-auto mb-4" style="max-width: 52em;"><?php echo esc_html( $summary ); ?></div>
+							<?php } elseif ( $needs_explain ) { ?>
+								<?php // wp_loading_min is the spinner the rest of the plugin uses.
+								      // Without it this line read as a statement about the website
+								      // rather than as something still happening, and the wait can
+								      // run close to a minute. ?>
+                                <div class="card-text text-muted mx-auto mb-4" style="max-width: 52em;">
+                                    <div class="wp_loading_min"></div>
+                                    <div class="mt-2"><?php echo esc_html__( 'Working out what these results mean for your website. This can take up to a minute.', 'hide-my-wp' ); ?></div>
+                                </div>
 							<?php } ?>
                             <form id="hmwp_securitycheck" method="POST" class="m-0">
 								<?php wp_nonce_field( 'hmwp_securitycheck', 'hmwp_nonce' ); ?>
@@ -352,18 +457,92 @@ $gdreport = array();
 						// is useful rather than an interruption. Everything above it works, so
 						// nothing here is a locked feature: the list, the scores and the task
 						// details are all free. This row only adds the wording.
+						//
+						// Nothing here tests the edition. The account server decides who gets
+						// an answer, so a website whose account carries an allowance gets the
+						// real controls and everything else falls through to the offer.
 						?>
-                        <div class="col-sm-12 px-4 py-3 d-flex flex-row justify-content-between align-items-center border-top">
-                            <div class="text-muted small" style="max-width: 62em;">
-								<?php echo esc_html__( 'Get these findings explained for your website, ranked by what actually puts you at risk.', 'hide-my-wp' ); ?>
+
+						<?php if ( $ai_ready || $ai_used_up ) { ?>
+							<?php
+							// One call explains every finding above. Behind a button on
+							// purpose, so using one of the monthly checks is a choice
+							// rather than something that happens on every page load.
+							?>
+                            <div class="col-sm-12 px-4 py-3 d-flex flex-row justify-content-between align-items-center border-top">
+                                <div class="text-muted small" style="max-width: 62em;">
+									<?php if ( $ai_used_up ) { ?>
+										<?php
+										echo $ai_resets
+											? esc_html(
+												sprintf(
+												/* translators: %s: Date the monthly allowance resets. */
+													__( 'No AI checks left this month, they reset on %s.', 'hide-my-wp' ),
+													$ai_resets
+												)
+											)
+											: esc_html__( 'No AI checks left this month.', 'hide-my-wp' );
+										?>
+									<?php } elseif ( $summary <> '' ) { ?>
+										<?php echo esc_html__( 'Explained for your website. Run it again after you make changes.', 'hide-my-wp' ); ?>
+									<?php } else { ?>
+										<?php echo esc_html__( 'Get these findings explained for your website, ranked by what actually puts you at risk.', 'hide-my-wp' ); ?>
+									<?php } ?>
+									<?php if ( ! $ai_used_up && ! empty( $ai_quota['data']['allowed'] ) ) { ?>
+                                        <span class="ml-1">
+                                            <?php
+                                            $ai_left = max( 0, (int) $ai_quota['data']['allowed'] - (int) $ai_quota['data']['used'] );
+                                            echo esc_html(
+	                                            sprintf(
+		                                            /* translators: 1: Checks left. 2: Checks allowed each month. */
+		                                            _n( '%1$s of %2$s AI check left this month', '%1$s of %2$s AI checks left this month', $ai_left, 'hide-my-wp' ),
+		                                            $ai_left,
+		                                            (int) $ai_quota['data']['allowed']
+	                                            )
+                                            );
+                                            ?>
+                                        </span>
+									<?php } ?>
+                                </div>
+								<?php if ( ! $ai_used_up ) { ?>
+                                    <form method="POST" id="hmwp_ai_explain" class="m-0">
+										<?php wp_nonce_field( 'hmwp_ai_explain', 'hmwp_nonce' ); ?>
+                                        <input type="hidden" name="action" value="hmwp_ai_explain"/>
+                                        <button type="submit" class="btn btn-success rounded-0 px-4" style="white-space: nowrap;">
+											<?php echo ( $has_ai ? esc_html__( 'Explain Again', 'hide-my-wp' ) : esc_html__( 'Explain These Findings', 'hide-my-wp' ) ); ?>
+                                        </button>
+                                    </form>
+								<?php } ?>
                             </div>
-								<?php // btn-warning without the CTA class, matching the PRO buttons
-								      // already on this screen. The class draws a corner ribbon, which
-								      // collides with a button whose label is already PRO. ?>
-                            <button type="button" class="btn btn-warning rounded-0 px-4" style="white-space: nowrap;" onclick="jQuery('#hmwp_ghost_mode_modal').modal('show')">
-								<?php echo esc_html__( 'PRO', 'hide-my-wp' ); ?>
-                            </button>
-                        </div>
+
+						<?php } else { ?>
+
+                            <div class="col-sm-12 px-4 py-3 d-flex flex-row justify-content-between align-items-center border-top">
+                                <div class="text-muted small" style="max-width: 62em;">
+									<?php if ( $ai_inactive ) { ?>
+										<?php // Naming the missing thing beats a bare PRO badge. The
+										      // account answered, so this is a fact about the licence
+										      // rather than a guess about the edition. ?>
+										<?php echo esc_html__( 'AI Security Explanations need an active subscription. Everything else on this page keeps working.', 'hide-my-wp' ); ?>
+									<?php } else { ?>
+										<?php echo esc_html__( 'Get these findings explained for your website, ranked by what actually puts you at risk.', 'hide-my-wp' ); ?>
+									<?php } ?>
+                                </div>
+									<?php // btn-warning without the CTA class, matching the PRO buttons
+									      // already on this screen. The class draws a corner ribbon, which
+									      // collides with a button whose label is already PRO. ?>
+								<?php if ( $ai_inactive && ! empty( $ai_quota['renew'] ) ) { ?>
+                                    <a href="<?php echo esc_url( $ai_quota['renew'] ); ?>" target="_blank" rel="noopener" class="btn btn-warning rounded-0 px-4" style="white-space: nowrap;">
+										<?php echo esc_html__( 'Renew', 'hide-my-wp' ); ?>
+                                    </a>
+								<?php } else { ?>
+                                    <button type="button" class="btn btn-warning rounded-0 px-4" style="white-space: nowrap;" onclick="jQuery('#hmwp_ghost_mode_modal').modal('show')">
+										<?php echo esc_html__( 'PRO', 'hide-my-wp' ); ?>
+                                    </button>
+								<?php } ?>
+                            </div>
+
+						<?php } ?>
 
 						<?php } ?>
 
@@ -563,13 +742,19 @@ $gdreport = array();
 // Nonce carriers for the Fix it buttons that have no dialog of their own.
 //
 // settings.js reads the action and the nonce out of a form with a fixed id
-// before posting, and passes the values themselves as arguments. Four of those
-// forms were never rendered anywhere, so the post went out with no action and no
+// before posting, and passes the values themselves as arguments. Those forms
+// were never rendered anywhere, so the post went out with no action and no
 // nonce, WordPress answered with 0, and jQuery reported it as "Ajax is not
-// loading correctly. Clear all cache and try again." Every Fix it for security
-// keys, the table prefix, the wp-config constants and the plugin updates failed
-// that way. They are hidden because the button is the whole interface.
+// loading correctly. Clear all cache and try again." Every Fix it for a plugin
+// setting, the security keys, the table prefix, the wp-config constants and the
+// plugin updates failed that way. They are hidden because the button is the
+// whole interface.
 ?>
+<form id="hmwp_fixsettings_form" method="POST" class="d-none">
+	<?php wp_nonce_field( 'hmwp_fixsettings', 'hmwp_nonce' ); ?>
+    <input type="hidden" name="action" value="hmwp_fixsettings"/>
+</form>
+
 <form id="hmwp_fixsalts_form" method="POST" class="d-none">
 	<?php wp_nonce_field( 'hmwp_fixsalts', 'hmwp_nonce' ); ?>
     <input type="hidden" name="action" value="hmwp_fixsalts"/>

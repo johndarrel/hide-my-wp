@@ -324,12 +324,16 @@ class HMWP_Models_Cookies {
 
 		// Most reliable if constant exists.
 		if ( defined( 'LOGGED_IN_COOKIE' ) && ! empty( $_COOKIE[ LOGGED_IN_COOKIE ] ) ) {
-			return true;
+			if ( self::isAuthCookieShape( $_COOKIE[ LOGGED_IN_COOKIE ] ) ) { //phpcs:ignore
+				return true;
+			}
 		}
 
-		// Your custom cookie (if you use it).
+		// Your custom cookie (if you use it). It holds a copy of the logged in cookie
 		if ( defined( 'HMWP_LOGGED_IN_COOKIE' ) && ! empty( $_COOKIE[ HMWP_LOGGED_IN_COOKIE . 'login' ] ) ) {
-			return true;
+			if ( self::isAuthCookieShape( $_COOKIE[ HMWP_LOGGED_IN_COOKIE . 'login' ] ) ) { //phpcs:ignore
+				return true;
+			}
 		}
 
 		// Fallback for very early bootstrap / edge cases:
@@ -339,12 +343,37 @@ class HMWP_Models_Cookies {
 				continue;
 			}
 
-			if ( strpos( $name, 'wordpress_logged_in_' ) === 0 ) {
+			if ( strpos( $name, 'wordpress_logged_in_' ) === 0 && self::isAuthCookieShape( $val ) ) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	/**
+	 * Check that a cookie value has the shape of a WordPress auth cookie
+	 *
+	 * Runs before pluggable.php, so the cookie is rejected on shape, not validated.
+	 *
+	 * @param  mixed  $value  The cookie value to check
+	 *
+	 * @return bool
+	 */
+	private static function isAuthCookieShape( $value ) {
+
+		if ( ! is_string( $value ) || $value === '' ) {
+			return false;
+		}
+
+		// WordPress stores username|expiration|token|hmac
+		$parts = explode( '|', $value );
+
+		if ( count( $parts ) !== 4 ) {
+			return false;
+		}
+
+		return ( is_numeric( $parts[1] ) && (int) $parts[1] > time() );
 	}
 
 

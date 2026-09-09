@@ -32,11 +32,11 @@
                             <p style="font-size: 14px; color: #777; margin: 0 0 20px; line-height: 1.5;">Get advanced hack prevention with enterprise-grade security hardening for your WordPress sites.</p>
 
                             <div style="display: flex; align-items: baseline; justify-content: center; gap: 10px; margin-bottom: 16px;">
-                                <span style="font-size: 16px; color: #aaa; text-decoration: line-through;">$149/yr</span>
-                                <span style="font-family: 'Georgia', serif; font-size: 42px; font-weight: 700; color: #1a1a1a; line-height: 1;">$52<span style="font-size: 18px; color: #555;">/yr</span></span>
+                                <span style="font-size: 16px; color: #aaa; text-decoration: line-through;">$119/yr</span>
+                                <span style="font-family: 'Georgia', serif; font-size: 42px; font-weight: 700; color: #1a1a1a; line-height: 1;">$59.5<span style="font-size: 18px; color: #555;">/yr</span></span>
                             </div>
 
-                            <div style="background: linear-gradient(135deg, #e84118 0%, #f97316 100%); color: white; border-radius: 8px; padding: 3px 12px; display: inline-block; font-size: 13px; font-weight: 600; margin-bottom: 20px; letter-spacing: 0.3px;">SAVE 65% on Ghost 5</div>
+                            <div style="background: linear-gradient(135deg, #e84118 0%, #f97316 100%); color: white; border-radius: 8px; padding: 3px 12px; display: inline-block; font-size: 13px; font-weight: 600; margin-bottom: 20px; letter-spacing: 0.3px;">SAVE 50% on Ghost 5</div>
 
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                     </div>
 
                     <div style="padding: 0 2rem 1.5rem; text-align: center;">
-                        <a id="cta-btn" href="https://wpghost.com/pricing/?coupon=HIDEMYWP70&utm_source=social&utm_medium=banner&utm_campaign=free&utm_id=offer#price" target="_blank" style="display: inline-block; background: #f97316; color: #fff; text-decoration: none; border-radius: 50px; padding: 15px 32px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.2s; box-shadow: 0 4px 18px rgba(239,139,26,0.35); letter-spacing: 0.3px; width: 300px;" onmouseenter="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 24px rgba(239,139,26,0.45)'" onmouseleave="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 18px rgba(239,139,26,0.35)'" onmousedown="this.style.transform='scale(0.97)'">
+                        <a id="cta-btn" href="https://wpghost.com/pricing/?utm_source=social&utm_medium=banner&utm_campaign=free&utm_id=offer#price" target="_blank" style="display: inline-block; background: #f97316; color: #fff; text-decoration: none; border-radius: 50px; padding: 15px 32px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.2s; box-shadow: 0 4px 18px rgba(239,139,26,0.35); letter-spacing: 0.3px; width: 300px;" onmouseenter="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 24px rgba(239,139,26,0.45)'" onmouseleave="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 18px rgba(239,139,26,0.35)'" onmousedown="this.style.transform='scale(0.97)'">
                             Secure My Site Now
                         </a>
                     </div>

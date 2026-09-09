@@ -31,14 +31,13 @@ class HMWP_Models_Compatibility_Wpml extends HMWP_Models_Compatibility_Abstract 
 			$uri = wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ); //phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 
+		//Anchored at the site root, the REST prefix already covers the tm and ate routes
 		if (
 			$uri &&
-			(
-				strpos( $uri, '/' . HMWP_Classes_Tools::getOption( 'hmwp_wp-json' ) . '/wpml/' ) !== false ||
-				strpos( $uri, '/wp-json/wpml/' ) !== false ||
-				strpos( $uri, '/wpml/tm/' ) !== false ||
-				strpos( $uri, '/ate/jobs/' ) !== false
-			)
+			HMWP_Classes_Tools::matchRootPath( $uri, array(
+				HMWP_Classes_Tools::getOption( 'hmwp_wp-json' ) . '/wpml',
+				HMWP_Classes_Tools::getDefault( 'hmwp_wp-json' ) . '/wpml',
+			) )
 		) {
 			add_filter( 'hmwp_process_hide_urls', '__return_false' );
 			add_filter( 'hmwp_process_firewall', '__return_false' );

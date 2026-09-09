@@ -315,14 +315,21 @@ class HMWP_Models_Compatibility_Others extends HMWP_Models_Compatibility_Abstrac
 				add_filter( 'hmwp_process_hide_urls', '__return_false' );
 			}
 
-			//If there is a loopback from itsec
-			if ( HMWP_Classes_Tools::getValue( 'action' ) == 'itsec-check-loopback' ) {
-				$exp    = HMWP_Classes_Tools::getValue( 'exp' );
-				$action = 'itsec-check-loopback';
-				$hash   = hash_hmac( 'sha1', "$action|$exp", wp_salt() );
+			//Only a request from the plugin itself, carrying the matching hash, is genuine
+			if ( HMWP_Classes_Tools::getValue( 'action' ) == 'itsec-check-loopback' &&
+			     ( HMWP_Classes_Tools::isPluginActive( 'better-wp-security/better-wp-security.php' ) ||
+			       HMWP_Classes_Tools::isPluginActive( 'ithemes-security-pro/ithemes-security-pro.php' ) ) ) {
 
-				if ( $hash <> HMWP_Classes_Tools::getValue( 'hash', '' ) ) {
-					add_filter( 'hmwp_process_hide_urls', '__return_false' );
+				$exp = HMWP_Classes_Tools::getValue( 'exp' );
+
+				//The loopback link is only valid until it expires
+				if ( $exp <> '' && is_numeric( $exp ) && (int) $exp > time() ) {
+					$action = 'itsec-check-loopback';
+					$hash   = hash_hmac( 'sha1', "$action|$exp", wp_salt() );
+
+					if ( hash_equals( $hash, (string) HMWP_Classes_Tools::getValue( 'hash', '' ) ) ) {
+						add_filter( 'hmwp_process_hide_urls', '__return_false' );
+					}
 				}
 			}
 

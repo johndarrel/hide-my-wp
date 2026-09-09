@@ -49,13 +49,18 @@ class HMWP_Models_Compatibility_LiteSpeed extends HMWP_Models_Compatibility_Abst
 		});
 
 		// Whitelist Litespeed quic cloud Ips after settings save
-		add_action( 'hmwp_settings_saved', function (){
-			$quic_ips = HMWP_Classes_Tools::hmwp_remote_get( 'https://www.quic.cloud/ips-all?json' );
-			set_transient( 'hmwp_lispeed_ips', $quic_ips );
-		} );
+		add_action( 'hmwp_settings_saved', array( $this, 'loadQuicCloudIPs' ) );
+
+		$quic_ips = get_transient( 'hmwp_lispeed_ips' );
+
+		// Quic Cloud changes the IPs in time, load them again when the list expired
+		// Only in admin or cron, never on a visitor request
+		if ( $quic_ips === false && ( is_admin() || HMWP_Classes_Tools::isCron() ) && ! get_transient( 'hmwp_lispeed_ips_lock' ) ) {
+			$quic_ips = $this->loadQuicCloudIPs();
+		}
 
 		// Add Litespeed IPs in whitelist
-		if( $quic_ips = get_transient('hmwp_lispeed_ips') ){
+		if( $quic_ips ){
 			add_filter( 'hmwp_whitelisted_ips', function ( $ips ) use ( $quic_ips ) {
 
 				if ( !empty($quic_ips) && $quic_ips = json_decode( $quic_ips, true ) ){
@@ -81,6 +86,27 @@ class HMWP_Models_Compatibility_LiteSpeed extends HMWP_Models_Compatibility_Abst
 			$firewallRules->checkWhitelistIPs();
 		}
 
+	}
+
+	/**
+	 * Load the Quic Cloud IPs and keep them for a week
+	 *
+	 * @return string|false The IP list as received from Quic Cloud
+	 */
+	public function loadQuicCloudIPs() {
+
+		// Don't call Quic Cloud again for an hour if the list can't be loaded
+		set_transient( 'hmwp_lispeed_ips_lock', 1, HOUR_IN_SECONDS );
+
+		$quic_ips = HMWP_Classes_Tools::hmwp_remote_get( 'https://www.quic.cloud/ips-all?json' );
+
+		if ( ! is_string( $quic_ips ) || $quic_ips == '' || ! json_decode( $quic_ips, true ) ) {
+			return false;
+		}
+
+		set_transient( 'hmwp_lispeed_ips', $quic_ips, WEEK_IN_SECONDS );
+
+		return $quic_ips;
 	}
 
 	/**

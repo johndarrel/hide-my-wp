@@ -119,7 +119,8 @@ class HMWP_Classes_Action extends HMWP_Classes_FrontController {
 						"hmwp_ghostdoctor_diagnose",
 						"hmwp_ghostdoctor_repair",
 						"hmwp_ghostdoctor_keep",
-						"hmwp_ghostdoctor_undo"
+						"hmwp_ghostdoctor_undo",
+						"hmwp_ai_explain"
 					)
 				),
 			),

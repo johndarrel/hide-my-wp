@@ -265,11 +265,22 @@ class HMWP_Models_ThreatsLog extends HMWP_Models_Firewall_Threats {
 	}
 
 	/**
-	 * Saves threat details to the database and prevents duplicate recording within a specified time period.
+	 * Write one threat to the log table.
 	 *
-	 * This method retrieves request information, prepares the data in a specific format, and records it
-	 * in the database for threat detection and analysis purposes. It uses caching mechanisms to avoid
-	 * duplicating threats within an hour.
+	 * Every call inserts a row. There is no time based de-duplication here, and
+	 * there never was: the docblock used to claim threats were cached and skipped
+	 * for an hour, which was wrong from the commit that added this feature and
+	 * made the stored counts look like an under-count that needed explaining.
+	 *
+	 * What actually limits the rows is the caller. HMWP_Controllers_ThreatsLog
+	 * keeps only the last threat detected during a request and writes it on
+	 * shutdown, so a request that trips several rules still produces a single
+	 * row. Threats per day can therefore never exceed requests per day.
+	 *
+	 * The transients elsewhere in this class cache the aggregates the dashboard
+	 * reads. They have no effect on what is written here.
+	 *
+	 * @param array $threat The detected threat. Ignored unless it carries a code.
 	 *
 	 * @return void
 	 * @throws Exception

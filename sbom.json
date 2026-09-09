@@ -1,0 +1,138 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "name": "WP Ghost",
+      "version": "7.0.10",
+      "description": "WordPress security plugin (free edition). Hides WP paths, firewall, brute-force defence, 2FA, GEO-IP blocking.",
+      "publisher": "MINBO QRE SRL",
+      "licenses": [ { "license": { "id": "GPL-2.0-or-later" } } ]
+    },
+    "properties": [
+      {
+        "name": "hmwp:sbom-note",
+        "value": "Third-party components are vendored, not installed through a package manager, so there is no lockfile to generate this from. Versions below were read from version constants inside the shipped files. Components marked version-determined=false had their banners stripped by minification and MUST be pinned down before this SBOM is relied on for vulnerability reporting."
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "bootstrap",
+      "version": "4.6.0",
+      "purl": "pkg:npm/bootstrap@4.6.0",
+      "licenses": [ { "license": { "id": "MIT" } } ],
+      "description": "view/assets/js/bootstrap.min.js, bootstrap.rtl.min.js, css/bootstrap.min.css",
+      "properties": [
+        { "name": "hmwp:version-determined", "value": "true" },
+        { "name": "hmwp:source", "value": "VERSION=\"4.6.0\" constant in bootstrap.min.js" },
+        { "name": "hmwp:risk", "value": "Bootstrap 4 is an end-of-life branch and receives no security fixes. CVE-2024-6531 (carousel data-slide XSS) lists 4.0.0-4.6.2 as affected; the upstream GitHub advisory was withdrawn as out of scope for Bootstrap's security model, but the CVE remains public and scanners still flag it." }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "bootstrap-select",
+      "version": "1.13.14",
+      "purl": "pkg:npm/bootstrap-select@1.13.14",
+      "licenses": [ { "license": { "id": "MIT" } } ],
+      "description": "view/assets/js/bootstrap-select.min.js, css/bootstrap-select.min.css",
+      "properties": [
+        { "name": "hmwp:version-determined", "value": "true" },
+        { "name": "hmwp:source", "value": "version string inside bootstrap-select.min.js" }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "chart.js",
+      "version": "4.5.0",
+      "purl": "pkg:npm/chart.js@4.5.0",
+      "licenses": [ { "license": { "id": "MIT" } } ],
+      "description": "view/assets/js/chart.umd.min.js",
+      "properties": [
+        { "name": "hmwp:version-determined", "value": "true" },
+        { "name": "hmwp:source", "value": "banner comment retained in the shipped file" }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "font-awesome",
+      "version": "4.7.0",
+      "purl": "pkg:npm/font-awesome@4.7.0",
+      "licenses": [
+        { "license": { "id": "MIT", "acknowledgement": "declared" } },
+        { "license": { "id": "OFL-1.1" } },
+        { "license": { "id": "CC-BY-4.0" } }
+      ],
+      "description": "view/assets/css/font-awesome.min.css, view/assets/fonts/fontawesome-webfont.woff, .woff2",
+      "properties": [
+        { "name": "hmwp:version-determined", "value": "true" },
+        { "name": "hmwp:risk", "value": "Released 2016. End of life, no upstream maintenance." }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "popper.js",
+      "version": "unknown",
+      "licenses": [ { "license": { "id": "MIT" } } ],
+      "description": "view/assets/js/popper.min.js",
+      "properties": [
+        { "name": "hmwp:version-determined", "value": "false" },
+        { "name": "hmwp:note", "value": "No version string survives in the shipped file. UMD build, ~20KB, and paired with Bootstrap 4.6.0, which expects the Popper 1.16.x line. Confirm against upstream before relying on this entry." }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "clipboard.js",
+      "version": "unknown",
+      "licenses": [ { "license": { "id": "MIT" } } ],
+      "description": "Inlined inside view/assets/js/settings.min.js rather than shipped as its own file.",
+      "properties": [
+        { "name": "hmwp:version-determined", "value": "false" },
+        { "name": "hmwp:risk", "value": "Bundled into a first-party file, so dependency scanners will not see it at all. Extract it to its own file or record the version here." }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "qrcodejs",
+      "version": "unknown",
+      "licenses": [ { "license": { "id": "MIT" } } ],
+      "description": "view/assets/js/qrcode.min.js",
+      "properties": [ { "name": "hmwp:version-determined", "value": "false" } ]
+    },
+    {
+      "type": "library",
+      "name": "parsedown",
+      "version": "unknown",
+      "purl": "pkg:composer/erusev/parsedown",
+      "licenses": [ { "license": { "id": "MIT" } } ],
+      "description": "update/vendor/Parsedown.php, update/vendor/ParsedownModern.php",
+      "properties": [
+        { "name": "hmwp:version-determined", "value": "false" },
+        { "name": "hmwp:note", "value": "ParsedownModern.php is a local fork, so upstream advisories may not map cleanly." }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "plugin-update-checker",
+      "version": "5.5",
+      "purl": "pkg:composer/yahnis-elsts/plugin-update-checker@5.5",
+      "licenses": [ { "license": { "id": "MIT" } } ],
+      "description": "update/v5p5/ (5.5 line) and update/v5/PucFactory.php, update/vendor/PucReadmeParser.php",
+      "properties": [
+        { "name": "hmwp:version-determined", "value": "partial" },
+        { "name": "hmwp:note", "value": "Version inferred from the v5p5 directory name, not from a version constant in the code." }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "maxmind-db-reader",
+      "version": "n/a",
+      "licenses": [ { "license": { "id": "GPL-2.0-or-later" } } ],
+      "description": "models/geoip/ - a first-party implementation of the MaxMind DB binary format, not vendored upstream code. Listed so the format dependency is visible; it carries no upstream advisory feed.",
+      "properties": [ { "name": "hmwp:first-party", "value": "true" } ]
+    }
+  ]
+}
