@@ -239,20 +239,8 @@ if ( ! isset( $view ) ) {
                                             </div>
                                         </div>
 
-                                        <?php if ( HMWP_Classes_Tools::getOption( 'brute_google_project_id' ) <> '' && HMWP_Classes_Tools::getOption( 'brute_google_api_key' ) <> '' && HMWP_Classes_Tools::getOption( 'brute_google_site_key' ) <> '' ) { ?>
-                                            <div class="col-sm-12 py-3 mx-0 my-3">
-                                                <button type="button" class="btn btn-lg btn-default brute_recaptcha_test hmwp_modal" data-remote="<?php echo esc_url( site_url( 'wp-login.php' ) . '?nordt=1&hmwp_preview=' . HMWP_Classes_Tools::getOption( 'hmwp_disable_name' ) ) ?>" data-target="#brute_recaptcha_modal"><?php echo esc_html__( 'reCAPTCHA Test', 'hide-my-wp' ); ?></button>
+                                        <?php $type = 'enterprise'; include _HMWP_THEME_DIR_ . 'blocks/RecaptchaCheck.php'; ?>
 
-                                                <h4 class="mt-5 mb-3"><?php echo esc_html__( 'Next Steps', 'hide-my-wp' ); ?></h4>
-                                                <ol>
-                                                    <li><?php echo wp_kses_post( sprintf( /* translators: 1: Opening <strong> tag. 2: Closing </strong> tag. */ __( 'Run %1$sreCAPTCHA Test%2$s and login inside the popup.', 'hide-my-wp' ), '<strong>', '</strong>' ) ); ?></li>
-                                                    <li><?php echo esc_html__( "If you're able to login, you've set reCAPTCHA correctly.", 'hide-my-wp' ); ?></li>
-                                                    <li><?php echo esc_html__( 'If the reCAPTCHA displays any error, please make sure you fix them before moving forward.', 'hide-my-wp' ); ?></li>
-                                                    <li><?php echo esc_html__( 'Do not logout from your account until you are confident that reCAPTCHA is working and you will be able to login again.', 'hide-my-wp' ); ?></li>
-                                                    <li><?php echo esc_html__( "If you can't configure reCAPTCHA, switch to Math reCaptcha protection.", 'hide-my-wp' ); ?></li>
-                                                </ol>
-                                            </div>
-                                        <?php } ?>
 
                                     </div>
                                 <?php } else { ?>
@@ -353,20 +341,8 @@ if ( ! isset( $view ) ) {
                                             </div>
                                         </div>
 
-                                        <?php if ( HMWP_Classes_Tools::getOption( 'brute_captcha_site_key' ) <> '' && HMWP_Classes_Tools::getOption( 'brute_captcha_secret_key' ) <> '' ) { ?>
-                                            <div class="col-sm-12 py-3 mx-0 my-3">
-                                                <button type="button" class="btn btn-lg btn-default brute_recaptcha_test hmwp_modal" data-remote="<?php echo esc_url( site_url( 'wp-login.php' ) . '?nordt=1&hmwp_preview=' . HMWP_Classes_Tools::getOption( 'hmwp_disable_name' ) ) ?>" data-target="#brute_recaptcha_modal"><?php echo esc_html__( 'reCAPTCHA V2 Test', 'hide-my-wp' ); ?></button>
+                                        <?php $type = 'v2'; include _HMWP_THEME_DIR_ . 'blocks/RecaptchaCheck.php'; ?>
 
-                                                <h4 class="mt-5 mb-3"><?php echo esc_html__( 'Next Steps', 'hide-my-wp' ); ?></h4>
-                                                <ol>
-                                                    <li><?php echo wp_kses_post( sprintf( /* translators: 1: Opening <strong> tag. 2: Closing </strong> tag. */ __( 'Run %1$sreCAPTCHA Test%2$s and login inside the popup.', 'hide-my-wp' ), '<strong>', '</strong>' ) ); ?></li>
-                                                    <li><?php echo esc_html__( "If you're able to login, you've set reCAPTCHA correctly.", 'hide-my-wp' ); ?></li>
-                                                    <li><?php echo esc_html__( 'If the reCAPTCHA displays any error, please make sure you fix them before moving forward.', 'hide-my-wp' ); ?></li>
-                                                    <li><?php echo esc_html__( 'Do not logout from your account until you are confident that reCAPTCHA is working and you will be able to login again.', 'hide-my-wp' ); ?></li>
-                                                    <li><?php echo esc_html__( "If you can't configure reCAPTCHA, switch to Math reCaptcha protection.", 'hide-my-wp' ); ?></li>
-                                                </ol>
-                                            </div>
-                                        <?php } ?>
 
                                     </div>
                                     <div class="brute_use_captcha_v3" <?php echo( ! HMWP_Classes_Tools::getOption( 'brute_use_captcha_v3' ) ? 'style="display:none"' : '' ) ?>>
@@ -392,20 +368,8 @@ if ( ! isset( $view ) ) {
                                             </div>
                                         </div>
 
-                                        <?php if ( HMWP_Classes_Tools::getOption( 'brute_captcha_site_key_v3' ) <> '' && HMWP_Classes_Tools::getOption( 'brute_captcha_secret_key_v3' ) <> '' ) { ?>
-                                            <div class="col-sm-12 py-3 mx-0 my-3">
-                                                <button type="button" class="btn btn-lg btn-default brute_recaptcha_test hmwp_modal" data-remote="<?php echo esc_url( site_url( 'wp-login.php' ) . '?nordt=1&hmwp_preview=' . HMWP_Classes_Tools::getOption( 'hmwp_disable_name' ) ) ?>" data-target="#brute_recaptcha_modal"><?php echo esc_html__( 'reCAPTCHA V3 Test', 'hide-my-wp' ); ?></button>
+                                        <?php $type = 'v3'; include _HMWP_THEME_DIR_ . 'blocks/RecaptchaCheck.php'; ?>
 
-                                                <h4 class="mt-5 mb-3"><?php echo esc_html__( 'Next Steps', 'hide-my-wp' ); ?></h4>
-                                                <ol>
-                                                    <li><?php echo wp_kses_post( sprintf( /* translators: 1: Opening <strong> tag. 2: Closing </strong> tag. */ __( 'Run %1$sreCAPTCHA Test%2$s and login inside the popup.', 'hide-my-wp' ), '<strong>', '</strong>' ) ); ?></li>
-                                                    <li><?php echo esc_html__( "If you're able to login, you've set reCAPTCHA correctly.", 'hide-my-wp' ); ?></li>
-                                                    <li><?php echo esc_html__( 'If the reCAPTCHA displays any error, please make sure you fix them before moving forward.', 'hide-my-wp' ); ?></li>
-                                                    <li><?php echo esc_html__( 'Do not logout from your account until you are confident that reCAPTCHA is working and you will be able to login again.', 'hide-my-wp' ); ?></li>
-                                                    <li><?php echo esc_html__( "If you can't configure reCAPTCHA, switch to Math reCaptcha protection.", 'hide-my-wp' ); ?></li>
-                                                </ol>
-                                            </div>
-                                        <?php } ?>
 
                                     </div>
                                 <?php } ?>
@@ -459,19 +423,6 @@ if ( ! isset( $view ) ) {
                                     </div>
                                 </div>
 
-                                <div class="modal" id="brute_recaptcha_modal" tabindex="-1" role="dialog" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="exampleModalLabel"><?php echo esc_html__( 'reCAPTCHA Test', 'hide-my-wp' ); ?></h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <iframe class="modal-body" style="min-height: 500px;"></iframe>
-                                        </div>
-                                    </div>
-                                </div>
 
                             </div>
 
@@ -515,6 +466,17 @@ if ( ! isset( $view ) ) {
                                                 <input type="checkbox" id="hmwp_bruteforce_woocommerce" name="hmwp_bruteforce_woocommerce" class="switch" <?php echo( HMWP_Classes_Tools::getOption( 'hmwp_bruteforce_woocommerce' ) ? 'checked="checked"' : '' ) ?> value="1"/>
                                                 <label for="hmwp_bruteforce_woocommerce"><?php echo esc_html__( 'WooCommerce Support', 'hide-my-wp' ); ?></label>
                                                 <div class="text-black-50 ml-5"><?php echo esc_html__( 'Activate the Brute Force protection on WooCommerce login forms.', 'hide-my-wp' ); ?></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-12 row mb-1 ml-1 p-2">
+                                        <div class="checker col-sm-12 row my-2 py-1">
+                                            <div class="col-sm-12 p-0 switch switch-sm">
+                                                <input type="hidden" name="hmwp_brute_checkout" value="0"/>
+                                                <input type="checkbox" id="hmwp_brute_checkout" name="hmwp_brute_checkout" class="switch" <?php echo( HMWP_Classes_Tools::getOption( 'hmwp_brute_checkout' ) ? 'checked="checked"' : '' ) ?> value="1"/>
+                                                <label for="hmwp_brute_checkout"><?php echo esc_html__( 'Checkout Protection', 'hide-my-wp' ); ?></label>
+                                                <div class="text-black-50 ml-5"><?php echo esc_html__( 'Stop card testing fraud by limiting repeated checkout attempts and failed payments from the same IP.', 'hide-my-wp' ); ?></div>
                                             </div>
                                         </div>
                                     </div>

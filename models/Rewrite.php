@@ -45,6 +45,13 @@ class HMWP_Models_Rewrite {
 	protected $_replacetextmapping = array();
 
 	/**
+	 * Patterns for the HTML comments that survive the Hide HTML Comments option
+	 *
+	 * @var array|null Null until the hmwp_keep_comments filter is called
+	 */
+	protected $_keepcomments = null;
+
+	/**
 	 * HMWP_Models_Rewrite constructor.
 	 */
 	public function __construct() {
@@ -2889,7 +2896,40 @@ class HMWP_Models_Rewrite {
 	 * @return string
 	 */
 	protected function _commentRemove( $m ) {
-		return ( 0 === strpos( $m[1], '[' ) || false !== strpos( $m[1], '<![' ) ) ? $m[0] : '';
+
+		//Leave the script, style and textarea blocks untouched
+		//A `<!--` inside JS, CSS or a form field is not the start of an HTML comment
+		if ( isset( $m[1] ) && $m[1] <> '' ) {
+			return $m[0];
+		}
+
+		$comment = ( isset( $m[3] ) ? $m[3] : '' );
+
+		//Keep the conditional comments and the CDATA blocks
+		if ( 0 === strpos( $comment, '[' ) || false !== strpos( $comment, '<![' ) ) {
+			return $m[0];
+		}
+
+		//Load the exceptions once, the callback runs for every comment in the page
+		if ( $this->_keepcomments === null ) {
+			$this->_keepcomments = array();
+
+			foreach ( (array) apply_filters( 'hmwp_keep_comments', array() ) as $pattern ) {
+				//Skip the invalid patterns, they would warn on every comment in the page
+				if ( is_string( $pattern ) && $pattern <> '' && @preg_match( $pattern, '' ) !== false ) { //phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+					$this->_keepcomments[] = $pattern;
+				}
+			}
+		}
+
+		//Keep the comments other plugins need for troubleshooting
+		foreach ( $this->_keepcomments as $pattern ) {
+			if ( preg_match( $pattern, $comment ) ) {
+				return $m[0];
+			}
+		}
+
+		return '';
 	}
 
 
@@ -3022,6 +3062,26 @@ class HMWP_Models_Rewrite {
 	}
 
 	/**
+	 * Replace a file version with a random number
+	 *
+	 * @param  array  $match  The query separator and the real version
+	 *
+	 * @return string
+	 */
+	public function replaceVersion( $match ) {
+		// One number for all files, it changes only when the settings are saved
+		if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_version_type' ) == 'static' ) {
+			return $match[1] . 'rnd=' . HMWP_Classes_Tools::getOption( 'hmwp_hide_version_random' );
+		}
+
+		// Hash the real version with a site secret: hidden, but it changes when the version changes
+		$secret = ( function_exists( 'wp_salt' ) ? wp_salt( 'auth' ) : HMWP_Classes_Tools::getOption( 'hmwp_disable_name' ) );
+		$hash   = hash_hmac( 'md5', $match[2], $secret . HMWP_Classes_Tools::getOption( 'hmwp_hide_version_random' ) );
+
+		return $match[1] . 'rnd=' . ( hexdec( substr( $hash, 0, 7 ) ) % 90000 + 10000 );
+	}
+
+	/**
 	 * Find & Replace the tags and headers
 	 *
 	 * @param  $content
@@ -3055,14 +3115,21 @@ class HMWP_Models_Rewrite {
 
 		//Remove source commets
 		if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_comments' ) ) {
-			$content = preg_replace_callback( '/<!--([\\s\\S]*?)-->/', array( $this, '_commentRemove' ), $content );
+			//The raw text blocks are matched first so a `<!--` inside them can't open a comment
+			$nocomments = preg_replace_callback( '#(<(script|style|textarea)\\b[^>]*>[\\s\\S]*?</\\2\\s*>)|<!--([\\s\\S]*?)-->#i', array( $this, '_commentRemove' ), $content );
+
+			//Keep the page as it is if the regex failed (PCRE backtrack limit on big pages)
+			if ( $nocomments !== null ) {
+				$content = $nocomments;
+			}
 		}
 
 		if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_source_map' ) ) {
 			// Remove devtools source pragmas (JS)
-			$find[]    = '/^[ \t]*\/\/[@#]\s*sourceMappingURL=.*$(\R)?/mi';
+			// Stop at the URL end, a minified page puts </script> and the rest of the HTML on the same line
+			$find[]    = '/^[ \t]*\/\/[@#][ \t]*sourceMappingURL=[^\s<]*[ \t]*(\R)?/mi';
 			$replace[] = '';
-			$find[]    = '/^[ \t]*\/\/[@#]\s*sourceURL=.*$(\R)?/mi';
+			$find[]    = '/^[ \t]*\/\/[@#][ \t]*sourceURL=[^\s<]*[ \t]*(\R)?/mi';
 			$replace[] = '';
 
 			// Remove devtools source pragmas (CSS)
@@ -3075,13 +3142,8 @@ class HMWP_Models_Rewrite {
 			//Remove versions
 		if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_version' ) ) {
 			if ( HMWP_Classes_Tools::getOption( 'hmwp_hide_version_random' ) ) {
-				if ( HMWP_Classes_Tools::isLoggedInUser()) {
-					HMWP_Classes_Tools::saveOptions( 'hmwp_hide_version_random', wp_rand( 11111, 99999 ) );
-				}
-				$find[]    = '/(\?|\&#038;|\&)ver=[0-9a-zA-Z\.\_\-\+]+(\&#038;|\&)/';
-				$replace[] = '$1rnd=' . HMWP_Classes_Tools::getOption( 'hmwp_hide_version_random' ) . '$2';
-				$find[]    = '/(\?|\&#038;|\&)ver=[0-9a-zA-Z\.\_\-\+]+("|\')/';
-				$replace[] = '$1rnd=' . HMWP_Classes_Tools::getOption( 'hmwp_hide_version_random' ) . '$2';
+				$result  = preg_replace_callback( '/(\?|\&#038;|\&)ver=([0-9a-zA-Z\.\_\-\+]+)(?=\&#038;|\&|"|\')/', array( $this, 'replaceVersion' ), $content );
+				$content = ( null === $result ) ? $content : $result;
 			} else {
 				$find[]    = '/(\?|\&#038;|\&)ver=[0-9a-zA-Z\.\_\-\+]+(\&#038;|\&)/';
 				$replace[] = '$1';

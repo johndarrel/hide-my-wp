@@ -361,4 +361,53 @@ class HMWP_Models_EventsLog extends HMWP_Models_Firewall_Threats {
 
 		return $out;
 	}
+
+	/**
+	 * Alert the admin and the cloud when a signed in person turns a security log off.
+	 * A disabled log often comes right before unwanted changes, so it is reported.
+	 *
+	 * @param  string  $label  The log that was turned off.
+	 *
+	 * @return void
+	 */
+	public function alertLoggingDisabled( $label ) {
+
+		// Only report a change made by a signed in person. Programmatic changes
+		// have no current user, and the cloud watches for a site that goes silent.
+		if ( ! function_exists( 'get_current_user_id' ) || ! get_current_user_id() ) {
+			return;
+		}
+
+		$user = wp_get_current_user();
+		$ip   = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Firewall_Server' )->getIp();
+		$site = home_url();
+		$host = (string) wp_parse_url( $site, PHP_URL_HOST );
+
+		$subject = sprintf( esc_html__( '%1$s: security logging was turned off', 'hide-my-wp' ), $host );
+		$message = sprintf( esc_html__( 'The %1$s on %2$s was turned off.', 'hide-my-wp' ), $label, $site ) . "\n\n"
+		           . sprintf( esc_html__( 'Turned off by: %1$s (%2$s)', 'hide-my-wp' ), $user->user_login, $user->user_email ) . "\n"
+		           . sprintf( esc_html__( 'Time: %1$s', 'hide-my-wp' ), gmdate( 'd M Y H:i', time() ) . ' UTC' ) . "\n"
+		           . sprintf( esc_html__( 'IP address: %1$s', 'hide-my-wp' ), $ip ) . "\n\n"
+		           . esc_html__( 'If this was not you, sign in, turn it back on, and review the recent changes.', 'hide-my-wp' );
+
+		$to = HMWP_Classes_Tools::getOption( 'hmwp_notification_email' );
+		if ( ! $to || ! is_email( $to ) ) {
+			$to = get_option( 'admin_email' );
+		}
+		if ( $to ) {
+			wp_mail( $to, $subject, $message );
+		}
+
+		// Tell the cloud so it can alert on its side too
+		HMWP_Classes_Tools::hmwp_remote_post( _HMWP_ACCOUNT_SITE_ . '/api/log', array(
+			'action' => 'security_logging_disabled',
+			'data'   => serialize( array(
+				'logtype'  => $label,
+				'username' => $user->user_login,
+				'email'    => $user->user_email,
+				'ip'       => $ip,
+				'url'      => $site,
+			) ),
+		), array( 'timeout' => 5, 'blocking' => false ) );
+	}
 }

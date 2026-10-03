@@ -68,6 +68,37 @@ class HMWP_Controllers_Cron {
 
 		// Batch-resolve missing country codes in the threats log
 		$this->maybeResolveCountryCodes();
+
+		// Send the weekly security summary if it is due
+		$this->maybeSendWeeklyDigest();
+	}
+
+	/**
+	 * Send the weekly security summary at most once a week when it is turned on.
+	 *
+	 * @return void
+	 * @throws Exception
+	 */
+	protected function maybeSendWeeklyDigest() {
+		if ( ! HMWP_Classes_Tools::getOption( 'hmwp_weekly_digest' ) ) {
+			return;
+		}
+
+		$now     = time();
+		$lastRun = (int) get_option( 'hmwp_weekly_digest_time', 0 );
+
+		// Seed the clock on first run so the first summary covers a full week
+		if ( $lastRun === 0 ) {
+			update_option( 'hmwp_weekly_digest_time', $now );
+			return;
+		}
+
+		if ( ( $now - $lastRun ) < WEEK_IN_SECONDS ) {
+			return;
+		}
+
+		update_option( 'hmwp_weekly_digest_time', $now );
+		HMWP_Classes_ObjController::getClass( 'HMWP_Models_ThreatsLog' )->sendWeeklyDigest();
 	}
 
 	/**

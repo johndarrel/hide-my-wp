@@ -21,6 +21,12 @@ class HMWP_Controllers_Firewall extends HMWP_Classes_FrontController {
 
 		try {
 
+			// A logged-in cookie can't be verified before pluggable.php loads,
+			// so run again at plugins_loaded where the signature is checked
+			if ( HMWP_Classes_ObjController::getClass( 'HMWP_Models_Cookies' )->deferUntilVerified( array( $this, 'init' ) ) ) {
+				return;
+			}
+
 			// If a firewall process is not activated, exit
 			if ( ! $this->doFirewall() ) {
 				return;
@@ -94,7 +100,7 @@ class HMWP_Controllers_Firewall extends HMWP_Classes_FrontController {
 		if ( ! is_admin() && ! is_network_admin() ) {
 
 			//if a user is not logged in
-			if ( ! HMWP_Classes_ObjController::getClass( 'HMWP_Models_Cookies' )->isLoggedInCookie() ) {
+			if ( ! HMWP_Classes_ObjController::getClass( 'HMWP_Models_Cookies' )->isLoggedInRequest() ) {
 				return true;
 			}
 

@@ -395,7 +395,19 @@ if ( function_exists( 'wp_roles' ) ) {
                                                 <a href="<?php echo esc_url( HMWP_Classes_Tools::getOption('hmwp_plugin_website') . '/kb/hide-wordpress-version/' ) ?>" target="_blank" class="d-inline ml-1"><i class="dashicons dashicons-editor-help d-inline"></i></a>
                                                 <span class="text-black-50 small">(<?php echo esc_html__( "recommended", 'hide-my-wp' ); ?>)</span>
                                             </label>
-                                            <div class="text-black-50 ml-5"><?php echo esc_html__( "Add a random static number to prevent frontend caching while the user is logged in.", 'hide-my-wp' ); ?></div>
+                                            <div class="text-black-50 ml-5"><?php echo esc_html__( "Replace the versions with a random number, so the WordPress, plugin and theme versions stay hidden.", 'hide-my-wp' ); ?></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 row py-2 mx-1 my-2 pl-5 hmwp_hide_version_random">
+                                        <div class="col-sm-4 p-1">
+                                            <div class="font-weight-bold"><?php echo esc_html__( 'Random Number Type', 'hide-my-wp' ); ?>:</div>
+                                            <div class="small text-black-50"><?php echo esc_html__( "A random version for each file changes when the file version changes, so CDN and browser caches update after plugin and theme updates.", 'hide-my-wp' ); ?></div>
+                                        </div>
+                                        <div class="col-sm-8 p-0 input-group">
+                                            <select name="hmwp_hide_version_type" class="selectpicker form-control mb-1">
+                                                <option value="file" <?php selected( 'file', HMWP_Classes_Tools::getOption( 'hmwp_hide_version_type' ) ) ?>><?php echo esc_html__( 'Random version for each file (recommended)', 'hide-my-wp' ) ?></option>
+                                                <option value="static" <?php selected( 'static', HMWP_Classes_Tools::getOption( 'hmwp_hide_version_type' ) ) ?>><?php echo esc_html__( 'Random static number for all files', 'hide-my-wp' ) ?></option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>

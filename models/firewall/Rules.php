@@ -89,7 +89,9 @@ class HMWP_Models_Firewall_Rules {
 		if ( (int) $level === 2 ) {
 			if ( $this->ua !== '' ) {
 				$hit = $this->matchRules( $this->ua, $this->getRulesL2UserAgent(), 'user_agent' );
-				return $hit ?: false;
+				if ( $hit ) {
+					return $hit;
+				}
 			}
 
 			if ( $this->qs !== '' ) {
@@ -783,7 +785,7 @@ class HMWP_Models_Firewall_Rules {
 				$rules = json_decode( $rules, true );
 			}
 
-			if ( in_array( $code, $rules, true ) ) {
+			if ( is_array( $rules ) && in_array( $code, $rules, true ) ) {
 				return true;
 			}
 		}

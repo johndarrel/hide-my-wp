@@ -110,9 +110,12 @@ class HMWP_Models_Templogin {
 				return false;
 			}
 
-			if ( is_numeric( $expire ) && $expire <= $this->gtmTimestamp() ) {
-				return false;
-			} elseif ( $expire <= $this->gtmTimestamp() ) {
+			if ( is_numeric( $expire ) ) {
+				if ( $expire <= $this->gtmTimestamp() ) {
+					return false;
+				}
+			} else {
+				// A duration key was stored at creation, the countdown starts on first access
 				$timestamp = ! empty( $this->expires[ $expire ] ) ? $this->expires[ $expire ]['timestamp'] : 0;
 				HMWP_Classes_Tools::saveUserMeta( self::USER_SESSION_EXPIRE, $this->gtmTimestamp() + $timestamp, $user->ID );
 			}

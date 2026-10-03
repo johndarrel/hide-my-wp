@@ -30,6 +30,15 @@ class HMWP_Controllers_ThreatsLog extends HMWP_Classes_FrontController {
 	public function __construct() {
 		parent::__construct();
 
+		// Report if the security threats log is turned off from the dashboard
+		add_action( 'update_option_hmwp_options', function ( $old, $new ) {
+			if ( is_string( $old ) ) { $old = json_decode( $old, true ); }
+			if ( is_string( $new ) ) { $new = json_decode( $new, true ); }
+			if ( is_array( $old ) && is_array( $new ) && ! empty( $old['hmwp_threats_log'] ) && empty( $new['hmwp_threats_log'] ) ) {
+				HMWP_Classes_ObjController::getClass( 'HMWP_Models_EventsLog' )->alertLoggingDisabled( esc_html__( 'security threats log', 'hide-my-wp' ) );
+			}
+		}, 10, 2 );
+
 		if ( HMWP_Classes_Tools::getValue( 'hmwp_preview' ) == HMWP_Classes_Tools::getOption( 'hmwp_disable_name' ) ) {
 			return;
 		}

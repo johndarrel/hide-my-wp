@@ -544,4 +544,72 @@ class HMWP_Models_ThreatsLog extends HMWP_Models_Firewall_Threats {
 
 		return $total;
 	}
+	/**
+	 * Build and email the weekly security summary to the site administrator.
+	 * A plain, factual recap of the week, in the style of other security plugins.
+	 *
+	 * @return void
+	 * @throws Exception
+	 */
+	public function sendWeeklyDigest() {
+		global $wpdb;
+
+		$db = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Firewall_Database' );
+		$db->maybeCreateTable();
+		$table = $db->tableName();
+		$since = time() - ( 7 * DAY_IN_SECONDS );
+
+		$threats = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM `" . esc_sql( $table ) . "` WHERE user_id = 0 AND stamp >= %d", $since ) ); // phpcs:ignore
+		$blocked = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM `" . esc_sql( $table ) . "` WHERE user_id = 0 AND blocked = 1 AND stamp >= %d", $since ) ); // phpcs:ignore
+		$logins  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM `" . esc_sql( $table ) . "` WHERE user_id > 0 AND stamp >= %d", $since ) ); // phpcs:ignore
+
+		$blockedIps = count( (array) HMWP_Classes_ObjController::getClass( 'HMWP_Models_Bruteforce_Database' )->getBlockedIps() );
+
+		$top   = array();
+		foreach ( $this->getThreatStatsByCountry( 7 ) as $cc => $d ) {
+			$top[ $cc ] = (int) $d['threats'] + (int) $d['blocked'];
+		}
+		arsort( $top );
+		$top = array_slice( $top, 0, 3, true );
+
+		$geo   = HMWP_Classes_ObjController::getClass( 'HMWP_Models_Geoip_GeoLocator' )->getInstance();
+		$names = ( is_object( $geo ) && method_exists( $geo, 'getCountryCodes' ) ) ? $geo->getCountryCodes() : array();
+
+		$host  = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+		$start = gmdate( 'd M Y', $since );
+		$end   = gmdate( 'd M Y', time() );
+
+		$lines   = array();
+		$lines[] = sprintf( esc_html__( 'Security summary for %1$s', 'hide-my-wp' ), $host );
+		$lines[] = sprintf( esc_html__( 'Week of %1$s to %2$s', 'hide-my-wp' ), $start, $end );
+		$lines[] = '';
+		$lines[] = sprintf( esc_html__( 'Threats blocked: %1$d', 'hide-my-wp' ), $blocked );
+		$lines[] = sprintf( esc_html__( 'Threats detected: %1$d', 'hide-my-wp' ), $threats );
+		$lines[] = sprintf( esc_html__( 'Login events recorded: %1$d', 'hide-my-wp' ), $logins );
+		$lines[] = sprintf( esc_html__( 'IP addresses blocked: %1$d', 'hide-my-wp' ), $blockedIps );
+
+		if ( ! empty( $top ) ) {
+			$lines[] = '';
+			$lines[] = esc_html__( 'Top countries by threats:', 'hide-my-wp' );
+			$i = 1;
+			foreach ( $top as $cc => $n ) {
+				$name    = isset( $names[ strtoupper( $cc ) ] ) ? $names[ strtoupper( $cc ) ] : strtoupper( $cc );
+				$lines[] = sprintf( '%1$d. %2$s %3$d', $i ++, $name, $n );
+			}
+		}
+
+		$lines[] = '';
+		$lines[] = sprintf( esc_html__( 'See the full log: %1$s', 'hide-my-wp' ), HMWP_Classes_Tools::getSettingsUrl( 'hmwp_log' ) );
+		$lines[] = '';
+		$lines[] = esc_html__( 'You are receiving this weekly summary from WP Ghost. Turn it off under WP Ghost, Advanced.', 'hide-my-wp' );
+
+		$to = HMWP_Classes_Tools::getOption( 'hmwp_notification_email' );
+		if ( ! $to || ! is_email( $to ) ) {
+			$to = get_option( 'admin_email' );
+		}
+		if ( $to ) {
+			wp_mail( $to, sprintf( esc_html__( '%1$s: weekly security summary', 'hide-my-wp' ), $host ), implode( "\n", $lines ) );
+		}
+	}
+
 }

@@ -956,7 +956,7 @@ class HMWP_Models_Files {
 					header( "HTTP/1.1 200 OK" );
 
 					if ( $mime ) {
-						header( 'Content-Type: ' . $mime . '; charset: UTF-8' );
+						header( 'Content-Type: ' . $mime . '; charset=UTF-8' );
 					}
 
 					//////////////////////////////////////////////////////////////////////////

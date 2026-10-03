@@ -49,15 +49,7 @@ class HMWP_Models_Bruteforce_Google extends HMWP_Models_Bruteforce_Abstract {
         $secret     = HMWP_Classes_Tools::getOption( 'brute_google_site_key' );
 
         if ( $secret <> '' && $project_id <> '' && $apikey <> '' ) {
-            $params['event'] = array(
-                    'token'          => $captcha,
-                    'expectedAction' => "LOGIN",
-                    'siteKey'        => $secret,
-            );
-
-            $params                             = wp_json_encode( $params );
-            $options['headers']['Content-Type'] = 'application/json';
-            $response                           = json_decode( HMWP_Classes_Tools::hmwp_remote_post( "https://recaptchaenterprise.googleapis.com/v1/projects/$project_id/assessments?key=$apikey", $params, $options ), true );
+            $response = $this->assess( $project_id, $apikey, $secret, $captcha );
 
             /**
              * Catch Google API configuration errors (403, SERVICE_DISABLED, etc)
@@ -92,6 +84,41 @@ class HMWP_Models_Bruteforce_Google extends HMWP_Models_Bruteforce_Abstract {
         return false;
     }
 
+
+    /**
+     * Ask reCAPTCHA Enterprise to assess a token. A plain request on purpose,
+     * the licence headers added by hmwp_remote_* must not reach a third party.
+     *
+     * @param  string  $project_id  The Google Cloud project ID
+     * @param  string  $apikey  The Google Cloud API key
+     * @param  string  $sitekey  The reCAPTCHA Enterprise site key
+     * @param  string  $token  The token sent by the form
+     *
+     * @return array The decoded assessment, empty on connection error
+     */
+    public function assess( $project_id, $apikey, $sitekey, $token ) {
+        $url = 'https://recaptchaenterprise.googleapis.com/v1/projects/' . rawurlencode( (string) $project_id ) . '/assessments?key=' . rawurlencode( (string) $apikey );
+
+        $response = wp_remote_post( $url, array(
+                'timeout' => 10,
+                'headers' => array( 'Content-Type' => 'application/json' ),
+                'body'    => wp_json_encode( array(
+                        'event' => array(
+                                'token'          => (string) $token,
+                                'expectedAction' => 'LOGIN',
+                                'siteKey'        => (string) $sitekey,
+                        ),
+                ) ),
+        ) );
+
+        if ( is_wp_error( $response ) ) {
+            return array();
+        }
+
+        $body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+        return is_array( $body ) ? $body : array();
+    }
 
     /**
      * reCAPTCHA head and login form
@@ -206,13 +233,33 @@ class HMWP_Models_Bruteforce_Google extends HMWP_Models_Bruteforce_Abstract {
                         });
                     }
 
-                    if (document.getElementsByTagName("form").length > 0) {
-                        var x = document.getElementsByTagName("form");
-                        for (var i = 0; i < x.length; i++) {
-                            // capture phase so token injection happens before most AJAX serializers
-                            x[i].addEventListener("submit", reCaptchaSubmit, true);
+                    // Bind only to the form this script was printed inside, so no other
+                    // form on the page is touched.
+                    (function () {
+                        var script = document.currentScript;
+                        var owner  = (script && script.closest) ? script.closest("form") : null;
+
+                        if (owner) {
+                            if (!owner.__hmwpRecaptchaBound) {
+                                owner.__hmwpRecaptchaBound = true;
+                                // capture phase so token injection happens before most AJAX serializers
+                                owner.addEventListener("submit", reCaptchaSubmit, true);
+                            }
+                            return;
                         }
-                    }
+
+                        // No owning form: printed outside it, or the form is added later.
+                        // Listen on the document once, skipping forms already bound above.
+                        if (!window.__hmwpRecaptchaDelegated) {
+                            window.__hmwpRecaptchaDelegated = true;
+                            document.addEventListener("submit", function (e) {
+                                var form = e.target;
+                                if (form && form.tagName === "FORM" && !form.__hmwpRecaptchaBound) {
+                                    reCaptchaSubmit.call(form, e);
+                                }
+                            }, true);
+                        }
+                    })();
                 </script>
             <?php }
         }

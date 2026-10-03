@@ -791,15 +791,13 @@ class HMWP_Models_EventsListTable extends WP_List_Table {
 			return $decoded;
 		}
 
-		// Then try PHP serialization
+		// Then try PHP serialization, never instantiating objects from stored data
 		if ( function_exists( 'is_serialized' ) && is_serialized( $payload ) ) {
-			$un = maybe_unserialize( $payload );
+			$un = @unserialize( $payload, array( 'allowed_classes' => false ) ); //phpcs:ignore
 			return is_array( $un ) ? $un : array();
 		}
 
-		// Sometimes request_details might be serialized without is_serialized() being available in some contexts
-		$un = @maybe_unserialize( $payload );
-		return is_array( $un ) ? $un : array();
+		return array();
 	}
 
 	/**

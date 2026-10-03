@@ -22,21 +22,13 @@
 
                         <div style="position: relative; z-index: 2;">
 
-                            <div style="display: inline-flex; align-items: center; gap: 6px; background: #fff3e6; border: 1px solid #ffd9a8; border-radius: 20px; padding: 5px 14px; margin-bottom: 16px;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7L12 2z" fill="#EF8B1A"/></svg>
-                                <span style="font-size: 12px; font-weight: 500; color: #b06000; letter-spacing: 0.5px; text-transform: uppercase;">Limited time offer</span>
-                            </div>
+                            <h2 style="font-family: 'Georgia', serif; font-size: 28px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px; line-height: 1.25;">Upgrade to Premium</h2>
 
-                            <h2 style="font-family: 'Georgia', serif; font-size: 28px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px; line-height: 1.25;">Upgrade to <span style="color: #EF8B1A;">Premium</span></h2>
-
-                            <p style="font-size: 14px; color: #777; margin: 0 0 20px; line-height: 1.5;">Get advanced hack prevention with enterprise-grade security hardening for your WordPress sites.</p>
+                            <p style="font-size: 14px; color: #777; margin: 0 0 20px; line-height: 1.5;">Get the most out of WP Ghost including GEO Security, Advanced Paths Security & Firewall, Automation and Alerts.</p>
 
                             <div style="display: flex; align-items: baseline; justify-content: center; gap: 10px; margin-bottom: 16px;">
-                                <span style="font-size: 16px; color: #aaa; text-decoration: line-through;">$119/yr</span>
-                                <span style="font-family: 'Georgia', serif; font-size: 42px; font-weight: 700; color: #1a1a1a; line-height: 1;">$59.5<span style="font-size: 18px; color: #555;">/yr</span></span>
+                                <span style="font-family: 'Georgia', serif; font-size: 52px; font-weight: 700; color: #1a1a1a; line-height: 1;">$20<span style="font-size: 18px; color: #555;">/yr</span></span>
                             </div>
-
-                            <div style="background: linear-gradient(135deg, #e84118 0%, #f97316 100%); color: white; border-radius: 8px; padding: 3px 12px; display: inline-block; font-size: 13px; font-weight: 600; margin-bottom: 20px; letter-spacing: 0.3px;">SAVE 50% on Ghost 5</div>
 
                         </div>
                     </div>
@@ -73,13 +65,13 @@
                         </div>
                     </div>
 
-                    <div style="padding: 0 2rem 1.5rem; text-align: center;">
-                        <a id="cta-btn" href="https://wpghost.com/pricing/?utm_source=social&utm_medium=banner&utm_campaign=free&utm_id=offer#price" target="_blank" style="display: inline-block; background: #f97316; color: #fff; text-decoration: none; border-radius: 50px; padding: 15px 32px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.2s; box-shadow: 0 4px 18px rgba(239,139,26,0.35); letter-spacing: 0.3px; width: 300px;" onmouseenter="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 24px rgba(239,139,26,0.45)'" onmouseleave="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 18px rgba(239,139,26,0.35)'" onmousedown="this.style.transform='scale(0.97)'">
-                            Secure My Site Now
+                    <div style="padding: 2rem 2rem 1.5rem; text-align: center;">
+                        <a id="cta-btn" href="https://wpghost.com/path-security-suite/?utm_source=social&utm_medium=banner&utm_campaign=free&utm_id=offer#price" target="_blank" style="display: inline-block; background: #3F72AF; color: #fff; text-decoration: none; border-radius: 0px; padding: 15px 32px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.2s; letter-spacing: 0.3px; width: 300px;"  onmouseleave="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 18px rgba(42,89,144,0.35)'" onmousedown="this.style.transform='scale(0.97)'">
+                            Secure my site
                         </a>
                     </div>
 
-                    <div style="text-align: center; padding: 10px 2rem 14px;">
+                    <div style="text-align: center; padding: 10px 2rem 14px; ">
                         <span data-dismiss="modal" style="font-size: 0.8rem; color: #aaa; cursor: pointer;" onmouseenter="this.style.color='#777'" onmouseleave="this.style.color='#aaa'">Continue with free version</span>
                     </div>
 

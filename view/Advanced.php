@@ -66,6 +66,39 @@ if ( ! isset($view)) {
                     </div>
                 </div>
 
+                <div id="notifications" style="<?php echo ( $current_tab === 'notifications' ? '' : 'display:none;' ); ?>" class="col-sm-12 p-0 m-0 tab-panel">
+                    <div class="card col-sm-12 p-0 m-0">
+                        <h3 class="card-title hmwp_header p-2 m-0">
+                            <?php echo esc_html__('Notifications', 'hide-my-wp'); ?>
+                        </h3>
+                        <div class="card-body">
+                            <div class="col-sm-12 row mb-1 ml-1 p-2">
+                                <div class="checker col-sm-12 row my-2 py-1">
+                                    <div class="col-sm-12 p-0 switch switch-sm">
+                                        <input type="hidden" name="hmwp_weekly_digest" value="0"/>
+                                        <input type="checkbox" id="hmwp_weekly_digest" name="hmwp_weekly_digest" class="switch" <?php echo(HMWP_Classes_Tools::getOption('hmwp_weekly_digest') ? 'checked="checked"' : '') ?> value="1"/>
+                                        <label for="hmwp_weekly_digest"><?php echo esc_html__('Weekly Email Summary', 'hide-my-wp'); ?></label>
+                                        <div class="text-black-50 ml-5"><?php echo esc_html__("Email the site administrator a weekly summary of blocked threats, logins and blocked IP addresses.", 'hide-my-wp'); ?></div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 row py-2 mx-0">
+                                    <div class="col-sm-3 p-1">
+                                        <div class="font-weight-bold"><?php echo esc_html__('Send Notifications To', 'hide-my-wp'); ?>:</div>
+                                    </div>
+                                    <div class="col-sm-9 p-0 input-group mb-1">
+                                        <input type="email" name="hmwp_notification_email" class="form-control" value="<?php echo esc_attr(HMWP_Classes_Tools::getOption('hmwp_notification_email')) ?>" placeholder="<?php echo esc_attr(get_option('admin_email')) ?>"/>
+                                        <div class="text-black-50 col-sm-12 p-0 mt-1"><?php echo esc_html__("Send the notifications to this email address. Leave empty to use the site admin email.", 'hide-my-wp'); ?></div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 py-2 px-2 text-danger">
+                                    <?php /* translators: 1: Opening <a> tag to Easy WP SMTP plugin page, 2: Closing </a> tag. */
+                                    echo wp_kses_post( sprintf( __( 'Guarantee email delivery using the complimentary email plugin like %1$sEasy WP SMTP%2$s', 'hide-my-wp' ), '<a href="' . esc_url( 'https://wordpress.org/plugins/easy-wp-smtp/' ) . '" target="_blank">', '</a>' ) ); ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="compatibility" style="<?php echo ( $current_tab === 'compatibility' ? '' : 'display:none;' ); ?>" class="col-sm-12 p-0 m-0 tab-panel">
                     <div class="card col-sm-12 p-0 m-0">
                         <h3 class="card-title hmwp_header p-2 m-0">

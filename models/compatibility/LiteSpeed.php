@@ -172,9 +172,47 @@ class HMWP_Models_Compatibility_LiteSpeed extends HMWP_Models_Compatibility_Abst
 		// Change the path withing litespeed buffer
 		add_filter( 'litespeed_buffer_after', array( $this, 'findReplaceCache' ), PHP_INT_MAX );
 
-		// Set priority load for compatibility
-		add_filter( 'litespeed_comment', '__return_false' );
+		// Keep the LiteSpeed comments when Hide HTML Comments is on
+		add_filter( 'hmwp_keep_comments', array( $this, 'keepComments' ) );
 
+	}
+
+	/**
+	 * Keep the LiteSpeed comments that must survive the Hide HTML Comments option.
+	 *
+	 * The cache status comments name the plugin and its exact version, so they are
+	 * a fingerprint and are only kept while the owner is debugging LiteSpeed. In
+	 * LiteSpeed's "admin IP only" debug mode LSCWP_LOG is defined just for that
+	 * visitor, so the comments come back for the admin and stay hidden from the
+	 * visitors. With Hide HTML Comments off nothing is stripped in the first place.
+	 *
+	 * The comments LiteSpeed prints only with LSCWP_LOG on (X-LiteSpeed-Vary,
+	 * X-LiteSpeed-Tag, Full varies) are never in the list since they expose cookie
+	 * names and post IDs.
+	 *
+	 * @param  array $patterns The patterns matched against the comment content.
+	 *
+	 * @return array
+	 */
+	public function keepComments( $patterns ) {
+
+		// <!-- lscwp ... --> delimits the <esi:include> tags, it's markup and not a
+		// note, so it's kept whether LiteSpeed is debugging or not
+		$patterns[] = '/^\s*lscwp /i';
+
+		// Hide the cache status and the LiteSpeed version when not debugging
+		if ( ! defined( 'LSCWP_LOG' ) ) {
+			return $patterns;
+		}
+
+		// <!-- Page optimized by LiteSpeed Cache @2025-01-01 00:00:00 -->
+		// <!-- Page cached by LiteSpeed Cache 7.0 on 2025-01-01 00:00:00 -->
+		$patterns[] = '/^\s*(?:Page|Block) [a-z]+ by LiteSpeed Cache/i';
+
+		// <!-- QUIC.cloud UCSS loaded ... --> and the CCSS equivalents
+		$patterns[] = '/^\s*QUIC\.cloud /i';
+
+		return $patterns;
 	}
 
 	/**

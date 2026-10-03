@@ -50,7 +50,7 @@ class HMWP_Models_Bruteforce_GoogleV2 extends HMWP_Models_Bruteforce_Abstract {
 		$secret  = HMWP_Classes_Tools::getOption( 'brute_captcha_secret_key' );
 
 		if ( $secret <> '' ) {
-			$response = json_decode( HMWP_Classes_Tools::hmwp_remote_get( "https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=" . $captcha . "&remoteip=" . wp_unslash( ( $_SERVER['REMOTE_ADDR'] ?? '') ) ), true ); //phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$response = json_decode( $this->siteVerify( $secret, $captcha ), true );
 
 			if ( isset( $response['success'] ) && ! $response['success'] ) {
 				//If captcha errors, let the user login and fix the error
@@ -93,7 +93,33 @@ class HMWP_Models_Bruteforce_GoogleV2 extends HMWP_Models_Bruteforce_Abstract {
 				$this->head();
 			}
 
-            ?><div class="g-recaptcha" data-sitekey="<?php echo esc_attr( HMWP_Classes_Tools::getOption( 'brute_captcha_site_key' ) ) ?>" data-theme="<?php echo esc_attr( HMWP_Classes_Tools::getOption( 'brute_captcha_theme' ) ) ?>" style="margin: 12px 0 24px 0;"></div><?php
+            ?><div class="g-recaptcha" data-sitekey="<?php echo esc_attr( HMWP_Classes_Tools::getOption( 'brute_captcha_site_key' ) ) ?>" data-theme="<?php echo esc_attr( HMWP_Classes_Tools::getOption( 'brute_captcha_theme' ) ) ?>" data-callback="hmwpRecaptchaSolved" data-expired-callback="hmwpRecaptchaReset" data-error-callback="hmwpRecaptchaReset" style="margin: 12px 0 24px 0;"></div>
+            <script>
+                (function () {
+                    // Keep the login button disabled until the visitor solves the checkbox
+                    function hmwpSubmitBtn() {
+                        var w = document.querySelector('.g-recaptcha');
+                        var f = w ? w.closest('form') : null;
+                        return f ? f.querySelector('[type=submit]') : null;
+                    }
+                    function hmwpToggle(on) {
+                        var b = hmwpSubmitBtn();
+                        if (b) { b.disabled = !on; }
+                    }
+                    window.hmwpRecaptchaSolved = function () { hmwpToggle(true); };
+                    window.hmwpRecaptchaReset = function () { hmwpToggle(false); };
+                    function hmwpInit() {
+                        hmwpToggle(false);
+                        // Do not keep the button locked if the widget fails to load
+                        setTimeout(function () {
+                            if (!document.querySelector('.g-recaptcha iframe')) { hmwpToggle(true); }
+                        }, 10000);
+                    }
+                    if (document.readyState !== 'loading') { hmwpInit(); }
+                    else { document.addEventListener('DOMContentLoaded', hmwpInit); }
+                })();
+            </script>
+            <?php
 		}
 	}
 

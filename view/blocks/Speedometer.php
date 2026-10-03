@@ -33,7 +33,7 @@ if ( ! $do_check ) {
         $hmwp_score_message = wp_kses_post( __( "You've completed all free security tasks.", 'hide-my-wp' ) ) ;
     }
     /* translators: 1: Opening <strong><a> tag linking to premium page, 2: Closing </a></strong> tag. */
-    $hmwp_score_message .= '<br />' . sprintf( wp_kses_post( __( '%1$sUnlock advanced protection with Premium >%2$s', 'hide-my-wp' ) ), '<strong><a href="https://wpghost.com/pricing/?utm_source=social&utm_medium=banner&utm_campaign=free&utm_id=offer#price" target="_blank" >', '</a></strong>' ) ;
+    $hmwp_score_message .= '<br />' . sprintf( wp_kses_post( __( '%1$sGet the firewall, 2FA and geo-blocking with Premium >%2$s', 'hide-my-wp' ) ), '<strong><a href="https://wpghost.com/path-security-suite/?utm_source=social&utm_medium=banner&utm_campaign=free&utm_id=offer#price" target="_blank" >', '</a></strong>' ) ;
 
 }
 
@@ -125,7 +125,7 @@ $hmwp_nmy  = round( $hmwp_gcy - ( $hmwp_nlen * 0.35 ) * sin( $hmwp_needle_rad ),
         }
     }
 </style>
-<?php // translators: %d: security score value (0–100) ?>
+<?php // translators: %d: security score value (0 to 100) ?>
     <a href="<?php echo esc_url( HMWP_Classes_Tools::getSettingsUrl( 'hmwp_securitycheck' ) ); ?>" class="hmwp_widget_gauge_link">
         <svg viewBox="0 0 400 195" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="<?php /* translators: %d: Security score number. */ echo esc_attr( sprintf( __( 'Security score: %d out of 100', 'hide-my-wp' ), $hmwp_security_score ) ); ?>" <?php echo $do_check ? 'style="filter: saturate(0.72); opacity: 0.5;"' : ''; ?>>
         <defs>

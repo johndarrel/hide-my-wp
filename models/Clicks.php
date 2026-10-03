@@ -61,6 +61,7 @@ class HMWP_Models_Clicks {
                     var events = eventNames.split(' ');
                     events.forEach(function (event) {
                         element.addEventListener(event, function (e) {
+                            if (__isFormField(e.target)) return;
                             e.preventDefault();
                             if (message !== '') __showError(message);
                         });
@@ -68,6 +69,16 @@ class HMWP_Models_Clicks {
                 }
 
                 function __returnFalse() {
+                    return false;
+                }
+
+                // Never block default behaviour inside form fields
+                function __isFormField(el) {
+                    while (el && el.nodeType) {
+                        var t = (el.tagName || '').toUpperCase();
+                        if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT' || el.isContentEditable) return true;
+                        el = el.parentNode;
+                    }
                     return false;
                 }
 
@@ -96,6 +107,7 @@ class HMWP_Models_Clicks {
                     }<?php }?>
                 });
                 document.addEventListener("contextmenu", function (event) {
+                    if (__isFormField(event.target)) return;
                     event.preventDefault();
                     return false;
                 });

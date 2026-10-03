@@ -105,6 +105,10 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 			return;
 		}
 
+		// The REST prefix is URL generation, not output rewriting. Register it before
+		// the process check so rest_url() is right in cron too.
+		add_filter( 'rest_url_prefix', array( $this->model, 'replace_rest_api' ), 1 );
+
 		// Check if the custom paths ar set to be processed
 		if ( ! apply_filters( 'hmwp_process_init', true ) ) {
 			return;
@@ -156,8 +160,6 @@ class HMWP_Controllers_Rewrite extends HMWP_Classes_FrontController {
 		add_filter( 'plugins_url', array( $this->model, 'plugin_url' ), PHP_INT_MAX, 3 );
 
 		add_filter( 'wp_php_error_message', array( $this->model, 'replace_error_message' ), PHP_INT_MAX, 2 );
-		// Change the rest api if needed
-		add_filter( 'rest_url_prefix', array( $this->model, 'replace_rest_api' ), 1 );
 
 		// Check and set the cookies for the modified urls
 		HMWP_Classes_ObjController::getClass( 'HMWP_Models_Cookies' );

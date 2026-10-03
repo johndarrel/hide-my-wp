@@ -305,6 +305,10 @@ class HMWP_Models_Menu {
                     'title' => esc_html__("Compatibility", 'hide-my-wp'),
                     'tab' =>'compatibility',
                 ),
+                array(
+                    'title' => esc_html__("Notifications", 'hide-my-wp'),
+                    'tab' =>'notifications',
+                ),
 
             ),
         );

@@ -149,7 +149,8 @@ class HMWP_Classes_Action extends HMWP_Classes_FrontController {
 						"hmwp_brutesettings",
 						"hmwp_google_enterprise",
 						"hmwp_deleteip",
-						"hmwp_deleteallips"
+						"hmwp_deleteallips",
+						"hmwp_recaptcha_check"
 					)
 				),
 			),

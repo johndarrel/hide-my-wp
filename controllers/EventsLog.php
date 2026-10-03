@@ -32,6 +32,15 @@ class HMWP_Controllers_EventsLog extends HMWP_Classes_FrontController {
         // Hook log function to wp_loaded action
 		add_action( 'wp_loaded', array( $this, 'run' ), 9 );
 
+		// Report if the activity log is turned off from the dashboard
+		add_action( 'update_option_hmwp_options', function ( $old, $new ) {
+			if ( is_string( $old ) ) { $old = json_decode( $old, true ); }
+			if ( is_string( $new ) ) { $new = json_decode( $new, true ); }
+			if ( is_array( $old ) && is_array( $new ) && ! empty( $old['hmwp_activity_log'] ) && empty( $new['hmwp_activity_log'] ) ) {
+				$this->model->alertLoggingDisabled( esc_html__( 'activity log', 'hide-my-wp' ) );
+			}
+		}, 10, 2 );
+
 		//Save the login method in the events log
 		add_action( 'hmwp_user_auth_success', function ( $user, $method ) {
 			$values = array(

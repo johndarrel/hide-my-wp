@@ -871,10 +871,6 @@ class HMWP_Controllers_Settings extends HMWP_Classes_FrontController {
 					HMWP_Classes_Tools::saveOptionsBackup();
 				}
 
-				if ( HMWP_Classes_Tools::isNginx() ) {
-					@shell_exec( 'nginx -s reload' );
-				}
-
 				break;
 			case 'hmwp_changepathsincache':
 				//Check the cache plugin

@@ -352,6 +352,82 @@ class HMWP_Models_Cookies {
 	}
 
 	/**
+	 * Logged-in check for the early firewall and brute force gates.
+	 * Verified by signature once pluggable.php is loaded, shape-only before that.
+	 *
+	 * @return bool
+	 */
+	public function isLoggedInRequest() {
+
+		if ( function_exists( 'wp_validate_auth_cookie' ) ) {
+			return $this->isValidLoggedInCookie();
+		}
+
+		return $this->isLoggedInCookie();
+	}
+
+	/**
+	 * Before pluggable.php a logged-in cookie can't be verified. Re-run the
+	 * callback at plugins_loaded instead and report that it was deferred.
+	 *
+	 * @param  callable  $callback
+	 *
+	 * @return bool True when the caller should stop and wait for the deferred run
+	 */
+	public function deferUntilVerified( $callback ) {
+
+		if ( did_action( 'plugins_loaded' ) || function_exists( 'wp_validate_auth_cookie' ) ) {
+			return false;
+		}
+
+		if ( ! $this->isLoggedInCookie() ) {
+			return false;
+		}
+
+		add_action( 'plugins_loaded', $callback, -9999 );
+
+		return true;
+	}
+
+	/**
+	 * Validate the logged-in cookie signature with WordPress without setting the current user
+	 *
+	 * @return bool
+	 */
+	public function isValidLoggedInCookie() {
+
+		if ( ! function_exists( 'wp_validate_auth_cookie' ) ) {
+			return false;
+		}
+
+		if ( ! defined( 'LOGGED_IN_COOKIE' ) && function_exists( 'wp_cookie_constants' ) ) {
+			wp_cookie_constants();
+		}
+
+		$names = array();
+		if ( defined( 'LOGGED_IN_COOKIE' ) ) {
+			$names[] = LOGGED_IN_COOKIE;
+		}
+		if ( defined( 'HMWP_LOGGED_IN_COOKIE' ) ) {
+			$names[] = HMWP_LOGGED_IN_COOKIE . 'login';
+		}
+
+		foreach ( $_COOKIE as $name => $value ) {
+			if ( ! is_string( $value ) || $value === '' ) {
+				continue;
+			}
+
+			if ( in_array( $name, $names, true ) || strpos( $name, 'wordpress_logged_in_' ) === 0 ) {
+				if ( wp_validate_auth_cookie( $value, 'logged_in' ) ) { //phpcs:ignore
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Check that a cookie value has the shape of a WordPress auth cookie
 	 *
 	 * Runs before pluggable.php, so the cookie is rejected on shape, not validated.
